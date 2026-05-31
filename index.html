@@ -6,7 +6,7 @@
 <title>Movie Library</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* ===== TOUS LES STYLES (inchangés, garder ceux d'avant pour ne pas tout réécrire) ===== */
+/* ===== TOUS LES STYLES (inchangés) ===== */
 :root {
   --bg:#050508;
   --s1:#0a0a10;
@@ -444,7 +444,7 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
       <div id="saga-posters-grid" class="posters" style="max-height:150px; overflow-y:auto;"></div>
     </div>
     
-    <!-- SECTION COLLECTION REFONDUE -->
+    <!-- SECTION COLLECTION REFONDUE (avec tri et doublons autorisés) -->
     <div id="collection-filmography-section" style="display:none;" class="field">
       <label>Lien de la collection (sera ajouté automatiquement aux films)</label>
       <input type="text" id="collectionLinkUrl" placeholder="https://... (lien vers la page de l'acteur/réalisateur)" style="margin-bottom:10px;">
@@ -470,7 +470,7 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
 <div class="mbg" id="rmod"><div class="modal rmod" id="rcont"></div></div>
 
 <script>
-// ==================== CONFIGURATION (identique à avant) ====================
+// ==================== CONFIGURATION ====================
 const SU='https://dnzrpvyeiyxplrcomsuo.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzYwNTAsImV4cCI6MjA5NTExMjA1MH0.BwuZBjZXQcJlNsaQ_DYSj_n-IbMZswsgL_VuGOVMVs4';
 const TK='4dc76b66e8b41dd652e56c6cc3a425ab';
@@ -487,7 +487,7 @@ let genreInc=new Set(), genreExc=new Set();
 
 // Variables pour la filmographie collection (avec qualités individuelles)
 let currentPersonId=null;
-let currentFilmography=[]; // tableau d'objets { movie, selected, quality } pour chaque film
+let currentFilmography=[]; // tableau d'objets { movie, selected, quality }
 let collectionLinkUrl = '';
 
 function ss(s,l){document.getElementById('sdot').className='sdot '+s;document.getElementById('slbl').textContent=l;}
@@ -915,7 +915,7 @@ async function loadSagaPosters() {
   } catch(e) { alert("Erreur lors du chargement des films de la saga."); }
 }
 
-// ==================== COLLECTION FILMOGRAPHY (avec qualité individuelle) ====================
+// ==================== COLLECTION FILMOGRAPHY (avec tri par date et doublons autorisés) ====================
 async function loadFilmographyForCollection() {
   const personId = meta.tmdb_id;
   if (!personId) { alert("Aucun TMDB ID pour cette personne. Veuillez d'abord rechercher via le bouton 'Search'."); return; }
@@ -924,14 +924,22 @@ async function loadFilmographyForCollection() {
   try {
     const res = await fetch(`https://api.themoviedb.org/3/person/${personId}/movie_credits?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
-    const cast = (data.cast || []).filter(m => m.poster_path).slice(0, 80);
+    let cast = (data.cast || []).filter(m => m.poster_path);
+    // Tri par date de sortie (plus récent en premier)
+    cast.sort((a, b) => {
+      const dateA = a.release_date || '0000-00-00';
+      const dateB = b.release_date || '0000-00-00';
+      return dateB.localeCompare(dateA);
+    });
+    // Limiter à 80 films pour éviter la surcharge
+    cast = cast.slice(0, 80);
     currentFilmography = cast.map(movie => ({
       movie: movie,
       selected: false,
       quality: '1l' // valeur par défaut (1080p Light)
     }));
     renderFilmographyList();
-    st.textContent = `${cast.length} films trouvés. Cochez ceux à importer et choisissez leur qualité.`;
+    st.textContent = `${cast.length} films trouvés (triés du plus récent au plus ancien). Cochez ceux à importer (doublons autorisés).`;
   } catch(e) {
     st.textContent = 'Erreur lors du chargement.';
   }
@@ -943,7 +951,6 @@ function renderFilmographyList() {
   container.innerHTML = '';
   currentFilmography.forEach((item, idx) => {
     const movie = item.movie;
-    const alreadyExists = movies.some(m => m.tmdb_id === movie.id);
     const div = document.createElement('div');
     div.style.display = 'flex';
     div.style.alignItems = 'center';
@@ -952,15 +959,14 @@ function renderFilmographyList() {
     div.style.borderBottom = '1px solid var(--border)';
     div.style.backgroundColor = item.selected ? 'rgba(167,139,250,0.1)' : 'transparent';
     div.innerHTML = `
-      <input type="checkbox" style="width:20px; height:20px; cursor:pointer;" ${item.selected ? 'checked' : ''} ${alreadyExists ? 'disabled' : ''}>
+      <input type="checkbox" style="width:20px; height:20px; cursor:pointer;" ${item.selected ? 'checked' : ''}>
       <img src="https://image.tmdb.org/t/p/w92${movie.poster_path}" style="width:50px; border-radius:6px;">
       <div style="flex:2; min-width:120px;">
         <strong>${movie.title}</strong><br>
         <span style="font-size:11px; color:var(--muted2);">${movie.release_date ? movie.release_date.slice(0,4) : 'N/A'}</span>
-        ${alreadyExists ? '<span style="color:#4ade80; margin-left:10px;">(déjà importé)</span>' : ''}
       </div>
       <div style="flex:1;">
-        <select class="movie-quality-select" data-idx="${idx}" style="background:var(--s2); border:1px solid var(--border); border-radius:6px; padding:5px; font-size:11px;" ${alreadyExists ? 'disabled' : ''}>
+        <select class="movie-quality-select" data-idx="${idx}" style="background:var(--s2); border:1px solid var(--border); border-radius:6px; padding:5px; font-size:11px;">
           <option value="4kr" ${item.quality === '4kr' ? 'selected' : ''}>💎 4K Remux</option>
           <option value="4kl" ${item.quality === '4kl' ? 'selected' : ''}>✨ 4K Light</option>
           <option value="1r" ${item.quality === '1r' ? 'selected' : ''}>🍀 1080p Remux</option>
@@ -969,26 +975,22 @@ function renderFilmographyList() {
       </div>
     `;
     const checkbox = div.querySelector('input');
-    if (!alreadyExists) {
-      checkbox.addEventListener('change', (e) => {
-        item.selected = checkbox.checked;
-        div.style.backgroundColor = item.selected ? 'rgba(167,139,250,0.1)' : 'transparent';
-      });
-      const qualitySelect = div.querySelector('.movie-quality-select');
-      qualitySelect.addEventListener('change', (e) => {
-        item.quality = qualitySelect.value;
-      });
-    } else {
-      checkbox.disabled = true;
-    }
+    checkbox.addEventListener('change', (e) => {
+      item.selected = checkbox.checked;
+      div.style.backgroundColor = item.selected ? 'rgba(167,139,250,0.1)' : 'transparent';
+    });
+    const qualitySelect = div.querySelector('.movie-quality-select');
+    qualitySelect.addEventListener('change', (e) => {
+      item.quality = qualitySelect.value;
+    });
     container.appendChild(div);
   });
 }
 
 async function importSelectedFilms() {
   const collectionLink = document.getElementById('collectionLinkUrl').value.trim();
-  const toImport = currentFilmography.filter(item => item.selected && !movies.some(m => m.tmdb_id === item.movie.id));
-  if (!toImport.length) { alert("Aucun film sélectionné ou déjà importé."); return; }
+  const toImport = currentFilmography.filter(item => item.selected);
+  if (!toImport.length) { alert("Aucun film sélectionné."); return; }
   let imported = 0;
   for (const item of toImport) {
     const movie = item.movie;
@@ -1007,7 +1009,7 @@ async function importSelectedFilms() {
     }
     const newMovie = {
       title: movie.title,
-      link: collectionLink, // pour compatibilité ancienne
+      link: collectionLink,
       links: links,
       quality: quality,
       poster: poster,
@@ -1025,7 +1027,7 @@ async function importSelectedFilms() {
   }
   alert(`${imported} film(s) importé(s) avec succès. Le lien de la collection a été ajouté à chacun.`);
   render();
-  // Vider la liste pour éviter double import
+  // Vider la liste après import (optionnel)
   currentFilmography = [];
   document.getElementById('filmography-list').innerHTML = '';
   document.getElementById('status').textContent = '';
