@@ -3,56 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>VIDÉO CLUB 3D - Expérience immersive</title>
+    <title>VIDÉO CLUB 3D - Point & Click</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        body {
-            overflow: hidden;
-            font-family: 'Courier New', 'Segoe UI', monospace;
-            background: #000;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        /* Conteneur principal */
-        .game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            transition: background-image 0.4s ease-in-out;
-        }
-
-        /* Zones cliquables (hotspots) */
-        .hotspot {
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', 'Courier New', monospace; }
+        #info {
             position: absolute;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.1);
-            transition: background 0.2s, box-shadow 0.2s;
-            border-radius: 8px;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: #ffdd99;
+            padding: 8px 15px;
+            border-radius: 30px;
+            pointer-events: none;
+            z-index: 10;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            font-weight: bold;
         }
-        .hotspot:hover {
-            background: rgba(255, 215, 0, 0.3);
-            box-shadow: 0 0 0 2px #ffcc44;
+        #interact-message {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #ff3366;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+            font-family: monospace;
+            box-shadow: 0 0 15px #ff3366;
+            transition: 0.2s;
         }
-
-        /* Interface overlay (catalogue, etc.) */
-        .overlay {
+        .catalog-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(10px);
-            z-index: 200;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(12px);
+            z-index: 100;
             display: none;
             justify-content: center;
             align-items: center;
@@ -60,335 +51,433 @@
             overflow-y: auto;
             padding: 20px;
         }
-        .overlay.visible {
-            display: flex;
-        }
+        .catalog-overlay.visible { display: flex; }
         .catalog-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 20px;
             width: 90%;
-            max-width: 1200px;
-            margin: 20px auto;
-            background: rgba(0,0,0,0.6);
-            padding: 20px;
+            max-width: 1000px;
+            background: rgba(20,15,30,0.8);
+            padding: 25px;
             border-radius: 30px;
+            border: 2px solid #ffcc44;
         }
         .movie-card {
-            background: #1e1a24;
-            border-radius: 12px;
+            background: #1e1a2c;
+            border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
-            border: 1px solid #ffcc66;
             transition: 0.2s;
+            border: 1px solid #ffaa66;
         }
-        .movie-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #ff66aa;
-        }
-        .movie-card img {
-            width: 100%;
-            aspect-ratio: 2/3;
-            object-fit: cover;
-        }
-        .movie-title {
-            padding: 8px;
-            text-align: center;
-            color: #ffecb3;
-            font-size: 12px;
-        }
-        .close-overlay {
+        .movie-card:hover { transform: scale(1.03); box-shadow: 0 0 20px #ff66aa; }
+        .movie-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        .movie-title { padding: 8px; text-align: center; color: #ffecb3; font-size: 12px; font-weight: bold; }
+        .close-catalog {
             position: absolute;
-            top: 20px;
-            right: 30px;
+            top: 30px;
+            right: 40px;
             background: #ff3366;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 25px;
             border-radius: 40px;
             color: white;
             font-weight: bold;
             cursor: pointer;
-        }
-
-        /* Animation prise DVD */
-        .take-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 300;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(8px);
-            animation: fadeIn 0.3s;
-        }
-        .hand-take {
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path fill="%23f7d9aa" d="M80,140 L110,170 L160,120 L130,90 L80,140Z" stroke="%23806040" stroke-width="2"/><circle cx="100" cy="110" r="28" fill="%23f7d9aa"/><rect x="90" y="80" width="40" height="60" fill="%23332211" rx="5"/><rect x="95" y="85" width="30" height="20" fill="%23ff3366"/></svg>') no-repeat center;
-            background-size: contain;
-            width: 180px;
-            height: 180px;
-            animation: grab 0.5s ease-out forwards;
-        }
-        @keyframes grab {
-            0% { transform: translateY(100px) scale(0.8); opacity: 0; }
-            50% { transform: translateY(-20px) scale(1.1); opacity: 1; }
-            100% { transform: translateY(0px) scale(1); opacity: 1; }
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Indicateur de direction */
-        .instruction {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.6);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #ffdd99;
-            pointer-events: none;
-            z-index: 100;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-<div class="game-container" id="gameContainer">
-    <div class="instruction" id="instruction">🏠 Cliquez sur la porte pour entrer</div>
-</div>
+    <div id="info">🎬 VIDÉO CLUB 3D | Cliquez sur la porte pour entrer</div>
+    <div id="interact-message">👉 POINT & CLICK 👈</div>
 
-<!-- Overlay catalogue -->
-<div id="catalogOverlay" class="overlay">
-    <button class="close-overlay" onclick="closeCatalog()">✖ FERMER</button>
-    <h2 style="color:#ffcc44; margin-bottom:20px;">📀 CATALOGUE COMPLET</h2>
-    <div id="catalogGrid" class="catalog-grid"></div>
-</div>
+    <div id="catalogOverlay" class="catalog-overlay">
+        <button class="close-catalog" onclick="closeCatalog()">✖ FERMER</button>
+        <h2 style="color:#ffdd99; margin-bottom:20px;">📀 TOUS LES FILMS</h2>
+        <div id="catalogGrid" class="catalog-grid"></div>
+    </div>
 
-<script>
-    // ---------- Configuration ----------
-    // Données des films (seront chargées depuis Supabase / localStorage)
-    let movies = []; // { title, poster, quality, media_type, tmdb_id, etc. }
-    
-    // État du jeu
-    let currentView = "street"; // street, hall, aisle_4kr, aisle_4kl, aisle_1r, aisle_1l, upstairs
-    let currentQuality = null;   // pour savoir dans quelle allée on est
-    let currentMediaType = "movie"; // movie ou tv
-    
-    // Éléments DOM
-    const container = document.getElementById("gameContainer");
-    const catalogOverlay = document.getElementById("catalogOverlay");
-    const catalogGridDiv = document.getElementById("catalogGrid");
-    
-    // ---------- Chargement des films (Supabase + fallback) ----------
-    const SU = 'https://dnzrpvyeiyxplrcomsuo.supabase.co';
-    const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzYwNTAsImV4cCI6MjA5NTExMjA1MH0.BwuZBjZXQcJlNsaQ_DYSj_n-IbMZswsgL_VuGOVMVs4';
-    const H = {'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK};
-    
-    async function loadMovies() {
-        try {
-            const r = await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc`, { headers: H });
-            if (r.ok) {
-                const data = await r.json();
-                movies = data.map(row => ({ ...row.data, _id: row.id }));
-                localStorage.setItem("videoclub_movies", JSON.stringify(movies));
-            } else throw new Error();
-        } catch(e) {
-            const local = localStorage.getItem("videoclub_movies");
-            if (local) movies = JSON.parse(local);
-            else movies = []; // exemple par défaut si rien
+    <!-- Importation de Three.js et des extensions -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
         }
-        renderCatalogGrid();
-    }
-    
-    function renderCatalogGrid() {
-        catalogGridDiv.innerHTML = "";
-        movies.forEach(m => {
-            const card = document.createElement("div");
-            card.className = "movie-card";
-            card.innerHTML = `
-                <img src="${m.poster || 'https://via.placeholder.com/150x225?text=NO+POSTER'}" onerror="this.src='https://via.placeholder.com/150x225?text=NO+POSTER'">
-                <div class="movie-title">${m.title} (${m.release_date?.slice(0,4) || '?'})</div>
-            `;
-            card.onclick = () => {
-                closeCatalog();
-                startTakeAnimation(m.title);
-            };
-            catalogGridDiv.appendChild(card);
-        });
-    }
-    
-    function openCatalog() {
-        renderCatalogGrid();
-        catalogOverlay.classList.add("visible");
-    }
-    function closeCatalog() {
-        catalogOverlay.classList.remove("visible");
-    }
-    
-    // Animation de prise de DVD
-    function startTakeAnimation(movieTitle) {
-        const animDiv = document.createElement("div");
-        animDiv.className = "take-animation";
-        animDiv.innerHTML = `
-            <div style="text-align:center; background:#1e1712; padding:30px; border-radius:48px; border:2px solid #ffcc44;">
-                <div class="hand-take"></div>
-                <p style="margin-top:20px; font-size:24px; font-weight:bold;">📀 ${movieTitle}</p>
-                <p style="margin-top:8px;">Vous prenez le DVD sur l'étagère...</p>
-                <button class="close-anim" style="margin-top:20px; background:#ffcc44; border:none; padding:8px 20px; border-radius:40px; cursor:pointer;">Refermer</button>
-            </div>
-        `;
-        document.body.appendChild(animDiv);
-        const closeBtn = animDiv.querySelector(".close-anim");
-        closeBtn.onclick = () => animDiv.remove();
-        setTimeout(() => { if(animDiv.parentNode) animDiv.remove(); }, 3000);
-    }
-    
-    // ---------- Vues et hotspots ----------
-    // On va définir des images de fond (des illustrations) pour chaque vue.
-    // Comme on n'a pas de vraies images 3D, on utilise des couleurs/gradients et du texte,
-    // mais pour un rendu réaliste, l'idéal serait d'avoir des photos. Faute de mieux,
-    // on va utiliser des backgrounds générés avec des formes CSS.
-    // Vous pourrez remplacer les URLs par de vraies images plus tard.
-    
-    const views = {
-        street: {
-            bg: "linear-gradient(135deg, #2c3e50, #1a2632)",
-            html: `
-                <div style="position:absolute; bottom:30%; left:35%; width:30%; height:40%; background:#8B5A2B; border-radius:20px; box-shadow:0 0 0 10px #5a3a1a;">
-                    <div style="position:absolute; top:-30px; left:50%; transform:translateX(-50%); background:#ff3366; padding:5px 15px; border-radius:30px; color:white; font-weight:bold;">📼 VIDEO CLUB</div>
-                    <div class="hotspot" id="doorHotspot" style="width:80px; height:150px; bottom:0; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.3);"></div>
-                </div>
-                <div style="position:absolute; bottom:10px; left:10px; color:#ddd; background:rgba(0,0,0,0.5); padding:5px;">🚪 Cliquez sur la porte</div>
-            `,
-            hotspots: [{ id: "doorHotspot", action: () => goToView("hall") }]
-        },
-        hall: {
-            bg: "linear-gradient(145deg, #3a2a1a, #1f1508)",
-            html: `
-                <div style="position:absolute; top:30%; left:5%; width:180px; height:120px; background:#2e241a; border:4px solid #ffcc44; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#ffdd99;">📋 CATALOGUE</div>
-                <div class="hotspot" id="catalogHotspot" style="top:30%; left:5%; width:180px; height:120px;"></div>
-                
-                <!-- Allées -->
-                <div style="position:absolute; bottom:20%; left:20%; width:150px; height:200px; background:#4a3520; border-radius:8px; text-align:center; padding-top:10px;">💎 4K REMUX</div>
-                <div class="hotspot" id="aisle4kr" style="bottom:20%; left:20%; width:150px; height:200px;"></div>
-                
-                <div style="position:absolute; bottom:20%; left:45%; width:150px; height:200px; background:#4a3520; border-radius:8px; text-align:center; padding-top:10px;">✨ 4K LIGHT</div>
-                <div class="hotspot" id="aisle4kl" style="bottom:20%; left:45%; width:150px; height:200px;"></div>
-                
-                <div style="position:absolute; bottom:20%; left:70%; width:150px; height:200px; background:#4a3520; border-radius:8px; text-align:center; padding-top:10px;">🍀 1080P REMUX</div>
-                <div class="hotspot" id="aisle1r" style="bottom:20%; left:70%; width:150px; height:200px;"></div>
-                
-                <!-- Escalier droite -->
-                <div style="position:absolute; top:40%; right:5%; width:100px; height:180px; background:#8B5A2B; border-radius:10px; text-align:center; padding-top:20px;">📺 SÉRIES<br>⬆️</div>
-                <div class="hotspot" id="stairs" style="top:40%; right:5%; width:100px; height:180px;"></div>
-            `,
-            hotspots: [
-                { id: "catalogHotspot", action: () => openCatalog() },
-                { id: "aisle4kr", action: () => goToAisle("4kr", "movie") },
-                { id: "aisle4kl", action: () => goToAisle("4kl", "movie") },
-                { id: "aisle1r", action: () => goToAisle("1r", "movie") },
-                { id: "stairs", action: () => goToView("upstairsHall") }
-            ]
-        },
-        upstairsHall: {
-            bg: "linear-gradient(145deg, #2a2a1a, #1a1508)",
-            html: `
-                <div style="position:absolute; top:20px; left:20px; background:#ffaa33; padding:5px 15px; border-radius:20px;">📺 ÉTAGE SÉRIES</div>
-                <div style="position:absolute; bottom:20%; left:20%; width:150px; height:200px; background:#4a3520; border-radius:8px; text-align:center; padding-top:10px;">💎 4K REMUX SÉRIES</div>
-                <div class="hotspot" id="aisle4kr_tv" style="bottom:20%; left:20%; width:150px; height:200px;"></div>
-                
-                <div style="position:absolute; bottom:20%; left:45%; width:150px; height:200px; background:#4a3520; border-radius:8px; text-align:center; padding-top:10px;">✨ 4K LIGHT SÉRIES</div>
-                <div class="hotspot" id="aisle4kl_tv" style="bottom:20%; left:45%; width:150px; height:200px;"></div>
-                
-                <div style="position:absolute; bottom:20%; left:70%; width:150px; height:200px; background:#4a3520; border-radius:8px; text-align:center; padding-top:10px;">🍀 1080P REMUX SÉRIES</div>
-                <div class="hotspot" id="aisle1r_tv" style="bottom:20%; left:70%; width:150px; height:200px;"></div>
-                
-                <div class="hotspot" id="backToHall" style="bottom:10px; left:10px; width:80px; height:40px; background:rgba(0,0,0,0.5); border-radius:20px; text-align:center; line-height:40px; color:white;">⬇ DESCENDRE</div>
-            `,
-            hotspots: [
-                { id: "aisle4kr_tv", action: () => goToAisle("4kr", "tv") },
-                { id: "aisle4kl_tv", action: () => goToAisle("4kl", "tv") },
-                { id: "aisle1r_tv", action: () => goToAisle("1r", "tv") },
-                { id: "backToHall", action: () => goToView("hall") }
-            ]
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        // ---------- CONFIGURATION ----------
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050b1a);
+        scene.fog = new THREE.FogExp2(0x050b1a, 0.008);
+
+        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.6, 3);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+        
+        // CSS2DRenderer pour textes toujours face caméra
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        document.body.appendChild(labelRenderer.domElement);
+
+        // Lumières
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
+        const mainLight = new THREE.DirectionalLight(0xfff5e0, 1);
+        mainLight.position.set(5, 10, 7);
+        mainLight.castShadow = true;
+        mainLight.receiveShadow = true;
+        scene.add(mainLight);
+        const fillLight = new THREE.PointLight(0x665588, 0.5);
+        fillLight.position.set(2, 3, 4);
+        scene.add(fillLight);
+        const backLight = new THREE.PointLight(0xffaa66, 0.4);
+        backLight.position.set(-3, 2, -4);
+        scene.add(backLight);
+        
+        // Sol
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x2a2018, roughness: 0.7, metalness: 0.1 });
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(15, 12), floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -0.05;
+        floor.receiveShadow = true;
+        scene.add(floor);
+        
+        // Mur du fond
+        const backWall = new THREE.Mesh(new THREE.BoxGeometry(15, 5, 0.2), new THREE.MeshStandardMaterial({ color: 0x4a3520 }));
+        backWall.position.set(0, 2, -6);
+        backWall.receiveShadow = true;
+        scene.add(backWall);
+        
+        // ---------- DONNÉES FILMS (Supabase + fallback) ----------
+        let movies = [];
+        const SU = 'https://dnzrpvyeiyxplrcomsuo.supabase.co';
+        const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzYwNTAsImV4cCI6MjA5NTExMjA1MH0.BwuZBjZXQcJlNsaQ_DYSj_n-IbMZswsgL_VuGOVMVs4';
+        const H = {'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK};
+        
+        async function loadMovies() {
+            try {
+                const res = await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc`, { headers: H });
+                if (res.ok) {
+                    const data = await res.json();
+                    movies = data.map(row => ({ ...row.data, _id: row.id }));
+                    localStorage.setItem("videoclub_movies", JSON.stringify(movies));
+                } else throw new Error();
+            } catch(e) {
+                const local = localStorage.getItem("videoclub_movies");
+                if (local) movies = JSON.parse(local);
+                else movies = [];
+            }
+            renderCatalogGrid();
         }
-    };
-    
-    // Génération dynamique des vues d'allées
-    function goToAisle(quality, mediaType) {
-        currentQuality = quality;
-        currentMediaType = mediaType;
-        const aisleId = `aisle_${quality}_${mediaType}`;
-        if (!views[aisleId]) {
-            // Créer la vue de l'allée avec les films correspondants
-            const filtered = movies.filter(m => 
-                m.quality === quality && (m.media_type || 'movie') === mediaType
-            );
-            let html = `<div style="position:absolute; top:20px; left:20px; background:#ffaa33; padding:5px 15px; border-radius:20px;">${quality.toUpperCase()} - ${mediaType === 'tv' ? 'SÉRIES' : 'FILMS'}</div>`;
-            html += `<div style="position:absolute; bottom:10px; left:10px; cursor:pointer; background:#00000099; padding:5px 10px; border-radius:20px;" class="back-btn">⬅ RETOUR</div>`;
-            // Afficher les films sur des étagères
-            html += `<div style="position:absolute; bottom:30%; left:10%; right:10%; display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">`;
-            filtered.forEach((film, idx) => {
-                html += `
-                    <div class="movie-dvd" data-title="${film.title}" style="width:100px; cursor:pointer; text-align:center;">
-                        <img src="${film.poster || 'https://via.placeholder.com/100x150'}" style="width:100px; border-radius:8px; border:2px solid #ffcc44;">
-                        <div style="font-size:10px; color:#ffecb3;">${film.title}</div>
-                    </div>
+        
+        function renderCatalogGrid() {
+            const grid = document.getElementById("catalogGrid");
+            if (!grid) return;
+            grid.innerHTML = "";
+            movies.forEach(m => {
+                const card = document.createElement("div");
+                card.className = "movie-card";
+                card.innerHTML = `
+                    <img src="${m.poster || 'https://via.placeholder.com/150x225?text=DVD'}" onerror="this.src='https://via.placeholder.com/150x225?text=DVD'">
+                    <div class="movie-title">${m.title}</div>
                 `;
+                card.onclick = () => {
+                    closeCatalog();
+                    startTakeAnimation(m.title);
+                };
+                grid.appendChild(card);
             });
-            html += `</div>`;
-            views[aisleId] = {
-                bg: "linear-gradient(145deg, #2a2418, #120e08)",
-                html: html,
-                hotspots: [] // sera ajouté après injection
-            };
         }
-        goToView(aisleId);
-        // Après affichage, attacher les événements sur les DVDs
-        setTimeout(() => {
-            document.querySelectorAll('.movie-dvd').forEach(el => {
-                const title = el.getAttribute('data-title');
-                el.addEventListener('click', () => startTakeAnimation(title));
-            });
-            const backBtn = document.querySelector('.back-btn');
-            if (backBtn) backBtn.addEventListener('click', () => goToView(mediaType === 'tv' ? 'upstairsHall' : 'hall'));
-        }, 50);
-    }
-    
-    function goToView(viewName) {
-        currentView = viewName;
-        const view = views[viewName];
-        if (!view) return;
-        container.style.backgroundImage = view.bg;
-        container.style.backgroundSize = "cover";
-        // Nettoyer les hotspots existants
-        const oldHotspots = container.querySelectorAll('.hotspot');
-        oldHotspots.forEach(h => h.remove());
-        // Ajouter le contenu HTML
-        container.innerHTML = view.html;
-        // Ajouter les hotspots
-        if (view.hotspots) {
-            view.hotspots.forEach(hs => {
-                const el = document.getElementById(hs.id);
-                if (el) {
-                    el.classList.add('hotspot');
-                    el.onclick = (e) => { e.stopPropagation(); hs.action(); };
+        
+        function openCatalog() {
+            document.getElementById("catalogOverlay").classList.add("visible");
+        }
+        window.openCatalog = openCatalog;
+        function closeCatalog() {
+            document.getElementById("catalogOverlay").classList.remove("visible");
+        }
+        window.closeCatalog = closeCatalog;
+        
+        // Animation main qui attrape
+        function startTakeAnimation(movieTitle) {
+            const animDiv = document.createElement("div");
+            animDiv.style.position = "fixed";
+            animDiv.style.top = "0";
+            animDiv.style.left = "0";
+            animDiv.style.width = "100%";
+            animDiv.style.height = "100%";
+            animDiv.style.background = "rgba(0,0,0,0.85)";
+            animDiv.style.zIndex = "200";
+            animDiv.style.display = "flex";
+            animDiv.style.alignItems = "center";
+            animDiv.style.justifyContent = "center";
+            animDiv.style.backdropFilter = "blur(8px)";
+            animDiv.style.animation = "fadeIn 0.3s";
+            animDiv.innerHTML = `
+                <div style="text-align:center; background:#1e1712; padding:30px; border-radius:48px; border:2px solid #ffcc44;">
+                    <div style="font-size:80px; animation: grabHand 0.5s ease-out;">🖐️📀</div>
+                    <p style="margin-top:20px; font-size:24px; font-weight:bold;">${movieTitle}</p>
+                    <p>Vous prenez le DVD sur l'étagère</p>
+                    <button style="margin-top:20px; background:#ffcc44; border:none; padding:8px 20px; border-radius:40px; cursor:pointer;" onclick="this.parentElement.parentElement.remove()">Fermer</button>
+                </div>
+            `;
+            document.body.appendChild(animDiv);
+            setTimeout(() => { if(animDiv.parentNode) animDiv.remove(); }, 3000);
+        }
+        window.startTakeAnimation = startTakeAnimation;
+        
+        // ---------- CRÉATION DU VIDÉO CLUB 3D ----------
+        // Panneau extérieur (façade)
+        const facadeGroup = new THREE.Group();
+        const facade = new THREE.Mesh(new THREE.BoxGeometry(6, 5, 0.3), new THREE.MeshStandardMaterial({ color: 0x8B5A2B, roughness: 0.4 }));
+        facade.position.set(0, 1.5, -4);
+        facade.castShadow = true;
+        scene.add(facade);
+        
+        // Enseigne
+        const signMat = new THREE.MeshStandardMaterial({ color: 0xff3366, emissive: 0x441122 });
+        const signBoard = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.6, 0.2), signMat);
+        signBoard.position.set(0, 3.2, -3.9);
+        scene.add(signBoard);
+        // Texte CSS2D sur enseigne
+        const signDiv = document.createElement('div');
+        signDiv.textContent = '📼 VIDEO CLUB';
+        signDiv.style.color = '#ffdd99';
+        signDiv.style.fontWeight = 'bold';
+        signDiv.style.fontSize = '20px';
+        signDiv.style.textShadow = '0 0 8px #ff3366';
+        const signLabel = new CSS2DObject(signDiv);
+        signLabel.position.set(0, 3.2, -3.8);
+        scene.add(signLabel);
+        
+        // Porte (avec animation)
+        const doorGroup = new THREE.Group();
+        const door = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 0.2), new THREE.MeshStandardMaterial({ color: 0xc28a5a }));
+        door.position.set(0, 1.1, 0);
+        door.castShadow = true;
+        doorGroup.add(door);
+        doorGroup.position.set(0, 0, -3.8);
+        scene.add(doorGroup);
+        
+        // Zone cliquable porte (raycaster)
+        const doorZone = new THREE.Mesh(new THREE.BoxGeometry(1.4, 2.4, 0.5), new THREE.MeshBasicMaterial({ visible: false }));
+        doorZone.position.set(0, 1.2, -3.7);
+        scene.add(doorZone);
+        
+        let doorOpen = false;
+        doorZone.userData = { action: () => {
+            if (!doorOpen) {
+                doorOpen = true;
+                doorGroup.rotation.y = -Math.PI / 2.2;
+                setTimeout(() => {
+                    document.getElementById("info").innerHTML = "🎬 À l'intérieur ! Cliquez sur les pancartes";
+                    document.getElementById("interact-message").innerHTML = "📀 ALLÉES | 🎞 CATALOGUE";
+                    // Afficher les allées après ouverture (création dynamique)
+                    createInterior();
+                }, 600);
+            }
+        }};
+        
+        // Création de l'intérieur (allées, étagères)
+        function createInterior() {
+            // Supprimer la façade extérieure de la vue pour pas gêner
+            facade.visible = false;
+            signBoard.visible = false;
+            signLabel.visible = false;
+            doorZone.visible = false;
+            
+            // Mur gauche avec pancarte CATALOGUE
+            const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 5), new THREE.MeshStandardMaterial({ color: 0x5a3a2a }));
+            leftWall.position.set(-4, 2, -2);
+            scene.add(leftWall);
+            
+            // Pancarte CATALOGUE cliquable
+            const catalogBoard = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1, 0.1), new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 }));
+            catalogBoard.position.set(-3.9, 2.2, -1.5);
+            scene.add(catalogBoard);
+            const catalogLabelDiv = document.createElement('div');
+            catalogLabelDiv.textContent = '📋 CATALOGUE';
+            catalogLabelDiv.style.backgroundColor = '#ffaa33';
+            catalogLabelDiv.style.padding = '5px 12px';
+            catalogLabelDiv.style.borderRadius = '30px';
+            catalogLabelDiv.style.fontWeight = 'bold';
+            catalogLabelDiv.style.cursor = 'pointer';
+            const catalogLabel = new CSS2DObject(catalogLabelDiv);
+            catalogLabel.position.set(-3.9, 2.2, -1.4);
+            scene.add(catalogLabel);
+            catalogLabel.userData = { action: () => openCatalog() };
+            
+            // Création des 4 allées (simplifiées avec étagères)
+            const aisles = [
+                { name: '💎 4K REMUX', quality: '4kr', x: -2, z: -1.5, color: 0xb87333 },
+                { name: '✨ 4K LIGHT', quality: '4kl', x: 0, z: -1.5, color: 0x88aaff },
+                { name: '🍀 1080P REMUX', quality: '1r', x: 2, z: -1.5, color: 0x66bb66 },
+                { name: '🎬 1080P LIGHT', quality: '1l', x: 4, z: -1.5, color: 0xdd88aa }
+            ];
+            
+            aisles.forEach(aisle => {
+                const shelfGroup = new THREE.Group();
+                // Étagères
+                for (let i = -1; i <= 1; i++) {
+                    const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.1, 0.8), new THREE.MeshStandardMaterial({ color: 0x8B5A2B }));
+                    shelf.position.set(0, 0.8 + i * 0.6, 0);
+                    shelf.castShadow = true;
+                    shelfGroup.add(shelf);
+                }
+                shelfGroup.position.set(aisle.x, 0.2, aisle.z);
+                scene.add(shelfGroup);
+                
+                // Panneau au-dessus
+                const signAisle = new THREE.Mesh(new THREE.BoxGeometry(1, 0.4, 0.1), new THREE.MeshStandardMaterial({ color: aisle.color, emissive: 0x221100 }));
+                signAisle.position.set(aisle.x, 1.6, aisle.z);
+                scene.add(signAisle);
+                const labelDiv = document.createElement('div');
+                labelDiv.textContent = aisle.name;
+                labelDiv.style.backgroundColor = '#000000aa';
+                labelDiv.style.padding = '3px 10px';
+                labelDiv.style.borderRadius = '20px';
+                labelDiv.style.fontSize = '12px';
+                labelDiv.style.fontWeight = 'bold';
+                labelDiv.style.color = '#ffdd99';
+                const labelObj = new CSS2DObject(labelDiv);
+                labelObj.position.set(aisle.x, 1.5, aisle.z);
+                scene.add(labelObj);
+                
+                // Ajout de DVD factices sur les étagères (représentés par des petits cubes colorés)
+                const moviesOfQuality = movies.filter(m => m.quality === aisle.quality && (m.media_type || 'movie') === 'movie');
+                for (let i = 0; i < Math.min(moviesOfQuality.length, 6); i++) {
+                    const dvd = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.22, 0.05), new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0x331100 }));
+                    dvd.position.set(aisle.x + (i % 3) * 0.35 - 0.35, 0.55 + Math.floor(i / 3) * 0.6, aisle.z + 0.2);
+                    dvd.castShadow = true;
+                    scene.add(dvd);
+                    // Interaction clic sur le DVD
+                    dvd.userData = { action: () => startTakeAnimation(moviesOfQuality[i]?.title || 'Film') };
                 }
             });
+            
+            // Escalier à droite menant aux séries (étage)
+            const stairs = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 1.2), new THREE.MeshStandardMaterial({ color: 0xaa8866 }));
+            stairs.position.set(5.5, 0.15, -2);
+            scene.add(stairs);
+            const stairsLabel = document.createElement('div');
+            stairsLabel.textContent = '📺 SÉRIES ⬆';
+            stairsLabel.style.backgroundColor = '#ff8844';
+            stairsLabel.style.padding = '4px 12px';
+            stairsLabel.style.borderRadius = '30px';
+            stairsLabel.style.fontWeight = 'bold';
+            const stairsCSS = new CSS2DObject(stairsLabel);
+            stairsCSS.position.set(5.5, 0.9, -2);
+            scene.add(stairsCSS);
+            stairsCSS.userData = { action: () => createUpstairs() };
         }
-        // Réattacher les hotspots créés dynamiquement (comme les DVDs)
-        const instructionDiv = document.createElement("div");
-        instructionDiv.className = "instruction";
-        instructionDiv.innerText = viewName === "street" ? "🏠 Cliquez sur la porte" : "👆 Cliquez sur les éléments pour interagir";
-        container.appendChild(instructionDiv);
-    }
-    
-    // Initialisation
-    loadMovies().then(() => {
-        goToView("street");
-    });
-</script>
+        
+        function createUpstairs() {
+            // Nettoyer l'étage courant (simple: on recrée une scène au-dessus)
+            // Pour garder simple, on déplace la caméra et on cache le rez-de-chaussée
+            camera.position.set(0, 3.5, 3);
+            document.getElementById("info").innerHTML = "📺 ÉTAGE SÉRIES | Cliquez sur une allée";
+            // Créer un nouvel espace avec étagères pour séries
+            const seriesAisles = [
+                { name: '💎 4K SÉRIES', quality: '4kr', x: -2, z: -1, color: 0xb87333 },
+                { name: '✨ 4K LIGHT SÉRIES', quality: '4kl', x: 0, z: -1, color: 0x88aaff },
+                { name: '🍀 1080P SÉRIES', quality: '1r', x: 2, z: -1, color: 0x66bb66 }
+            ];
+            seriesAisles.forEach(aisle => {
+                const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: 0x8B5A2B }));
+                shelf.position.set(aisle.x, 0.8, aisle.z);
+                scene.add(shelf);
+                const sign = new THREE.Mesh(new THREE.BoxGeometry(1, 0.3, 0.1), new THREE.MeshStandardMaterial({ color: aisle.color }));
+                sign.position.set(aisle.x, 1.6, aisle.z);
+                scene.add(sign);
+                const labelDiv = document.createElement('div');
+                labelDiv.textContent = aisle.name;
+                labelDiv.style.backgroundColor = '#000000aa';
+                labelDiv.style.padding = '3px 10px';
+                labelDiv.style.borderRadius = '20px';
+                labelDiv.style.fontSize = '12px';
+                const labelObj = new CSS2DObject(labelDiv);
+                labelObj.position.set(aisle.x, 1.5, aisle.z);
+                scene.add(labelObj);
+                // DVD séries
+                const seriesMovies = movies.filter(m => m.quality === aisle.quality && m.media_type === 'tv');
+                for (let i = 0; i < Math.min(seriesMovies.length, 4); i++) {
+                    const dvd = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.22, 0.05), new THREE.MeshStandardMaterial({ color: 0x77aaff }));
+                    dvd.position.set(aisle.x + (i % 2) * 0.4 - 0.2, 0.9, aisle.z + 0.2);
+                    scene.add(dvd);
+                    dvd.userData = { action: () => startTakeAnimation(seriesMovies[i]?.title || 'Série') };
+                }
+            });
+            // Bouton retour
+            const backBtnDiv = document.createElement('div');
+            backBtnDiv.textContent = '⬇ RETOUR REZ-DE-CHAUSSÉE';
+            backBtnDiv.style.backgroundColor = '#ffaa33';
+            backBtnDiv.style.padding = '6px 15px';
+            backBtnDiv.style.borderRadius = '40px';
+            backBtnDiv.style.cursor = 'pointer';
+            const backBtn = new CSS2DObject(backBtnDiv);
+            backBtn.position.set(0, 0.5, 2.5);
+            scene.add(backBtn);
+            backBtn.userData = { action: () => { camera.position.set(0, 1.6, 3); document.getElementById("info").innerHTML = "🎬 Rez-de-chaussée"; setTimeout(() => { backBtn.visible = false; }, 100); } };
+        }
+        
+        // Raycaster pour interactions
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        window.addEventListener('click', (event) => {
+            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            for (let obj of intersects) {
+                let current = obj.object;
+                while (current) {
+                    if (current.userData && typeof current.userData.action === 'function') {
+                        current.userData.action();
+                        return;
+                    }
+                    current = current.parent;
+                }
+            }
+        });
+        
+        // Animation et rendu
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+        
+        loadMovies();
+    </script>
+    <style>
+        @keyframes grabHand {
+            0% { transform: scale(0.2) rotate(-20deg); opacity: 0; }
+            60% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </body>
 </html>
