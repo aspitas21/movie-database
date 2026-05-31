@@ -6,7 +6,7 @@
 <title>Movie Library</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* ===== TOUS LES STYLES (inchangés) ===== */
+/* ===== TOUS LES STYLES (inchangés, garder ceux d'avant pour ne pas tout réécrire) ===== */
 :root {
   --bg:#050508;
   --s1:#0a0a10;
@@ -380,7 +380,7 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
   </div>
 </div>
 
-<!-- ADD/EDIT MODAL (avec modifications pour collection : agrandissement + choix qualité) -->
+<!-- ADD/EDIT MODAL -->
 <div class="mbg" id="modal">
   <div class="modal">
     <div class="mtitle" id="mtitle">Add a movie</div>
@@ -437,26 +437,21 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
       </select>
     </div>
     
-    <!-- Section spécifique pour les sagas : sélecteur de poster parmi les films -->
+    <!-- Section spécifique pour les sagas -->
     <div id="saga-poster-section" style="display:none;" class="field">
       <label>Changer le poster (depuis les films de la saga)</label>
       <button type="button" id="loadSagaPostersBtn" class="sbtn" style="margin-bottom:8px;">📀 Charger les posters de la saga</button>
       <div id="saga-posters-grid" class="posters" style="max-height:150px; overflow-y:auto;"></div>
     </div>
     
-    <!-- Section collection : filmographie agrandie + choix qualité -->
+    <!-- SECTION COLLECTION REFONDUE -->
     <div id="collection-filmography-section" style="display:none;" class="field">
-      <label>Filmographie (sélectionnez les films à importer)</label>
+      <label>Lien de la collection (sera ajouté automatiquement aux films)</label>
+      <input type="text" id="collectionLinkUrl" placeholder="https://... (lien vers la page de l'acteur/réalisateur)" style="margin-bottom:10px;">
       <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
         <button type="button" id="loadFilmographyBtn" class="sbtn" style="flex:1;">🎭 Charger la filmographie</button>
-        <select id="filmographyQuality" class="bsel" style="flex:1;">
-          <option value="4kr">💎 4K Remux</option>
-          <option value="4kl">✨ 4K Light</option>
-          <option value="1r">🍀 1080p Remux</option>
-          <option value="1l">🎬 1080p Light</option>
-        </select>
       </div>
-      <div id="filmography-list" style="height: 400px; overflow-y: auto; border:1px solid var(--border); border-radius:12px; padding:8px;"></div>
+      <div id="filmography-list" style="height: 400px; overflow-y: auto; border:1px solid var(--border); border-radius:12px; padding:8px; background: var(--s2);"></div>
       <button type="button" id="importSelectedFilmsBtn" class="btns" style="margin-top:12px; width:100%;">⬇ Importer les films sélectionnés</button>
     </div>
     
@@ -475,7 +470,7 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
 <div class="mbg" id="rmod"><div class="modal rmod" id="rcont"></div></div>
 
 <script>
-// ==================== CONFIGURATION ====================
+// ==================== CONFIGURATION (identique à avant) ====================
 const SU='https://dnzrpvyeiyxplrcomsuo.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzYwNTAsImV4cCI6MjA5NTExMjA1MH0.BwuZBjZXQcJlNsaQ_DYSj_n-IbMZswsgL_VuGOVMVs4';
 const TK='4dc76b66e8b41dd652e56c6cc3a425ab';
@@ -490,17 +485,11 @@ let filts=new Set();
 let sortDir=1;
 let genreInc=new Set(), genreExc=new Set();
 
-// Variables pour la filmographie collection (agrandie)
+// Variables pour la filmographie collection (avec qualités individuelles)
 let currentPersonId=null;
-let currentPersonName='';
-let currentFilmography=[];
-let selectedFilmographyIndices=new Set();
+let currentFilmography=[]; // tableau d'objets { movie, selected, quality } pour chaque film
+let collectionLinkUrl = '';
 
-// Variables pour saga poster
-let currentSagaId=null;
-let currentSagaPosters=[];
-
-// ==================== FONCTIONS UTILITAIRES ====================
 function ss(s,l){document.getElementById('sdot').className='sdot '+s;document.getElementById('slbl').textContent=l;}
 function toggleSize(){ sizeIdx=(sizeIdx+1)%SIZES.length; document.documentElement.style.setProperty('--card-w',SIZES[sizeIdx]+'px'); document.getElementById('size-btn').textContent=sizeIdx===0?'⊞':sizeIdx===1?'⊟':'⊠';}
 function fmt(m){if(!m)return '';return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0');}
@@ -926,7 +915,7 @@ async function loadSagaPosters() {
   } catch(e) { alert("Erreur lors du chargement des films de la saga."); }
 }
 
-// ==================== COLLECTION FILMOGRAPHY (AGRANDIE) ====================
+// ==================== COLLECTION FILMOGRAPHY (avec qualité individuelle) ====================
 async function loadFilmographyForCollection() {
   const personId = meta.tmdb_id;
   if (!personId) { alert("Aucun TMDB ID pour cette personne. Veuillez d'abord rechercher via le bouton 'Search'."); return; }
@@ -935,59 +924,75 @@ async function loadFilmographyForCollection() {
   try {
     const res = await fetch(`https://api.themoviedb.org/3/person/${personId}/movie_credits?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
-    const cast = (data.cast || []).filter(m => m.poster_path).slice(0, 60);
-    currentFilmography = cast;
-    selectedFilmographyIndices.clear();
-    const container = document.getElementById('filmography-list');
-    container.innerHTML = '';
-    cast.forEach((movie, idx) => {
-      const alreadyExists = movies.some(m => m.tmdb_id === movie.id);
-      const div = document.createElement('div');
-      div.style.display = 'flex';
-      div.style.alignItems = 'center';
-      div.style.gap = '12px';
-      div.style.padding = '8px';
-      div.style.borderBottom = '1px solid var(--border)';
-      div.style.cursor = 'pointer';
-      div.innerHTML = `
-        <input type="checkbox" style="width:20px; height:20px; cursor:pointer;" ${selectedFilmographyIndices.has(idx) ? 'checked' : ''} ${alreadyExists ? 'disabled' : ''}>
-        <img src="https://image.tmdb.org/t/p/w92${movie.poster_path}" style="width:45px; border-radius:6px;">
-        <div style="flex:1;">
-          <strong>${movie.title}</strong><br>
-          <span style="font-size:11px; color:var(--muted2);">${movie.release_date ? movie.release_date.slice(0,4) : 'N/A'}</span>
-          ${alreadyExists ? '<span style="color:#4ade80; margin-left:10px;">(déjà importé)</span>' : ''}
-        </div>
-      `;
-      const checkbox = div.querySelector('input');
-      if (!alreadyExists) {
-        div.addEventListener('click', (e) => {
-          if (e.target.tagName !== 'INPUT') checkbox.checked = !checkbox.checked;
-          if (checkbox.checked) selectedFilmographyIndices.add(idx);
-          else selectedFilmographyIndices.delete(idx);
-        });
-        checkbox.addEventListener('change', (e) => {
-          if (checkbox.checked) selectedFilmographyIndices.add(idx);
-          else selectedFilmographyIndices.delete(idx);
-        });
-      } else {
-        checkbox.disabled = true;
-      }
-      container.appendChild(div);
-    });
-    st.textContent = `${cast.length} films trouvés. Sélectionnez ceux à importer.`;
+    const cast = (data.cast || []).filter(m => m.poster_path).slice(0, 80);
+    currentFilmography = cast.map(movie => ({
+      movie: movie,
+      selected: false,
+      quality: '1l' // valeur par défaut (1080p Light)
+    }));
+    renderFilmographyList();
+    st.textContent = `${cast.length} films trouvés. Cochez ceux à importer et choisissez leur qualité.`;
   } catch(e) {
     st.textContent = 'Erreur lors du chargement.';
   }
 }
 
+function renderFilmographyList() {
+  const container = document.getElementById('filmography-list');
+  if (!container) return;
+  container.innerHTML = '';
+  currentFilmography.forEach((item, idx) => {
+    const movie = item.movie;
+    const alreadyExists = movies.some(m => m.tmdb_id === movie.id);
+    const div = document.createElement('div');
+    div.style.display = 'flex';
+    div.style.alignItems = 'center';
+    div.style.gap = '12px';
+    div.style.padding = '10px';
+    div.style.borderBottom = '1px solid var(--border)';
+    div.style.backgroundColor = item.selected ? 'rgba(167,139,250,0.1)' : 'transparent';
+    div.innerHTML = `
+      <input type="checkbox" style="width:20px; height:20px; cursor:pointer;" ${item.selected ? 'checked' : ''} ${alreadyExists ? 'disabled' : ''}>
+      <img src="https://image.tmdb.org/t/p/w92${movie.poster_path}" style="width:50px; border-radius:6px;">
+      <div style="flex:2; min-width:120px;">
+        <strong>${movie.title}</strong><br>
+        <span style="font-size:11px; color:var(--muted2);">${movie.release_date ? movie.release_date.slice(0,4) : 'N/A'}</span>
+        ${alreadyExists ? '<span style="color:#4ade80; margin-left:10px;">(déjà importé)</span>' : ''}
+      </div>
+      <div style="flex:1;">
+        <select class="movie-quality-select" data-idx="${idx}" style="background:var(--s2); border:1px solid var(--border); border-radius:6px; padding:5px; font-size:11px;" ${alreadyExists ? 'disabled' : ''}>
+          <option value="4kr" ${item.quality === '4kr' ? 'selected' : ''}>💎 4K Remux</option>
+          <option value="4kl" ${item.quality === '4kl' ? 'selected' : ''}>✨ 4K Light</option>
+          <option value="1r" ${item.quality === '1r' ? 'selected' : ''}>🍀 1080p Remux</option>
+          <option value="1l" ${item.quality === '1l' ? 'selected' : ''}>🎬 1080p Light</option>
+        </select>
+      </div>
+    `;
+    const checkbox = div.querySelector('input');
+    if (!alreadyExists) {
+      checkbox.addEventListener('change', (e) => {
+        item.selected = checkbox.checked;
+        div.style.backgroundColor = item.selected ? 'rgba(167,139,250,0.1)' : 'transparent';
+      });
+      const qualitySelect = div.querySelector('.movie-quality-select');
+      qualitySelect.addEventListener('change', (e) => {
+        item.quality = qualitySelect.value;
+      });
+    } else {
+      checkbox.disabled = true;
+    }
+    container.appendChild(div);
+  });
+}
+
 async function importSelectedFilms() {
-  const qualitySelect = document.getElementById('filmographyQuality');
-  const quality = qualitySelect ? qualitySelect.value : '1l';
-  const toImport = Array.from(selectedFilmographyIndices).map(i => currentFilmography[i]);
-  if (!toImport.length) { alert("Aucun film sélectionné."); return; }
+  const collectionLink = document.getElementById('collectionLinkUrl').value.trim();
+  const toImport = currentFilmography.filter(item => item.selected && !movies.some(m => m.tmdb_id === item.movie.id));
+  if (!toImport.length) { alert("Aucun film sélectionné ou déjà importé."); return; }
   let imported = 0;
-  for (const movie of toImport) {
-    if (movies.some(m => m.tmdb_id === movie.id)) continue;
+  for (const item of toImport) {
+    const movie = item.movie;
+    const quality = item.quality;
     const poster = movie.poster_path ? `https://image.tmdb.org/t/p/w342${movie.poster_path}` : '';
     let runtime = 0;
     try {
@@ -995,10 +1000,15 @@ async function importSelectedFilms() {
       const data = await d.json();
       runtime = data.runtime || 0;
     } catch(e) {}
+    // Lien de la collection : on l'ajoute dans le champ 'links' du film
+    const links = [];
+    if (collectionLink) {
+      links.push({ name: "Collection", url: collectionLink });
+    }
     const newMovie = {
       title: movie.title,
-      link: '',
-      links: [],
+      link: collectionLink, // pour compatibilité ancienne
+      links: links,
       quality: quality,
       poster: poster,
       release_date: movie.release_date || '',
@@ -1013,11 +1023,13 @@ async function importSelectedFilms() {
     await addM(newMovie);
     imported++;
   }
-  alert(`${imported} film(s) importé(s) avec succès.`);
+  alert(`${imported} film(s) importé(s) avec succès. Le lien de la collection a été ajouté à chacun.`);
   render();
+  // Vider la liste pour éviter double import
+  currentFilmography = [];
   document.getElementById('filmography-list').innerHTML = '';
-  selectedFilmographyIndices.clear();
   document.getElementById('status').textContent = '';
+  document.getElementById('collectionLinkUrl').value = '';
 }
 
 // ==================== ADD/EDIT MODAL ====================
@@ -1060,7 +1072,8 @@ function openEdit(e,idx){
     collectionSection.style.display = 'block';
     sagaSection.style.display = 'none';
     document.getElementById('filmography-list').innerHTML = '';
-    selectedFilmographyIndices.clear();
+    document.getElementById('collectionLinkUrl').value = '';
+    currentFilmography = [];
     const loadBtn = document.getElementById('loadFilmographyBtn');
     const newBtn = loadBtn.cloneNode(true);
     loadBtn.parentNode.replaceChild(newBtn, loadBtn);
