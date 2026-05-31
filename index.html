@@ -355,6 +355,27 @@
             margin-top: 1rem;
         }
 
+        .external-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        .external-link {
+            background: rgba(255,255,255,0.05);
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            text-decoration: none;
+            color: var(--accent);
+            transition: 0.1s;
+        }
+        .external-link:hover {
+            background: var(--accent-glow);
+        }
+
         @media (max-width: 700px) {
             header { padding: 0.8rem; }
             .filters-bar, .genre-bar, .content { padding-left: 1rem; padding-right: 1rem; }
@@ -375,12 +396,11 @@
         <button id="addMovieBtn">+ Ajouter</button>
         <button id="exportBtn">⬇ Export</button>
         <button id="importBtn">⬆ Import</button>
+        <button id="letterboxdExportBtn" class="btn-primary" style="background:#00e5ff; color:#000;">🎞 Export Letterboxd</button>
     </div>
 </header>
 
-<div class="filters-bar" id="filtersBar">
-    <!-- Les filtres seront injectés ici -->
-</div>
+<div class="filters-bar" id="filtersBar"></div>
 <div class="genre-bar" id="genreBar"></div>
 
 <div class="content" id="content">
@@ -426,7 +446,7 @@
             <img id="currentPosterPreview" style="max-width: 80px; margin-top: 0.5rem; border-radius: 0.5rem;" />
         </div>
         <div class="form-group">
-            <label>Liens (streaming / bande-annonce)</label>
+            <label>Liens personnalisés (streaming / bande-annonce)</label>
             <div id="linksContainer"></div>
             <button id="addLinkBtn" style="width: 100%; margin-top: 0.3rem;">+ Ajouter un lien</button>
         </div>
@@ -450,16 +470,16 @@
     let currentMediaType = 'movie';
     let currentPoster = '';
     let currentTmdbResults = [];
-    let currentLinks = []; // stockage temporaire
+    let currentLinks = [];
 
     // Filtres
-    let qualityFilters = new Set();  // '4kr', '4kl', etc.
-    let mediaTypeFilters = new Set(); // 'movie', 'tv', 'collection', 'saga'
+    let qualityFilters = new Set();
+    let mediaTypeFilters = new Set();
     let genreInc = new Set();
     let genreExc = new Set();
     let searchQuery = '';
 
-    // DOM elements
+    // DOM
     const gridEl = document.getElementById('grid');
     const movieCountEl = document.getElementById('movieCount');
     const filtersBar = document.getElementById('filtersBar');
@@ -482,7 +502,7 @@
     const deleteMovieBtn = document.getElementById('deleteMovieBtn');
     const typeBtns = document.querySelectorAll('.type-btn');
 
-    // ---------- Chargement des films ----------
+    // ---------- Chargement ----------
     async function loadMovies() {
         try {
             const res = await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc`, { headers: HEADERS });
@@ -491,7 +511,6 @@
             movies = data.map(row => ({ ...row.data, _id: row.id }));
             localStorage.setItem('movies_backup', JSON.stringify(movies));
         } catch (e) {
-            console.warn('Supabase hors ligne, utilisation localStorage');
             const backup = localStorage.getItem('movies_backup');
             if (backup) movies = JSON.parse(backup);
             else movies = [];
@@ -521,7 +540,6 @@
             localStorage.setItem('movies_backup', JSON.stringify(movies));
             render();
         } catch (e) {
-            // Fallback local
             if (isEdit) movies[index] = movie;
             else movies.push(movie);
             localStorage.setItem('movies_backup', JSON.stringify(movies));
@@ -543,14 +561,10 @@
     // ---------- Rendu principal ----------
     function render() {
         let filtered = [...movies];
-        // Filtre qualité
         if (qualityFilters.size) filtered = filtered.filter(m => qualityFilters.has(m.quality));
-        // Filtre type
         if (mediaTypeFilters.size) filtered = filtered.filter(m => mediaTypeFilters.has(m.media_type || 'movie'));
-        // Filtre genres (inc/exc)
         if (genreInc.size) filtered = filtered.filter(m => (m.tags || []).some(t => genreInc.has(t)));
         if (genreExc.size) filtered = filtered.filter(m => !(m.tags || []).some(t => genreExc.has(t)));
-        // Recherche textuelle
         if (searchQuery) {
             const q = searchQuery.toLowerCase();
             filtered = filtered.filter(m => m.title.toLowerCase().includes(q));
@@ -566,14 +580,15 @@
                     ${movie.poster ? `<img class="poster" src="${movie.poster}" alt="${movie.title}" loading="lazy" onerror="this.src=''">` : `<div class="no-poster">🎬</div>`}
                 </div>
                 <div class="card-body">
-                    <div class="card-title">${movie.title}</div>
+                    <div class="card-title">${escapeHtml(movie.title)}</div>
                     <div class="card-meta">
                         <span class="quality">${getQualityIcon(movie.quality)}</span>
                         <span>${movie.release_date ? movie.release_date.slice(0,4) : ''}</span>
                     </div>
                 </div>
             `;
-            card.addEventListener('click', () => openDetail(movies.indexOf(movie)));
+            const originalIdx = movies.indexOf(movie);
+            card.addEventListener('click', () => openDetail(originalIdx));
             gridEl.appendChild(card);
         });
         renderFilters();
@@ -583,6 +598,16 @@
     function getQualityIcon(q) {
         const map = { '4kr': '💎', '4kl': '✨', '1r': '🍀', '1l': '🎬' };
         return map[q] || '🎞️';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
     }
 
     function renderFilters() {
@@ -599,7 +624,6 @@
             { key: 'saga', label: '⚡ Sagas' }
         ];
         filtersBar.innerHTML = '';
-        // Qualité
         qualities.forEach(q => {
             const chip = document.createElement('div');
             chip.className = `chip ${qualityFilters.has(q.key) ? 'active' : ''}`;
@@ -612,13 +636,11 @@
             });
             filtersBar.appendChild(chip);
         });
-        // Séparateur
         const sep = document.createElement('span');
         sep.style.width = '1px';
         sep.style.background = 'var(--border)';
         sep.style.margin = '0 0.5rem';
         filtersBar.appendChild(sep);
-        // Types
         types.forEach(t => {
             const chip = document.createElement('div');
             chip.className = `chip ${mediaTypeFilters.has(t.key) ? 'active' : ''}`;
@@ -670,20 +692,32 @@
         });
     }
 
-    // ---------- Détail d'un film ----------
+    // ---------- Détail avec liens Letterboxd, Allociné, sous-titres ----------
     function openDetail(index) {
         const movie = movies[index];
+        const titleEncoded = encodeURIComponent(movie.title);
+        const letterboxdUrl = movie.tmdb_id 
+            ? `https://letterboxd.com/tmdb/${movie.tmdb_id}/`
+            : `https://letterboxd.com/search/${titleEncoded}/`;
+        const allocineUrl = `https://www.allocine.fr/rechercher/?q=${titleEncoded}`;
+        const subsUrl = `https://www.opensubtitles.com/fr/search/all/q-${titleEncoded}/hearing_impaired-include/machine_translated-exclude/trusted_sources-include`;
+
         const detailHtml = `
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <img src="${movie.poster || ''}" style="width: 120px; border-radius: 0.8rem;" onerror="this.src=''">
                 <div style="flex:1">
-                    <h3>${movie.title}</h3>
+                    <h3>${escapeHtml(movie.title)}</h3>
                     <p>Qualité: ${getQualityIcon(movie.quality)} ${movie.quality}</p>
                     <p>Année: ${movie.release_date?.slice(0,4) || 'N/A'}</p>
                     <p>Note: ${movie.vote_average ? '⭐ ' + movie.vote_average.toFixed(1) : 'N/A'}</p>
                     <p>Genres: ${(movie.tags || []).join(', ') || 'Aucun'}</p>
-                    ${(movie.links && movie.links.length) ? `<div>Liens: ${movie.links.map(l => `<a href="${l.url}" target="_blank" style="color:var(--accent)">${l.name || 'lien'}</a>`).join(', ')}</div>` : ''}
+                    ${(movie.links && movie.links.length) ? `<div>Liens personnalisés: ${movie.links.map(l => `<a href="${l.url}" target="_blank" style="color:var(--accent)">${l.name || 'lien'}</a>`).join(', ')}</div>` : ''}
                 </div>
+            </div>
+            <div class="external-links">
+                <a href="${letterboxdUrl}" target="_blank" class="external-link">🎞 Letterboxd</a>
+                <a href="${allocineUrl}" target="_blank" class="external-link">🎬 Allociné</a>
+                <a href="${subsUrl}" target="_blank" class="external-link">💬 Sous-titres</a>
             </div>
             <div class="footer-buttons" style="margin-top: 1rem;">
                 <button id="editFromDetail">Modifier</button>
@@ -702,7 +736,7 @@
         modalDetail.addEventListener('click', (e) => { if (e.target === modalDetail) modalDetail.remove(); });
     }
 
-    // ---------- Modal d'édition / ajout ----------
+    // ---------- Modal d'édition ----------
     function openEdit(index = null) {
         editIndex = index;
         const movie = index !== null ? movies[index] : null;
@@ -768,8 +802,6 @@
         });
     }
 
-    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m) { if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
-
     function collectLinks() {
         const rows = linksContainer.querySelectorAll('.link-row');
         const newLinks = [];
@@ -801,7 +833,6 @@
                     posterUrlInput.value = currentPoster;
                     currentPosterPreview.src = currentPoster;
                     tmdbResultsDiv.innerHTML = '';
-                    // Optionnel : remplir automatiquement les métadonnées
                 });
                 tmdbResultsDiv.appendChild(div);
             });
@@ -839,7 +870,6 @@
         }
     }
 
-    // Export / Import
     function exportData() {
         const dataStr = JSON.stringify(movies, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
@@ -865,6 +895,20 @@
         input.click();
     }
 
+    function exportLetterboxd() {
+        let csv = 'Title,Year,tmdbID\n';
+        movies.forEach(m => {
+            const year = m.release_date ? m.release_date.slice(0,4) : '';
+            const tmdbId = m.tmdb_id || '';
+            csv += `"${m.title.replace(/"/g, '""')}",${year},${tmdbId}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'letterboxd_export.csv';
+        a.click();
+    }
+
     // Event listeners
     searchInput.addEventListener('input', (e) => { searchQuery = e.target.value; render(); });
     addMovieBtn.addEventListener('click', () => openEdit());
@@ -883,9 +927,9 @@
     posterUrlInput.addEventListener('input', (e) => { currentPoster = e.target.value; currentPosterPreview.src = currentPoster; });
     document.getElementById('exportBtn').addEventListener('click', exportData);
     document.getElementById('importBtn').addEventListener('click', importData);
+    document.getElementById('letterboxdExportBtn').addEventListener('click', exportLetterboxd);
     modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-    // Init
     loadMovies();
 </script>
 </body>
