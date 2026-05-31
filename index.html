@@ -6,8 +6,7 @@
 <title>Movie Library</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* ... tous les styles identiques à votre version ... */
-/* (je conserve exactement les mêmes styles pour ne rien casser) */
+/* ===== TOUS LES STYLES (inchangés) ===== */
 :root {
   --bg:#050508;
   --s1:#0a0a10;
@@ -29,8 +28,6 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
 body::before{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:900px;height:600px;border-radius:50%;background:var(--bg-glow);pointer-events:none;z-index:0;transition:background 0.6s ease;}
-
-/* RECENT SECTION */
 .recent-section{padding:1rem 2.5rem 0;position:relative;z-index:1;}
 .recent-header{display:flex;align-items:center;gap:10px;margin-bottom:0.9rem;}
 .recent-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);}
@@ -42,8 +39,6 @@ body::before{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-5
 .recent-card img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;}
 .recent-card .rc-placeholder{width:100%;aspect-ratio:2/3;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted);}
 .recent-card .rc-title{font-size:9px;font-weight:600;color:var(--muted2);padding:4px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
-/* HEADER */
 header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(5,5,8,0.92);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;backdrop-filter:blur(24px);}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
 .logo-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#6d28d9,#a855f7);display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 0 14px rgba(124,58,237,0.45);position:relative;overflow:hidden;flex-shrink:0;}
@@ -70,8 +65,6 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .btn-size:hover{border-color:var(--border2);color:var(--text);}
 .btn-add{padding:7px 15px;background:linear-gradient(135deg,#6d28d9,#9333ea);border:none;border-radius:8px;color:#fff;font-family:'Inter',sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s;letter-spacing:0.4px;text-transform:uppercase;white-space:nowrap;box-shadow:0 4px 12px rgba(109,40,217,0.35);}
 .btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(109,40,217,0.5);}
-
-/* FILTERS BAR */
 .bar{padding:0 2.5rem;height:44px;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--border);background:rgba(5,5,8,0.75);backdrop-filter:blur(12px);overflow-x:auto;scrollbar-width:none;position:sticky;top:60px;z-index:40;}
 .bar::-webkit-scrollbar{display:none;}
 .chip{display:flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap;flex-shrink:0;}
@@ -86,16 +79,10 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .bsel{padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;outline:none;transition:all 0.15s;flex-shrink:0;}
 .bsel:focus{border-color:var(--border2);color:var(--text);}
 .bsel option{background:#0f0f18;color:var(--text);}
-
-/* RESULTS */
 .results-bar{padding:0.9rem 2.5rem 0;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
 .results-label{font-size:12px;color:var(--muted2);font-weight:500;}
 .results-label strong{color:var(--text);font-weight:700;}
-
-/* GRID */
 .content{padding:1.2rem 2.5rem 3rem;position:relative;z-index:1;}
-
-/* GENRE CHIPS ROW */
 .genre-bar{padding:0.4rem 2.5rem;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--border);background:rgba(5,5,8,0.6);overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;min-height:36px;}
 .genre-bar::-webkit-scrollbar{display:none;}
 .genre-bar:empty{display:none;}
@@ -107,8 +94,6 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .genre-clear{padding:3px 8px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;}
 .genre-clear:hover{color:var(--text);border-color:var(--border2);}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--card-w),1fr));gap:14px;transition:grid-template-columns 0.3s;}
-
-/* CARD */
 .card{position:relative;border-radius:11px;overflow:hidden;background:var(--s1);border:1px solid var(--border);cursor:pointer;text-decoration:none;display:block;transition:transform 0.25s cubic-bezier(0.34,1.4,0.64,1),border-color 0.2s,box-shadow 0.25s;will-change:transform;}
 .card.q4kr{background:linear-gradient(160deg,#0f0b18 0%,#0a0a10 60%);}
 .card.q4kl{background:linear-gradient(160deg,#0a1410 0%,#0a0a10 60%);}
@@ -122,7 +107,6 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .card:hover .cov{opacity:1;}
 .card:hover .cposter{transform:scale(1.05);}
 .card:hover .detail-btn{opacity:1;transform:scale(1);}
-
 .poster-wrap{overflow:hidden;position:relative;aspect-ratio:2/3;}
 .cposter{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.4s ease;}
 .no-poster{width:100%;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--muted);}
@@ -130,17 +114,12 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .no-poster.q4kl{background:linear-gradient(135deg,#0d1f12,#0a1410);}
 .no-poster.q1r{background:linear-gradient(135deg,#0d1a26,#0a1218);}
 .no-poster.q1l{background:linear-gradient(135deg,#261408,#160e08);}
-
 .crating{position:absolute;top:7px;left:7px;z-index:2;background:rgba(0,0,0,0.8);color:#fbbf24;font-size:9px;font-weight:800;padding:2px 6px;border-radius:5px;border:1px solid rgba(251,191,36,0.2);backdrop-filter:blur(6px);}
-
 .cov{position:absolute;inset:0;opacity:0;transition:opacity 0.2s;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.2) 55%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:10px;z-index:1;}
 .cov-play{position:absolute;top:calc(50% - 28px);left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;backdrop-filter:blur(4px);}
 .cov-year{font-size:9px;color:rgba(255,255,255,0.55);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
-
 .detail-btn{position:absolute;top:7px;right:7px;z-index:3;width:24px;height:24px;border-radius:6px;background:rgba(0,0,0,0.75);border:1px solid rgba(255,255,255,0.1);color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(0.8);transition:all 0.18s;backdrop-filter:blur(6px);}
 .detail-btn:hover{background:rgba(109,40,217,0.4);border-color:rgba(167,139,250,0.4);}
-
-/* QUALITY BADGE - bottom right of card body */
 .cbody{padding:8px 10px 10px;position:relative;}
 .ctitle{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.1px;padding-right:4px;}
 .csub{font-size:10px;color:var(--muted2);margin-top:2px;font-weight:500;}
@@ -152,13 +131,10 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .qbadge.q4kl{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);}
 .qbadge.q1r{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);}
 .qbadge.q1l{background:rgba(100,100,120,0.1);border:1px solid rgba(255,255,255,0.08);filter:grayscale(1);opacity:0.55;}
-
 .empty{padding:5rem 1rem;text-align:center;}
 .empty-icon{font-size:52px;opacity:0.15;margin-bottom:14px;}
 .empty-title{font-size:17px;font-weight:800;letter-spacing:-0.4px;margin-bottom:7px;}
 .empty-sub{font-size:13px;color:var(--muted2);}
-
-/* COLLECTION CARD */
 .card.collection{background:linear-gradient(160deg,#120a1e 0%,#0a0a10 60%);}
 .card.collection:hover{border-color:rgba(232,184,74,0.3);box-shadow:0 24px 50px rgba(0,0,0,0.6),0 0 20px rgba(232,184,74,0.08);}
 .col-portrait{width:100%;aspect-ratio:2/3;object-fit:cover;object-position:top;display:block;transition:transform 0.4s ease;}
@@ -167,8 +143,6 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .col-name-overlay{position:absolute;bottom:8px;left:8px;right:8px;z-index:2;}
 .col-name-overlay .col-role{font-size:9px;color:rgba(232,184,74,0.8);font-weight:700;letter-spacing:1px;text-transform:uppercase;}
 .no-portrait{width:100%;aspect-ratio:2/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#1a0d2e,#120820);color:var(--muted);font-size:36px;}
-
-/* MODALS */
 .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(12px);}
 .mbg.open{display:flex;}
 .modal{background:var(--s1);border:1px solid rgba(255,255,255,0.07);border-radius:18px;padding:1.75rem;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:up 0.25s cubic-bezier(0.34,1.4,0.64,1);box-shadow:0 40px 80px rgba(0,0,0,0.7);}
@@ -202,8 +176,6 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .btnd{padding:9px 13px;background:transparent;border:1px solid rgba(239,68,68,0.25);border-radius:9px;color:#f87171;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
 .btnd:hover{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.45);}
 .btndc{padding:9px 16px;background:#b91c1c;border:none;border-radius:9px;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
-
-/* FILMOGRAPHIE MODAL (gardé pour compatibilité mais moins utilisé) */
 .fmod{width:680px;}
 .fmod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:1rem;max-height:420px;overflow-y:auto;padding-right:4px;}
 .fmod-grid::-webkit-scrollbar{width:4px;}
@@ -223,8 +195,6 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .fmod-count strong{color:#a78bfa;}
 .fmod-selall{padding:5px 10px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted2);font-family:Inter,sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.15s;}
 .fmod-selall:hover{border-color:var(--border2);color:var(--text);}
-
-
 .dmod{width:580px;}
 .dbody{display:flex;gap:1.5rem;}
 .dposter-wrap{flex-shrink:0;}
@@ -254,26 +224,20 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .dbtn-sub{display:inline-flex;align-items:center;gap:6px;padding:10px 15px;background:rgba(34,197,94,0.08);color:#4ade80;border:1px solid rgba(34,197,94,0.2);border-radius:9px;text-decoration:none;font-size:12px;font-weight:800;transition:all 0.15s;}
 .dbtn-sub:hover{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.35);}
 .nolink{font-size:12px;color:var(--muted);font-weight:500;font-style:italic;}
-
-/* RANDOM */
 .rmod{text-align:center;}
 .rtitle{font-size:22px;font-weight:900;letter-spacing:-0.5px;margin-bottom:3px;}
 .rmeta{font-size:11px;color:var(--muted2);font-weight:600;margin-bottom:1rem;letter-spacing:0.5px;text-transform:uppercase;}
 .btnreroll{padding:9px 16px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-right:7px;transition:all 0.15s;}
 .btnreroll:hover{border-color:var(--border2);}
-
-/* LOADING */
 .loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:999;}
 .lname{font-size:24px;font-weight:900;letter-spacing:-0.5px;}
 .lname span{color:#a78bfa;}
 .lbar{width:150px;height:2px;background:var(--s3);border-radius:2px;overflow:hidden;}
 .lbar-i{height:100%;background:linear-gradient(90deg,#6d28d9,#a78bfa);border-radius:2px;animation:lb 1.3s ease infinite;}
 @keyframes lb{0%{width:0;margin-left:0}50%{width:50%;margin-left:25%}100%{width:0;margin-left:100%}}
-
 footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap:7px;position:relative;z-index:1;}
 .btni{padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted);font-family:'Inter',sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;text-transform:uppercase;}
 .btni:hover{border-color:var(--border2);color:var(--muted2);}
-/* RESPONSIVE MOBILE */
 @media (max-width: 768px) {
   header{padding:0.75rem 1rem;height:auto;flex-wrap:wrap;gap:8px;}
   .logo-name{font-size:13px;}
@@ -282,24 +246,20 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
   .sync{display:none;}
   .btn-size{display:none;}
   .btn-rnd{padding:7px 10px;}
-
   .bar{padding:0.5rem 1rem;top:auto;position:relative;height:auto;flex-wrap:wrap;gap:5px;row-gap:6px;}
   .bsep{display:none;}
   .bsel{display:block;flex:1;min-width:calc(50% - 6px);font-size:12px;padding:6px 10px;}
   .bar-selects{display:flex;gap:6px;width:100%;margin-top:2px;}
-
   .recent-section{padding:0.8rem 1rem 0;}
   .results-bar{padding:0.6rem 1rem 0;}
   .content{padding:0.8rem 1rem 3rem;}
   .genre-bar{padding:0.4rem 1rem;}
   .grid{grid-template-columns:repeat(3,1fr);gap:8px;}
   .card .ctags{display:none;}
-
   .modal{border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;width:100%;max-width:100%;max-height:85vh;padding:1.5rem 1.25rem;animation:slideup-mob 0.25s ease;}
   @keyframes slideup-mob{from{transform:translateY(100%)}to{transform:translateY(0)}}
   .mbg.open{align-items:flex-end;}
   .dmod{width:100%;}
-
   .dbody{flex-direction:column;align-items:center;text-align:center;}
   .dposter-wrap img{width:120px;}
   .dposter img{width:120px;}
@@ -308,10 +268,8 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
   .dbtns{justify-content:center;flex-wrap:wrap;}
   .dtags{justify-content:center;}
   .dbadges{justify-content:center;}
-
   footer{padding:1rem;justify-content:center;flex-wrap:wrap;}
 }
-
 @media (max-width: 480px) {
   .logo-name{display:none;}
   .count{display:none;}
@@ -386,7 +344,7 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
   <button class="btni" style="color:#a78bfa;border-color:rgba(167,139,250,0.2)" onclick="openFilmo()">🎭 Importer filmographie</button>
 </footer>
 
-<!-- FILMOGRAPHIE MODAL -->
+<!-- FILMOGRAPHIE MODAL (dédié) -->
 <div class="mbg" id="fmod">
   <div class="modal fmod">
     <div class="mtitle">🎭 Importer une filmographie</div>
@@ -422,7 +380,7 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
   </div>
 </div>
 
-<!-- ADD/EDIT MODAL -->
+<!-- ADD/EDIT MODAL (avec modifications pour collection : agrandissement + choix qualité) -->
 <div class="mbg" id="modal">
   <div class="modal">
     <div class="mtitle" id="mtitle">Add a movie</div>
@@ -479,19 +437,27 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
       </select>
     </div>
     
-    <!-- Section spécifique pour les sagas : sélecteur de poster parmi les films de la collection -->
+    <!-- Section spécifique pour les sagas : sélecteur de poster parmi les films -->
     <div id="saga-poster-section" style="display:none;" class="field">
       <label>Changer le poster (depuis les films de la saga)</label>
       <button type="button" id="loadSagaPostersBtn" class="sbtn" style="margin-bottom:8px;">📀 Charger les posters de la saga</button>
       <div id="saga-posters-grid" class="posters" style="max-height:150px; overflow-y:auto;"></div>
     </div>
     
-    <!-- Section spécifique pour les collections : filmographie avec cases à cocher -->
+    <!-- Section collection : filmographie agrandie + choix qualité -->
     <div id="collection-filmography-section" style="display:none;" class="field">
       <label>Filmographie (sélectionnez les films à importer)</label>
-      <button type="button" id="loadFilmographyBtn" class="sbtn" style="margin-bottom:8px;">🎭 Charger la filmographie</button>
-      <div id="filmography-list" style="max-height:250px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:6px;"></div>
-      <button type="button" id="importSelectedFilmsBtn" class="btns" style="margin-top:8px; width:100%;">⬇ Importer les films sélectionnés</button>
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+        <button type="button" id="loadFilmographyBtn" class="sbtn" style="flex:1;">🎭 Charger la filmographie</button>
+        <select id="filmographyQuality" class="bsel" style="flex:1;">
+          <option value="4kr">💎 4K Remux</option>
+          <option value="4kl">✨ 4K Light</option>
+          <option value="1r">🍀 1080p Remux</option>
+          <option value="1l">🎬 1080p Light</option>
+        </select>
+      </div>
+      <div id="filmography-list" style="height: 400px; overflow-y: auto; border:1px solid var(--border); border-radius:12px; padding:8px;"></div>
+      <button type="button" id="importSelectedFilmsBtn" class="btns" style="margin-top:12px; width:100%;">⬇ Importer les films sélectionnés</button>
     </div>
     
     <div class="mact" id="mact">
@@ -509,6 +475,7 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
 <div class="mbg" id="rmod"><div class="modal rmod" id="rcont"></div></div>
 
 <script>
+// ==================== CONFIGURATION ====================
 const SU='https://dnzrpvyeiyxplrcomsuo.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzYwNTAsImV4cCI6MjA5NTExMjA1MH0.BwuZBjZXQcJlNsaQ_DYSj_n-IbMZswsgL_VuGOVMVs4';
 const TK='4dc76b66e8b41dd652e56c6cc3a425ab';
@@ -519,8 +486,11 @@ const SIZES=[160,130,200];
 let movies=[],selPoster='',srt='pop',genre='',meta={},editIdx=-1,sizeIdx=0;
 let mediaType='movie';
 let mediaFilt='';
+let filts=new Set();
+let sortDir=1;
+let genreInc=new Set(), genreExc=new Set();
 
-// Variables pour la filmographie collection
+// Variables pour la filmographie collection (agrandie)
 let currentPersonId=null;
 let currentPersonName='';
 let currentFilmography=[];
@@ -530,62 +500,20 @@ let selectedFilmographyIndices=new Set();
 let currentSagaId=null;
 let currentSagaPosters=[];
 
+// ==================== FONCTIONS UTILITAIRES ====================
 function ss(s,l){document.getElementById('sdot').className='sdot '+s;document.getElementById('slbl').textContent=l;}
-
-function toggleSize(){
-  sizeIdx=(sizeIdx+1)%SIZES.length;
-  document.documentElement.style.setProperty('--card-w',SIZES[sizeIdx]+'px');
-  document.getElementById('size-btn').textContent=sizeIdx===0?'⊞':sizeIdx===1?'⊟':'⊠';
-}
-
-async function load(){
-  ss('loading','Loading...');
-  try{
-    const r=await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc`,{headers:H});
-    if(!r.ok) throw new Error();
-    movies=(await r.json()).map(row=>({...row.data,_id:row.id}));
-    ss('ok','Synced');
-    document.getElementById('ls').style.display='none';
-    render();
-  }catch(e){ss('error','Error');document.getElementById('ls').style.display='none';render();}
-}
-
-async function addM(m){
-  ss('loading','Saving...');
-  try{
-    const r=await fetch(`${SU}/rest/v1/movies`,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({data:m})});
-    if(!r.ok) throw new Error();
-    m._id=(await r.json())[0].id; movies.push(m); ss('ok','Synced'); render();
-  }catch(e){ss('error','Save error');}
-}
-async function updM(idx,m){
-  const id=movies[idx]._id; ss('loading','Updating...');
-  try{
-    const r=await fetch(`${SU}/rest/v1/movies?id=eq.${id}`,{method:'PATCH',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({data:m})});
-    if(!r.ok) throw new Error();
-    m._id=id; movies[idx]=m; ss('ok','Synced'); render();
-  }catch(e){ss('error','Error');}
-}
-async function delM(idx){
-  const id=movies[idx]._id; ss('loading','Deleting...');
-  try{
-    const r=await fetch(`${SU}/rest/v1/movies?id=eq.${id}`,{method:'DELETE',headers:H});
-    if(!r.ok) throw new Error();
-    movies.splice(idx,1); ss('ok','Synced'); render(); closeModal();
-  }catch(e){ss('error','Error');}
-}
-
-let filts=new Set();
-
+function toggleSize(){ sizeIdx=(sizeIdx+1)%SIZES.length; document.documentElement.style.setProperty('--card-w',SIZES[sizeIdx]+'px'); document.getElementById('size-btn').textContent=sizeIdx===0?'⊞':sizeIdx===1?'⊟':'⊠';}
+function fmt(m){if(!m)return '';return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0');}
 function setSort(s){srt=s;render();}
-
-const BG_GLOWS={
-  '':'radial-gradient(ellipse,rgba(109,40,217,0.07) 0%,transparent 70%)',
-  '4kr':'radial-gradient(ellipse,rgba(192,132,252,0.1) 0%,transparent 70%)',
-  '4kl':'radial-gradient(ellipse,rgba(74,222,128,0.08) 0%,transparent 70%)',
-  '1r':'radial-gradient(ellipse,rgba(56,189,248,0.09) 0%,transparent 70%)',
-  '1l':'radial-gradient(ellipse,rgba(251,146,60,0.08) 0%,transparent 70%)'
-};
+function toggleSortDir(){sortDir*=-1;document.getElementById('sort-dir-btn').textContent=sortDir===1?'↓':'↑';render();}
+function toggleGenre(g){
+  if(!genreInc.has(g)&&!genreExc.has(g)){genreInc.add(g);}
+  else if(genreInc.has(g)){genreInc.delete(g);genreExc.add(g);}
+  else{genreExc.delete(g);}
+  render();
+}
+function clearGenres(){genreInc.clear();genreExc.clear();render();}
+function setMediaFilter(t){ mediaFilt=(mediaFilt===t?'':t); render(); }
 
 function setFilter(f,btn){
   if(f===''){
@@ -607,13 +535,13 @@ function setFilter(f,btn){
   }
   render();
 }
-let sortDir=1;
-
-function toggleSortDir(){
-  sortDir*=-1;
-  document.getElementById('sort-dir-btn').textContent=sortDir===1?'↓':'↑';
-  render();
-}
+const BG_GLOWS={
+  '':'radial-gradient(ellipse,rgba(109,40,217,0.07) 0%,transparent 70%)',
+  '4kr':'radial-gradient(ellipse,rgba(192,132,252,0.1) 0%,transparent 70%)',
+  '4kl':'radial-gradient(ellipse,rgba(74,222,128,0.08) 0%,transparent 70%)',
+  '1r':'radial-gradient(ellipse,rgba(56,189,248,0.09) 0%,transparent 70%)',
+  '1l':'radial-gradient(ellipse,rgba(251,146,60,0.08) 0%,transparent 70%)'
+};
 
 function sorted(list){
   const a=[...list];
@@ -626,17 +554,6 @@ function sorted(list){
   if(srt==='added') return d===1?a:a.reverse();
   return a;
 }
-function fmt(m){if(!m)return '';return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0');}
-
-let genreInc=new Set(), genreExc=new Set();
-
-function toggleGenre(g){
-  if(!genreInc.has(g)&&!genreExc.has(g)){genreInc.add(g);}
-  else if(genreInc.has(g)){genreInc.delete(g);genreExc.add(g);}
-  else{genreExc.delete(g);}
-  render();
-}
-function clearGenres(){genreInc.clear();genreExc.clear();render();}
 
 function updGenres(){
   const all=new Set(); movies.forEach(m=>(m.tags||[]).forEach(t=>all.add(t)));
@@ -872,13 +789,11 @@ function applyPosterUrl(url){
   selPoster=url;
   showCurrentPoster(url);
 }
-
 function clearPoster(){
   selPoster='';
   document.getElementById('current-poster-wrap').style.display='none';
   document.getElementById('iposterurl').value='';
 }
-
 function showCurrentPoster(url){
   const wrap=document.getElementById('current-poster-wrap');
   const img=document.getElementById('current-poster-img');
@@ -886,27 +801,11 @@ function showCurrentPoster(url){
   else{wrap.style.display='none';}
 }
 
-/* ---- FILMOGRAPHIE (pour le modal dédié) ---- */
+// ==================== FILMOGRAPHIE MODAL DÉDIÉ ====================
 let filmoResults=[], filmoSel=new Set();
-
-function openFilmo(){
-  filmoResults=[]; filmoSel.clear();
-  document.getElementById('filmo-search').value='';
-  document.getElementById('filmo-status').textContent='';
-  document.getElementById('filmo-grid').innerHTML='';
-  document.getElementById('filmo-bar').style.display='none';
-  document.getElementById('filmo-quality-field').style.display='none';
-  document.getElementById('filmo-import-btn').style.display='none';
-  document.getElementById('fmod').classList.add('open');
-  setTimeout(()=>document.getElementById('filmo-search').focus(),100);
-}
+function openFilmo(){ filmoResults=[]; filmoSel.clear(); document.getElementById('filmo-search').value=''; document.getElementById('filmo-status').textContent=''; document.getElementById('filmo-grid').innerHTML=''; document.getElementById('filmo-bar').style.display='none'; document.getElementById('filmo-quality-field').style.display='none'; document.getElementById('filmo-import-btn').style.display='none'; document.getElementById('fmod').classList.add('open'); setTimeout(()=>document.getElementById('filmo-search').focus(),100); }
 function closeFilmo(){document.getElementById('fmod').classList.remove('open');}
-document.addEventListener('DOMContentLoaded',()=>{
-  const fm=document.getElementById('fmod');
-  if(fm) fm.addEventListener('click',e=>{if(e.target===fm)closeFilmo();});
-  document.getElementById('filmo-search').addEventListener('keydown',e=>{if(e.key==='Enter')searchFilmo();});
-});
-
+document.addEventListener('DOMContentLoaded',()=>{ const fm=document.getElementById('fmod'); if(fm) fm.addEventListener('click',e=>{if(e.target===fm)closeFilmo();}); document.getElementById('filmo-search').addEventListener('keydown',e=>{if(e.key==='Enter')searchFilmo();}); });
 async function searchFilmo(){
   const q=document.getElementById('filmo-search').value.trim(); if(!q) return;
   const st=document.getElementById('filmo-status');
@@ -925,20 +824,15 @@ async function searchFilmo(){
       st.innerHTML='Plusieurs résultats : '+people.slice(0,4).map((p,i)=>
         `<button onclick="loadFilmo(${p.id},'${p.name.replace(/'/g,"\\'")}','${p.known_for_department}')" style="margin:3px;padding:4px 10px;background:var(--s2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:Inter,sans-serif;font-size:11px;cursor:pointer;">${p.name} <span style="color:var(--muted2)">(${p.known_for_department})</span></button>`
       ).join('');
-    } else {
-      loadFilmo(people[0].id, people[0].name, people[0].known_for_department);
-    }
+    } else { loadFilmo(people[0].id, people[0].name, people[0].known_for_department); }
   }catch(e){st.textContent='Erreur réseau.';}
 }
-
 async function loadFilmo(personId, name, dept){
   const st=document.getElementById('filmo-status');
   st.textContent=`Chargement de la filmographie de ${name}...`;
   try{
     const isDir=dept==='Directing';
-    const url=isDir
-      ?`https://api.themoviedb.org/3/person/${personId}/movie_credits?api_key=${TK}&language=fr-FR`
-      :`https://api.themoviedb.org/3/person/${personId}/movie_credits?api_key=${TK}&language=fr-FR`;
+    const url=`https://api.themoviedb.org/3/person/${personId}/movie_credits?api_key=${TK}&language=fr-FR`;
     const res=await fetch(url);
     const data=await res.json();
     const cast=(data.cast||[]);
@@ -956,7 +850,6 @@ async function loadFilmo(personId, name, dept){
     renderFilmoGrid();
   }catch(e){st.textContent='Erreur réseau.';}
 }
-
 function renderFilmoGrid(){
   const grid=document.getElementById('filmo-grid');
   grid.innerHTML='';
@@ -977,23 +870,15 @@ function renderFilmoGrid(){
   });
   document.getElementById('filmo-count').innerHTML=`<strong>${filmoSel.size}</strong> sélectionnés`;
 }
-
 function filmoToggleAll(){
-  if(filmoSel.size===filmoResults.length){
-    filmoSel.clear();
-  } else {
-    filmoResults.forEach((_,i)=>filmoSel.add(i));
-  }
+  if(filmoSel.size===filmoResults.length){ filmoSel.clear(); }
+  else { filmoResults.forEach((_,i)=>filmoSel.add(i)); }
   renderFilmoGrid();
 }
-
 function filmoDeselectExisting(){
-  filmoResults.forEach((m,i)=>{
-    if(movies.some(ex=>ex.tmdb_id===m.id)) filmoSel.delete(i);
-  });
+  filmoResults.forEach((m,i)=>{ if(movies.some(ex=>ex.tmdb_id===m.id)) filmoSel.delete(i); });
   renderFilmoGrid();
 }
-
 async function importFilmo(){
   const qual=document.getElementById('filmo-qual').value;
   const sel=[...filmoSel].map(i=>filmoResults[i]);
@@ -1004,12 +889,7 @@ async function importFilmo(){
     const poster=m.poster_path?`https://image.tmdb.org/t/p/w342${m.poster_path}`:'';
     let runtime=0;
     try{const d=await(await fetch(`https://api.themoviedb.org/3/movie/${m.id}?api_key=${TK}`)).json();runtime=d.runtime||0;}catch(e){}
-    const obj={
-      title:m.title,link:'',links:[],quality:qual,poster,
-      release_date:m.release_date||'',popularity:m.popularity||0,
-      vote_average:m.vote_average||0,tags:[],runtime,
-      tmdb_id:m.id,media_type:'movie',person_role:''
-    };
+    const obj={ title:m.title, link:'', links:[], quality:qual, poster, release_date:m.release_date||'', popularity:m.popularity||0, vote_average:m.vote_average||0, tags:[], runtime, tmdb_id:m.id, media_type:'movie', person_role:'' };
     await addM(obj);
     done++;
     ss('loading',`Import ${done}/${sel.length}...`);
@@ -1017,32 +897,16 @@ async function importFilmo(){
   ss('ok',`${done} films importés !`);
 }
 
-function showGP(tags){
-  const el=document.getElementById('gprev');
-  if(!el) return;
-  if(!tags||!tags.length){el.innerHTML='';return;}
-  el.innerHTML=tags.map(t=>`<span class="gpill">${t}</span>`).join('');
-}
-
-// NOUVELLES FONCTIONS POUR SAGA POSTER
+// ==================== SAGA POSTERS ====================
 async function loadSagaPosters() {
   const sagaId = meta.tmdb_id;
-  if (!sagaId) {
-    alert("Aucun TMDB ID pour cette saga. Veuillez d'abord rechercher la saga via le bouton 'Search'.");
-    return;
-  }
+  if (!sagaId) { alert("Aucun TMDB ID pour cette saga. Veuillez d'abord rechercher la saga via le bouton 'Search'."); return; }
   try {
     const res = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
     const parts = data.parts || [];
-    if (!parts.length) {
-      alert("Aucun film trouvé dans cette collection.");
-      return;
-    }
-    currentSagaPosters = parts.filter(p => p.poster_path).map(p => ({
-      url: `https://image.tmdb.org/t/p/w342${p.poster_path}`,
-      title: p.title
-    }));
+    if (!parts.length) { alert("Aucun film trouvé dans cette collection."); return; }
+    currentSagaPosters = parts.filter(p => p.poster_path).map(p => ({ url: `https://image.tmdb.org/t/p/w342${p.poster_path}`, title: p.title }));
     const container = document.getElementById('saga-posters-grid');
     container.innerHTML = '';
     currentSagaPosters.forEach(p => {
@@ -1059,24 +923,19 @@ async function loadSagaPosters() {
       };
       container.appendChild(imgDiv);
     });
-  } catch(e) {
-    alert("Erreur lors du chargement des films de la saga.");
-  }
+  } catch(e) { alert("Erreur lors du chargement des films de la saga."); }
 }
 
-// NOUVELLES FONCTIONS POUR COLLECTION FILMOGRAPHY
+// ==================== COLLECTION FILMOGRAPHY (AGRANDIE) ====================
 async function loadFilmographyForCollection() {
   const personId = meta.tmdb_id;
-  if (!personId) {
-    alert("Aucun TMDB ID pour cette personne. Veuillez d'abord rechercher via le bouton 'Search'.");
-    return;
-  }
+  if (!personId) { alert("Aucun TMDB ID pour cette personne. Veuillez d'abord rechercher via le bouton 'Search'."); return; }
   const st = document.getElementById('status');
   st.textContent = 'Chargement de la filmographie...';
   try {
     const res = await fetch(`https://api.themoviedb.org/3/person/${personId}/movie_credits?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
-    const cast = (data.cast || []).filter(m => m.poster_path).slice(0, 40);
+    const cast = (data.cast || []).filter(m => m.poster_path).slice(0, 60);
     currentFilmography = cast;
     selectedFilmographyIndices.clear();
     const container = document.getElementById('filmography-list');
@@ -1086,17 +945,17 @@ async function loadFilmographyForCollection() {
       const div = document.createElement('div');
       div.style.display = 'flex';
       div.style.alignItems = 'center';
-      div.style.gap = '8px';
-      div.style.padding = '6px';
+      div.style.gap = '12px';
+      div.style.padding = '8px';
       div.style.borderBottom = '1px solid var(--border)';
       div.style.cursor = 'pointer';
       div.innerHTML = `
-        <input type="checkbox" style="width:18px; height:18px; cursor:pointer;" ${selectedFilmographyIndices.has(idx) ? 'checked' : ''} ${alreadyExists ? 'disabled' : ''}>
-        <img src="https://image.tmdb.org/t/p/w92${movie.poster_path}" style="width:40px; border-radius:4px;">
+        <input type="checkbox" style="width:20px; height:20px; cursor:pointer;" ${selectedFilmographyIndices.has(idx) ? 'checked' : ''} ${alreadyExists ? 'disabled' : ''}>
+        <img src="https://image.tmdb.org/t/p/w92${movie.poster_path}" style="width:45px; border-radius:6px;">
         <div style="flex:1;">
           <strong>${movie.title}</strong><br>
-          <span style="font-size:10px; color:var(--muted2);">${movie.release_date ? movie.release_date.slice(0,4) : 'N/A'}</span>
-          ${alreadyExists ? '<span style="color:#4ade80; margin-left:8px;">(déjà importé)</span>' : ''}
+          <span style="font-size:11px; color:var(--muted2);">${movie.release_date ? movie.release_date.slice(0,4) : 'N/A'}</span>
+          ${alreadyExists ? '<span style="color:#4ade80; margin-left:10px;">(déjà importé)</span>' : ''}
         </div>
       `;
       const checkbox = div.querySelector('input');
@@ -1122,12 +981,10 @@ async function loadFilmographyForCollection() {
 }
 
 async function importSelectedFilms() {
-  const quality = document.getElementById('iqual').value;
+  const qualitySelect = document.getElementById('filmographyQuality');
+  const quality = qualitySelect ? qualitySelect.value : '1l';
   const toImport = Array.from(selectedFilmographyIndices).map(i => currentFilmography[i]);
-  if (!toImport.length) {
-    alert("Aucun film sélectionné.");
-    return;
-  }
+  if (!toImport.length) { alert("Aucun film sélectionné."); return; }
   let imported = 0;
   for (const movie of toImport) {
     if (movies.some(m => m.tmdb_id === movie.id)) continue;
@@ -1158,12 +1015,12 @@ async function importSelectedFilms() {
   }
   alert(`${imported} film(s) importé(s) avec succès.`);
   render();
-  // Réinitialiser la section
   document.getElementById('filmography-list').innerHTML = '';
   selectedFilmographyIndices.clear();
   document.getElementById('status').textContent = '';
 }
 
+// ==================== ADD/EDIT MODAL ====================
 function openEdit(e,idx){
   if(e){e.preventDefault();e.stopPropagation();}
   editIdx=idx; const m=movies[idx];
@@ -1189,15 +1046,12 @@ function openEdit(e,idx){
     <button class="btnd" onclick="delFromModal()">🗑 Delete</button>
     <div class="mright"><button class="btnc" onclick="closeModal()">Cancel</button><button class="btns" onclick="saveMovie()">Save</button></div>`;
   
-  // Afficher les sections spécifiques selon le type
   const sagaSection = document.getElementById('saga-poster-section');
   const collectionSection = document.getElementById('collection-filmography-section');
   if (mediaType === 'saga') {
     sagaSection.style.display = 'block';
     collectionSection.style.display = 'none';
-    // Nettoyer l'ancien contenu
     document.getElementById('saga-posters-grid').innerHTML = '';
-    // Re-attacher l'événement du bouton
     const loadBtn = document.getElementById('loadSagaPostersBtn');
     const newBtn = loadBtn.cloneNode(true);
     loadBtn.parentNode.replaceChild(newBtn, loadBtn);
@@ -1219,7 +1073,6 @@ function openEdit(e,idx){
     sagaSection.style.display = 'none';
     collectionSection.style.display = 'none';
   }
-  
   document.getElementById('modal').classList.add('open');
 }
 
@@ -1242,7 +1095,6 @@ function openModal(){
   document.getElementById('iposterurl').value='';
   document.getElementById('mact').innerHTML=`
     <div class="mright" style="margin-left:auto"><button class="btnc" onclick="closeModal()">Cancel</button><button class="btns" onclick="saveMovie()">Add</button></div>`;
-  // Cacher sections spécifiques
   document.getElementById('saga-poster-section').style.display = 'none';
   document.getElementById('collection-filmography-section').style.display = 'none';
   document.getElementById('modal').classList.add('open');
@@ -1252,24 +1104,6 @@ function openModal(){
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
 document.getElementById('ititle').addEventListener('keydown',e=>{if(e.key==='Enter')searchPosters();});
-
-function setMediaFilter(t){
-  if(mediaFilt===t){
-    mediaFilt='';
-    ['movie','tv','col','saga'].forEach(x=>{
-      const el=document.getElementById('filter-'+x);
-      if(el) el.classList.remove('active');
-    });
-  } else {
-    mediaFilt=t;
-    ['movie','tv','col','saga'].forEach(x=>{
-      const map={movie:'movie',tv:'tv',collection:'col',saga:'saga'};
-      const el=document.getElementById('filter-'+x);
-      if(el) el.classList.toggle('active',map[t]===x);
-    });
-  }
-  render();
-}
 
 function setType(t){
   mediaType=t;
@@ -1285,53 +1119,26 @@ function setType(t){
   document.getElementById('status').textContent='';
   document.getElementById('gprev').innerHTML='';
   if(editIdx<0) selPoster='';
-  
-  // Afficher/masquer sections dans le modal selon le type
   const sagaSection = document.getElementById('saga-poster-section');
   const collectionSection = document.getElementById('collection-filmography-section');
-  if (t === 'saga') {
-    sagaSection.style.display = 'block';
-    collectionSection.style.display = 'none';
-  } else if (t === 'collection') {
-    collectionSection.style.display = 'block';
-    sagaSection.style.display = 'none';
-  } else {
-    sagaSection.style.display = 'none';
-    collectionSection.style.display = 'none';
-  }
+  if (t === 'saga') { sagaSection.style.display = 'block'; collectionSection.style.display = 'none'; }
+  else if (t === 'collection') { collectionSection.style.display = 'block'; sagaSection.style.display = 'none'; }
+  else { sagaSection.style.display = 'none'; collectionSection.style.display = 'none'; }
 }
 
 function addLinkRow(name='',url=''){
   const row=document.createElement('div');
   row.className='link-row';
   row.style.cssText='display:flex;gap:6px;margin-bottom:6px;';
-  row.innerHTML=`<input type="text" class="link-input" placeholder="Titre du film / Nom..." style="flex:1.2;padding:10px 13px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:Inter,sans-serif;font-size:13px;outline:none;" value="${name}"/>
-    <input type="text" class="link-url" placeholder="https://..." style="flex:2;padding:10px 13px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:Inter,sans-serif;font-size:13px;outline:none;" value="${url}"/>
+  row.innerHTML=`<input type="text" class="link-input" placeholder="Titre du film / Nom..." style="flex:1.2;padding:10px 13px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:Inter,sans-serif;font-size:13px;outline:none;" value="${name.replace(/"/g, '&quot;')}"/>
+    <input type="text" class="link-url" placeholder="https://..." style="flex:2;padding:10px 13px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:Inter,sans-serif;font-size:13px;outline:none;" value="${url.replace(/"/g, '&quot;')}"/>
     <button onclick="removeLinkRow(this)" style="padding:0 10px;background:transparent;border:1px solid rgba(239,68,68,0.25);border-radius:8px;color:#f87171;cursor:pointer;font-size:14px;flex-shrink:0;">✕</button>`;
   document.getElementById('links-container').appendChild(row);
 }
-
-function removeLinkRow(btn){
-  const rows=document.querySelectorAll('#links-container .link-row');
-  if(rows.length>1) btn.closest('.link-row').remove();
-}
-
-function getLinks(){
-  return [...document.querySelectorAll('#links-container .link-row')].map(row=>({
-    name: row.querySelector('.link-input').value.trim(),
-    url: row.querySelector('.link-url').value.trim()
-  })).filter(l=>l.url);
-}
-
-function setLinks(links){
-  const container=document.getElementById('links-container');
-  container.innerHTML='';
-  if(!links||!links.length){
-    addLinkRow();
-  } else {
-    links.forEach(l=>addLinkRow(l.name||'',l.url||''));
-  }
-}
+function removeLinkRow(btn){ const rows=document.querySelectorAll('#links-container .link-row'); if(rows.length>1) btn.closest('.link-row').remove(); }
+function getLinks(){ return [...document.querySelectorAll('#links-container .link-row')].map(row=>({ name: row.querySelector('.link-input').value.trim(), url: row.querySelector('.link-url').value.trim() })).filter(l=>l.url); }
+function setLinks(links){ const container=document.getElementById('links-container'); container.innerHTML=''; if(!links||!links.length){ addLinkRow(); } else { links.forEach(l=>addLinkRow(l.name||'',l.url||'')); } }
+function showGP(tags){ const el=document.getElementById('gprev'); if(!el) return; if(!tags||!tags.length){el.innerHTML='';return;} el.innerHTML=tags.map(t=>`<span class="gpill">${t}</span>`).join(''); }
 
 async function searchPosters(){
   const title=document.getElementById('ititle').value.trim(); if(!title) return;
@@ -1340,7 +1147,6 @@ async function searchPosters(){
   if(editIdx<0) selPoster='';
   try{
     let results=[], gmap={};
-
     if(mediaType==='collection'){
       const res=await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`);
       const data=await res.json();
@@ -1365,12 +1171,8 @@ async function searchPosters(){
           meta={release_date:'',popularity:r.popularity||0,vote_average:0,tags:[r.known_for_department||''],runtime:0,tmdb_id:r.id||null,media_type:'collection',person_role:r.known_for_department||''};
           document.getElementById('ititle').value=r.name;
           st.textContent='';
-          // Déclencher le chargement de la filmographie si le modal est ouvert
           if (document.getElementById('modal').classList.contains('open') && mediaType === 'collection') {
-            // On attend que le champ tmdb_id soit rempli
-            setTimeout(() => {
-              if (meta.tmdb_id) loadFilmographyForCollection();
-            }, 300);
+            setTimeout(() => { if (meta.tmdb_id) loadFilmographyForCollection(); }, 300);
           }
         };
         row.appendChild(wrap);
@@ -1516,6 +1318,42 @@ async function importData(event){
     }catch(err){alert('Read error.');}
   };
   reader.readAsText(file);
+}
+
+async function load(){
+  ss('loading','Loading...');
+  try{
+    const r=await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc`,{headers:H});
+    if(!r.ok) throw new Error();
+    movies=(await r.json()).map(row=>({...row.data,_id:row.id}));
+    ss('ok','Synced');
+    document.getElementById('ls').style.display='none';
+    render();
+  }catch(e){ss('error','Error');document.getElementById('ls').style.display='none';render();}
+}
+async function addM(m){
+  ss('loading','Saving...');
+  try{
+    const r=await fetch(`${SU}/rest/v1/movies`,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({data:m})});
+    if(!r.ok) throw new Error();
+    m._id=(await r.json())[0].id; movies.push(m); ss('ok','Synced'); render();
+  }catch(e){ss('error','Save error');}
+}
+async function updM(idx,m){
+  const id=movies[idx]._id; ss('loading','Updating...');
+  try{
+    const r=await fetch(`${SU}/rest/v1/movies?id=eq.${id}`,{method:'PATCH',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({data:m})});
+    if(!r.ok) throw new Error();
+    m._id=id; movies[idx]=m; ss('ok','Synced'); render();
+  }catch(e){ss('error','Error');}
+}
+async function delM(idx){
+  const id=movies[idx]._id; ss('loading','Deleting...');
+  try{
+    const r=await fetch(`${SU}/rest/v1/movies?id=eq.${id}`,{method:'DELETE',headers:H});
+    if(!r.ok) throw new Error();
+    movies.splice(idx,1); ss('ok','Synced'); render(); closeModal();
+  }catch(e){ss('error','Error');}
 }
 
 load();
