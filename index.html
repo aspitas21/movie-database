@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movie Library</title>
+<title>Movie Library · Collection Manager</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* ===== TOUS LES STYLES (inchangés) ===== */
 :root {
   --bg:#050508;
   --s1:#0a0a10;
@@ -28,6 +27,8 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
 body::before{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:900px;height:600px;border-radius:50%;background:var(--bg-glow);pointer-events:none;z-index:0;transition:background 0.6s ease;}
+
+/* RECENT SECTION */
 .recent-section{padding:1rem 2.5rem 0;position:relative;z-index:1;}
 .recent-header{display:flex;align-items:center;gap:10px;margin-bottom:0.9rem;}
 .recent-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);}
@@ -39,6 +40,8 @@ body::before{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-5
 .recent-card img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;}
 .recent-card .rc-placeholder{width:100%;aspect-ratio:2/3;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted);}
 .recent-card .rc-title{font-size:9px;font-weight:600;color:var(--muted2);padding:4px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* HEADER */
 header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(5,5,8,0.92);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;backdrop-filter:blur(24px);}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
 .logo-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#6d28d9,#a855f7);display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 0 14px rgba(124,58,237,0.45);position:relative;overflow:hidden;flex-shrink:0;}
@@ -65,6 +68,8 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .btn-size:hover{border-color:var(--border2);color:var(--text);}
 .btn-add{padding:7px 15px;background:linear-gradient(135deg,#6d28d9,#9333ea);border:none;border-radius:8px;color:#fff;font-family:'Inter',sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s;letter-spacing:0.4px;text-transform:uppercase;white-space:nowrap;box-shadow:0 4px 12px rgba(109,40,217,0.35);}
 .btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(109,40,217,0.5);}
+
+/* FILTERS BAR */
 .bar{padding:0 2.5rem;height:44px;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--border);background:rgba(5,5,8,0.75);backdrop-filter:blur(12px);overflow-x:auto;scrollbar-width:none;position:sticky;top:60px;z-index:40;}
 .bar::-webkit-scrollbar{display:none;}
 .chip{display:flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap;flex-shrink:0;}
@@ -79,10 +84,16 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .bsel{padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;outline:none;transition:all 0.15s;flex-shrink:0;}
 .bsel:focus{border-color:var(--border2);color:var(--text);}
 .bsel option{background:#0f0f18;color:var(--text);}
+
+/* RESULTS */
 .results-bar{padding:0.9rem 2.5rem 0;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
 .results-label{font-size:12px;color:var(--muted2);font-weight:500;}
 .results-label strong{color:var(--text);font-weight:700;}
+
+/* GRID */
 .content{padding:1.2rem 2.5rem 3rem;position:relative;z-index:1;}
+
+/* GENRE CHIPS ROW */
 .genre-bar{padding:0.4rem 2.5rem;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--border);background:rgba(5,5,8,0.6);overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;min-height:36px;}
 .genre-bar::-webkit-scrollbar{display:none;}
 .genre-bar:empty{display:none;}
@@ -94,6 +105,8 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .genre-clear{padding:3px 8px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;}
 .genre-clear:hover{color:var(--text);border-color:var(--border2);}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--card-w),1fr));gap:14px;transition:grid-template-columns 0.3s;}
+
+/* CARD */
 .card{position:relative;border-radius:11px;overflow:hidden;background:var(--s1);border:1px solid var(--border);cursor:pointer;text-decoration:none;display:block;transition:transform 0.25s cubic-bezier(0.34,1.4,0.64,1),border-color 0.2s,box-shadow 0.25s;will-change:transform;}
 .card.q4kr{background:linear-gradient(160deg,#0f0b18 0%,#0a0a10 60%);}
 .card.q4kl{background:linear-gradient(160deg,#0a1410 0%,#0a0a10 60%);}
@@ -107,6 +120,7 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .card:hover .cov{opacity:1;}
 .card:hover .cposter{transform:scale(1.05);}
 .card:hover .detail-btn{opacity:1;transform:scale(1);}
+
 .poster-wrap{overflow:hidden;position:relative;aspect-ratio:2/3;}
 .cposter{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.4s ease;}
 .no-poster{width:100%;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--muted);}
@@ -114,12 +128,17 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .no-poster.q4kl{background:linear-gradient(135deg,#0d1f12,#0a1410);}
 .no-poster.q1r{background:linear-gradient(135deg,#0d1a26,#0a1218);}
 .no-poster.q1l{background:linear-gradient(135deg,#261408,#160e08);}
+
 .crating{position:absolute;top:7px;left:7px;z-index:2;background:rgba(0,0,0,0.8);color:#fbbf24;font-size:9px;font-weight:800;padding:2px 6px;border-radius:5px;border:1px solid rgba(251,191,36,0.2);backdrop-filter:blur(6px);}
+
 .cov{position:absolute;inset:0;opacity:0;transition:opacity 0.2s;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.2) 55%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:10px;z-index:1;}
 .cov-play{position:absolute;top:calc(50% - 28px);left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;backdrop-filter:blur(4px);}
 .cov-year{font-size:9px;color:rgba(255,255,255,0.55);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+
 .detail-btn{position:absolute;top:7px;right:7px;z-index:3;width:24px;height:24px;border-radius:6px;background:rgba(0,0,0,0.75);border:1px solid rgba(255,255,255,0.1);color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(0.8);transition:all 0.18s;backdrop-filter:blur(6px);}
 .detail-btn:hover{background:rgba(109,40,217,0.4);border-color:rgba(167,139,250,0.4);}
+
+/* QUALITY BADGE - bottom right of card body */
 .cbody{padding:8px 10px 10px;position:relative;}
 .ctitle{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.1px;padding-right:4px;}
 .csub{font-size:10px;color:var(--muted2);margin-top:2px;font-weight:500;}
@@ -131,10 +150,13 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .qbadge.q4kl{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);}
 .qbadge.q1r{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);}
 .qbadge.q1l{background:rgba(100,100,120,0.1);border:1px solid rgba(255,255,255,0.08);filter:grayscale(1);opacity:0.55;}
+
 .empty{padding:5rem 1rem;text-align:center;}
 .empty-icon{font-size:52px;opacity:0.15;margin-bottom:14px;}
 .empty-title{font-size:17px;font-weight:800;letter-spacing:-0.4px;margin-bottom:7px;}
 .empty-sub{font-size:13px;color:var(--muted2);}
+
+/* COLLECTION CARD */
 .card.collection{background:linear-gradient(160deg,#120a1e 0%,#0a0a10 60%);}
 .card.collection:hover{border-color:rgba(232,184,74,0.3);box-shadow:0 24px 50px rgba(0,0,0,0.6),0 0 20px rgba(232,184,74,0.08);}
 .col-portrait{width:100%;aspect-ratio:2/3;object-fit:cover;object-position:top;display:block;transition:transform 0.4s ease;}
@@ -143,6 +165,8 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .col-name-overlay{position:absolute;bottom:8px;left:8px;right:8px;z-index:2;}
 .col-name-overlay .col-role{font-size:9px;color:rgba(232,184,74,0.8);font-weight:700;letter-spacing:1px;text-transform:uppercase;}
 .no-portrait{width:100%;aspect-ratio:2/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#1a0d2e,#120820);color:var(--muted);font-size:36px;}
+
+/* MODALS */
 .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(12px);}
 .mbg.open{display:flex;}
 .modal{background:var(--s1);border:1px solid rgba(255,255,255,0.07);border-radius:18px;padding:1.75rem;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:up 0.25s cubic-bezier(0.34,1.4,0.64,1);box-shadow:0 40px 80px rgba(0,0,0,0.7);}
@@ -176,6 +200,8 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .btnd{padding:9px 13px;background:transparent;border:1px solid rgba(239,68,68,0.25);border-radius:9px;color:#f87171;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
 .btnd:hover{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.45);}
 .btndc{padding:9px 16px;background:#b91c1c;border:none;border-radius:9px;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+
+/* FILMOGRAPHIE MODAL */
 .fmod{width:680px;}
 .fmod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:1rem;max-height:420px;overflow-y:auto;padding-right:4px;}
 .fmod-grid::-webkit-scrollbar{width:4px;}
@@ -195,6 +221,8 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .fmod-count strong{color:#a78bfa;}
 .fmod-selall{padding:5px 10px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted2);font-family:Inter,sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.15s;}
 .fmod-selall:hover{border-color:var(--border2);color:var(--text);}
+
+
 .dmod{width:580px;}
 .dbody{display:flex;gap:1.5rem;}
 .dposter-wrap{flex-shrink:0;}
@@ -224,20 +252,26 @@ header{padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-cont
 .dbtn-sub{display:inline-flex;align-items:center;gap:6px;padding:10px 15px;background:rgba(34,197,94,0.08);color:#4ade80;border:1px solid rgba(34,197,94,0.2);border-radius:9px;text-decoration:none;font-size:12px;font-weight:800;transition:all 0.15s;}
 .dbtn-sub:hover{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.35);}
 .nolink{font-size:12px;color:var(--muted);font-weight:500;font-style:italic;}
+
+/* RANDOM */
 .rmod{text-align:center;}
 .rtitle{font-size:22px;font-weight:900;letter-spacing:-0.5px;margin-bottom:3px;}
 .rmeta{font-size:11px;color:var(--muted2);font-weight:600;margin-bottom:1rem;letter-spacing:0.5px;text-transform:uppercase;}
 .btnreroll{padding:9px 16px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-right:7px;transition:all 0.15s;}
 .btnreroll:hover{border-color:var(--border2);}
+
+/* LOADING */
 .loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:999;}
 .lname{font-size:24px;font-weight:900;letter-spacing:-0.5px;}
 .lname span{color:#a78bfa;}
 .lbar{width:150px;height:2px;background:var(--s3);border-radius:2px;overflow:hidden;}
 .lbar-i{height:100%;background:linear-gradient(90deg,#6d28d9,#a78bfa);border-radius:2px;animation:lb 1.3s ease infinite;}
 @keyframes lb{0%{width:0;margin-left:0}50%{width:50%;margin-left:25%}100%{width:0;margin-left:100%}}
+
 footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap:7px;position:relative;z-index:1;}
 .btni{padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted);font-family:'Inter',sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;text-transform:uppercase;}
 .btni:hover{border-color:var(--border2);color:var(--muted2);}
+/* RESPONSIVE MOBILE */
 @media (max-width: 768px) {
   header{padding:0.75rem 1rem;height:auto;flex-wrap:wrap;gap:8px;}
   .logo-name{font-size:13px;}
@@ -246,20 +280,24 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
   .sync{display:none;}
   .btn-size{display:none;}
   .btn-rnd{padding:7px 10px;}
+
   .bar{padding:0.5rem 1rem;top:auto;position:relative;height:auto;flex-wrap:wrap;gap:5px;row-gap:6px;}
   .bsep{display:none;}
   .bsel{display:block;flex:1;min-width:calc(50% - 6px);font-size:12px;padding:6px 10px;}
   .bar-selects{display:flex;gap:6px;width:100%;margin-top:2px;}
+
   .recent-section{padding:0.8rem 1rem 0;}
   .results-bar{padding:0.6rem 1rem 0;}
   .content{padding:0.8rem 1rem 3rem;}
   .genre-bar{padding:0.4rem 1rem;}
   .grid{grid-template-columns:repeat(3,1fr);gap:8px;}
   .card .ctags{display:none;}
+
   .modal{border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;width:100%;max-width:100%;max-height:85vh;padding:1.5rem 1.25rem;animation:slideup-mob 0.25s ease;}
   @keyframes slideup-mob{from{transform:translateY(100%)}to{transform:translateY(0)}}
   .mbg.open{align-items:flex-end;}
   .dmod{width:100%;}
+
   .dbody{flex-direction:column;align-items:center;text-align:center;}
   .dposter-wrap img{width:120px;}
   .dposter img{width:120px;}
@@ -268,8 +306,10 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
   .dbtns{justify-content:center;flex-wrap:wrap;}
   .dtags{justify-content:center;}
   .dbadges{justify-content:center;}
+
   footer{padding:1rem;justify-content:center;flex-wrap:wrap;}
 }
+
 @media (max-width: 480px) {
   .logo-name{display:none;}
   .count{display:none;}
@@ -344,7 +384,7 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
   <button class="btni" style="color:#a78bfa;border-color:rgba(167,139,250,0.2)" onclick="openFilmo()">🎭 Importer filmographie</button>
 </footer>
 
-<!-- FILMOGRAPHIE MODAL (dédié) -->
+<!-- FILMOGRAPHIE MODAL -->
 <div class="mbg" id="fmod">
   <div class="modal fmod">
     <div class="mtitle">🎭 Importer une filmographie</div>
@@ -436,15 +476,13 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
         <option value="1l">🎬 1080p Light</option>
       </select>
     </div>
-    
-    <!-- Section spécifique pour les sagas -->
+    <!-- SECTION SAGA -->
     <div id="saga-poster-section" style="display:none;" class="field">
       <label>Changer le poster (depuis les films de la saga)</label>
       <button type="button" id="loadSagaPostersBtn" class="sbtn" style="margin-bottom:8px;">📀 Charger les posters de la saga</button>
       <div id="saga-posters-grid" class="posters" style="max-height:150px; overflow-y:auto;"></div>
     </div>
-    
-    <!-- SECTION COLLECTION REFONDUE (avec tri et doublons autorisés) -->
+    <!-- SECTION COLLECTION (avec filmographie complète, tri par date, doublons autorisés) -->
     <div id="collection-filmography-section" style="display:none;" class="field">
       <label>Lien de la collection (sera ajouté automatiquement aux films)</label>
       <input type="text" id="collectionLinkUrl" placeholder="https://... (lien vers la page de l'acteur/réalisateur)" style="margin-bottom:10px;">
@@ -454,7 +492,6 @@ footer{padding:1.2rem 2.5rem;border-top:1px solid var(--border);display:flex;gap
       <div id="filmography-list" style="height: 400px; overflow-y: auto; border:1px solid var(--border); border-radius:12px; padding:8px; background: var(--s2);"></div>
       <button type="button" id="importSelectedFilmsBtn" class="btns" style="margin-top:12px; width:100%;">⬇ Importer les films sélectionnés</button>
     </div>
-    
     <div class="mact" id="mact">
       <div class="mright" style="margin-left:auto">
         <button class="btnc" onclick="closeModal()">Cancel</button>
@@ -485,10 +522,8 @@ let filts=new Set();
 let sortDir=1;
 let genreInc=new Set(), genreExc=new Set();
 
-// Variables pour la filmographie collection (avec qualités individuelles)
-let currentPersonId=null;
-let currentFilmography=[]; // tableau d'objets { movie, selected, quality }
-let collectionLinkUrl = '';
+// Variables pour la filmographie collection
+let currentFilmography=[]; // chaque élément: { movie, selected, quality }
 
 function ss(s,l){document.getElementById('sdot').className='sdot '+s;document.getElementById('slbl').textContent=l;}
 function toggleSize(){ sizeIdx=(sizeIdx+1)%SIZES.length; document.documentElement.style.setProperty('--card-w',SIZES[sizeIdx]+'px'); document.getElementById('size-btn').textContent=sizeIdx===0?'⊞':sizeIdx===1?'⊟':'⊠';}
@@ -790,7 +825,7 @@ function showCurrentPoster(url){
   else{wrap.style.display='none';}
 }
 
-// ==================== FILMOGRAPHIE MODAL DÉDIÉ ====================
+// ==================== FILMOGRAPHIE MODAL DÉDIÉ (pour sagas/acteurs classiques) ====================
 let filmoResults=[], filmoSel=new Set();
 function openFilmo(){ filmoResults=[]; filmoSel.clear(); document.getElementById('filmo-search').value=''; document.getElementById('filmo-status').textContent=''; document.getElementById('filmo-grid').innerHTML=''; document.getElementById('filmo-bar').style.display='none'; document.getElementById('filmo-quality-field').style.display='none'; document.getElementById('filmo-import-btn').style.display='none'; document.getElementById('fmod').classList.add('open'); setTimeout(()=>document.getElementById('filmo-search').focus(),100); }
 function closeFilmo(){document.getElementById('fmod').classList.remove('open');}
@@ -820,19 +855,16 @@ async function loadFilmo(personId, name, dept){
   const st=document.getElementById('filmo-status');
   st.textContent=`Chargement de la filmographie de ${name}...`;
   try{
-    const isDir=dept==='Directing';
-    const url=`https://api.themoviedb.org/3/person/${personId}/movie_credits?api_key=${TK}&language=fr-FR`;
+    const url=`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=fr-FR`;
     const res=await fetch(url);
     const data=await res.json();
-    const cast=(data.cast||[]);
-    const crew=(data.crew||[]).filter(c=>c.job==='Director');
-    let all=[...cast,...crew];
-    const seen=new Set(); all=all.filter(m=>{if(seen.has(m.id))return false;seen.add(m.id);return true;});
-    all=all.filter(m=>m.poster_path).sort((a,b)=>(b.popularity||0)-(a.popularity||0));
-    if(!all.length){st.textContent='Aucun film trouvé.';return;}
-    filmoResults=all;
-    filmoSel=new Set(all.map((_,i)=>i).filter(i=>!movies.some(m=>m.tmdb_id===all[i].id)));
-    st.textContent=`${all.length} films trouvés pour ${name}`;
+    let cast=(data.cast||[]).filter(m=>m.media_type==='movie' && m.poster_path);
+    cast.sort((a,b)=> (b.release_date||'').localeCompare(a.release_date||''));
+    cast=cast.slice(0,200);
+    if(!cast.length){st.textContent='Aucun film trouvé.';return;}
+    filmoResults=cast;
+    filmoSel=new Set(cast.map((_,i)=>i).filter(i=>!movies.some(m=>m.tmdb_id===cast[i].id)));
+    st.textContent=`${cast.length} films trouvés pour ${name}`;
     document.getElementById('filmo-bar').style.display='flex';
     document.getElementById('filmo-quality-field').style.display='block';
     document.getElementById('filmo-import-btn').style.display='block';
@@ -887,6 +919,7 @@ async function importFilmo(){
 }
 
 // ==================== SAGA POSTERS ====================
+let currentSagaPosters=[];
 async function loadSagaPosters() {
   const sagaId = meta.tmdb_id;
   if (!sagaId) { alert("Aucun TMDB ID pour cette saga. Veuillez d'abord rechercher la saga via le bouton 'Search'."); return; }
@@ -915,33 +948,33 @@ async function loadSagaPosters() {
   } catch(e) { alert("Erreur lors du chargement des films de la saga."); }
 }
 
-// ==================== COLLECTION FILMOGRAPHY (avec tri par date et doublons autorisés) ====================
+// ==================== COLLECTION FILMOGRAPHY (complète avec tri par date, doublons autorisés) ====================
 async function loadFilmographyForCollection() {
   const personId = meta.tmdb_id;
   if (!personId) { alert("Aucun TMDB ID pour cette personne. Veuillez d'abord rechercher via le bouton 'Search'."); return; }
   const st = document.getElementById('status');
-  st.textContent = 'Chargement de la filmographie...';
+  st.textContent = 'Chargement de la filmographie... (peut prendre quelques secondes)';
   try {
-    const res = await fetch(`https://api.themoviedb.org/3/person/${personId}/movie_credits?api_key=${TK}&language=fr-FR`);
+    const res = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
-    let cast = (data.cast || []).filter(m => m.poster_path);
-    // Tri par date de sortie (plus récent en premier)
+    let cast = (data.cast || []).filter(m => m.media_type === 'movie' && m.poster_path);
+    // Tri par date de sortie (du plus récent au plus ancien)
     cast.sort((a, b) => {
       const dateA = a.release_date || '0000-00-00';
       const dateB = b.release_date || '0000-00-00';
       return dateB.localeCompare(dateA);
     });
-    // Limiter à 80 films pour éviter la surcharge
-    cast = cast.slice(0, 80);
+    cast = cast.slice(0, 200); // limite à 200 films
     currentFilmography = cast.map(movie => ({
       movie: movie,
       selected: false,
-      quality: '1l' // valeur par défaut (1080p Light)
+      quality: '1l' // 1080p Light par défaut
     }));
     renderFilmographyList();
-    st.textContent = `${cast.length} films trouvés (triés du plus récent au plus ancien). Cochez ceux à importer (doublons autorisés).`;
+    st.textContent = `${cast.length} films trouvés (triés du plus récent au plus ancien). Doublons autorisés.`;
   } catch(e) {
     st.textContent = 'Erreur lors du chargement.';
+    console.error(e);
   }
 }
 
@@ -975,7 +1008,7 @@ function renderFilmographyList() {
       </div>
     `;
     const checkbox = div.querySelector('input');
-    checkbox.addEventListener('change', (e) => {
+    checkbox.addEventListener('change', () => {
       item.selected = checkbox.checked;
       div.style.backgroundColor = item.selected ? 'rgba(167,139,250,0.1)' : 'transparent';
     });
@@ -1002,7 +1035,6 @@ async function importSelectedFilms() {
       const data = await d.json();
       runtime = data.runtime || 0;
     } catch(e) {}
-    // Lien de la collection : on l'ajoute dans le champ 'links' du film
     const links = [];
     if (collectionLink) {
       links.push({ name: "Collection", url: collectionLink });
@@ -1027,7 +1059,6 @@ async function importSelectedFilms() {
   }
   alert(`${imported} film(s) importé(s) avec succès. Le lien de la collection a été ajouté à chacun.`);
   render();
-  // Vider la liste après import (optionnel)
   currentFilmography = [];
   document.getElementById('filmography-list').innerHTML = '';
   document.getElementById('status').textContent = '';
