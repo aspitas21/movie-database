@@ -2,482 +2,891 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>VIDÉO CLUB 3D - Point & Click</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CINEMA ARCHIVE · Médiathèque</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', 'Courier New', monospace; }
-        #info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.7);
-            color: #ffdd99;
-            padding: 8px 15px;
-            border-radius: 30px;
-            pointer-events: none;
-            z-index: 10;
-            font-size: 14px;
-            backdrop-filter: blur(5px);
-            font-weight: bold;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        #interact-message {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: #ff3366;
-            color: white;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-weight: bold;
-            pointer-events: none;
-            z-index: 10;
-            font-family: monospace;
-            box-shadow: 0 0 15px #ff3366;
-            transition: 0.2s;
+
+        :root {
+            --bg: #0a0a10;
+            --surface: #12121c;
+            --surface-hover: #1e1e2a;
+            --border: rgba(255,255,255,0.08);
+            --border-active: rgba(255,255,255,0.2);
+            --text: #f0f0f0;
+            --text-muted: #8888aa;
+            --accent: #c084fc;
+            --accent-glow: rgba(192,132,252,0.2);
+            --danger: #ff4d4d;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --card-width: 170px;
         }
-        .catalog-overlay {
-            position: fixed;
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.92);
-            backdrop-filter: blur(12px);
             z-index: 100;
-            display: none;
-            justify-content: center;
+            background: rgba(10,10,16,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            flex-direction: column;
-            overflow-y: auto;
-            padding: 20px;
+            justify-content: space-between;
+            gap: 1rem;
         }
-        .catalog-overlay.visible { display: flex; }
-        .catalog-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 20px;
-            width: 90%;
-            max-width: 1000px;
-            background: rgba(20,15,30,0.8);
-            padding: 25px;
-            border-radius: 30px;
-            border: 2px solid #ffcc44;
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, #c084fc, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
-        .movie-card {
-            background: #1e1a2c;
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: 0.2s;
-            border: 1px solid #ffaa66;
+
+        .search-wrap {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
         }
-        .movie-card:hover { transform: scale(1.03); box-shadow: 0 0 20px #ff66aa; }
-        .movie-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-        .movie-title { padding: 8px; text-align: center; color: #ffecb3; font-size: 12px; font-weight: bold; }
-        .close-catalog {
+
+        .search-input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .search-icon {
             position: absolute;
-            top: 30px;
-            right: 40px;
-            background: #ff3366;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 40px;
-            color: white;
-            font-weight: bold;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge {
+            background: var(--surface);
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        button {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.5rem 1.2rem;
+            color: var(--text);
+            font-weight: 600;
             cursor: pointer;
-            font-size: 16px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        button:hover {
+            background: var(--surface-hover);
+            border-color: var(--border-active);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #d8b4fe;
+            transform: translateY(-1px);
+        }
+
+        /* Filtres */
+        .filters-bar {
+            padding: 0.8rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            position: sticky;
+            top: 70px;
+            z-index: 99;
+        }
+
+        .chip {
+            padding: 0.3rem 0.9rem;
+            border-radius: 2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .chip.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .genre-bar {
+            padding: 0.5rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .genre-chip {
+            background: var(--surface);
+            border-radius: 2rem;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .genre-chip.inc {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .genre-chip.exc {
+            background: rgba(255,77,77,0.2);
+            color: var(--danger);
+            text-decoration: line-through;
+        }
+
+        /* Grille */
+        .content {
+            padding: 1.5rem 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+            gap: 1.2rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+            border-color: var(--border-active);
+        }
+
+        .poster {
+            aspect-ratio: 2/3;
+            width: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .no-poster {
+            aspect-ratio: 2/3;
+            background: var(--surface-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .card-body {
+            padding: 0.6rem;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.3rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .quality {
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 1.5rem;
+            width: 90%;
+            max-width: 550px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            border: 1px solid var(--border-active);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.6rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.8rem;
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        .poster-grid {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+        }
+
+        .poster-option {
+            width: 70px;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            border: 2px solid transparent;
+        }
+
+        .poster-option.selected {
+            border-color: var(--accent);
+        }
+
+        .link-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 700px) {
+            header { padding: 0.8rem; }
+            .filters-bar, .genre-bar, .content { padding-left: 1rem; padding-right: 1rem; }
+            .grid { gap: 0.8rem; }
         }
     </style>
 </head>
 <body>
-    <div id="info">🎬 VIDÉO CLUB 3D | Cliquez sur la porte pour entrer</div>
-    <div id="interact-message">👉 POINT & CLICK 👈</div>
 
-    <div id="catalogOverlay" class="catalog-overlay">
-        <button class="close-catalog" onclick="closeCatalog()">✖ FERMER</button>
-        <h2 style="color:#ffdd99; margin-bottom:20px;">📀 TOUS LES FILMS</h2>
-        <div id="catalogGrid" class="catalog-grid"></div>
+<header>
+    <div class="logo">🎬 CINEMA ARCHIVE</div>
+    <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Rechercher un film...">
     </div>
+    <div class="stats">
+        <span class="badge" id="movieCount">0</span>
+        <button id="addMovieBtn">+ Ajouter</button>
+        <button id="exportBtn">⬇ Export</button>
+        <button id="importBtn">⬆ Import</button>
+    </div>
+</header>
 
-    <!-- Importation de Three.js et des extensions -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+<div class="filters-bar" id="filtersBar">
+    <!-- Les filtres seront injectés ici -->
+</div>
+<div class="genre-bar" id="genreBar"></div>
+
+<div class="content" id="content">
+    <div class="grid" id="grid"></div>
+</div>
+
+<!-- Modal Add/Edit -->
+<div id="movieModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Ajouter un film</h2>
+            <button id="closeModalBtn">✕</button>
+        </div>
+        <div class="form-group">
+            <label>Type</label>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" data-type="movie" class="type-btn active">🎬 Film</button>
+                <button type="button" data-type="tv" class="type-btn">📺 Série</button>
+                <button type="button" data-type="collection" class="type-btn">🎞 Collection</button>
+                <button type="button" data-type="saga" class="type-btn">⚡ Saga</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Titre</label>
+            <input type="text" id="movieTitle" placeholder="Titre du film / série / collection">
+        </div>
+        <div class="form-group">
+            <label>Qualité</label>
+            <select id="movieQuality">
+                <option value="4kr">💎 4K Remux</option>
+                <option value="4kl">✨ 4K Light</option>
+                <option value="1r">🍀 1080p Remux</option>
+                <option value="1l">🎬 1080p Light</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Poster (URL ou recherche TMDB)</label>
+            <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="posterUrl" placeholder="URL directe">
+                <button id="searchTmdbBtn">Rechercher</button>
+            </div>
+            <div id="tmdbResults" class="poster-grid"></div>
+            <img id="currentPosterPreview" style="max-width: 80px; margin-top: 0.5rem; border-radius: 0.5rem;" />
+        </div>
+        <div class="form-group">
+            <label>Liens (streaming / bande-annonce)</label>
+            <div id="linksContainer"></div>
+            <button id="addLinkBtn" style="width: 100%; margin-top: 0.3rem;">+ Ajouter un lien</button>
+        </div>
+        <div class="footer-buttons">
+            <button id="cancelModalBtn">Annuler</button>
+            <button id="saveMovieBtn" class="btn-primary">Sauvegarder</button>
+            <button id="deleteMovieBtn" style="background: rgba(255,77,77,0.2); border-color: var(--danger); color: var(--danger); display: none;">Supprimer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- Configuration Supabase ----------
+    const SU = 'https://dnzrpvyeiyxplrcomsuo.supabase.co';
+    const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzYwNTAsImV4cCI6MjA5NTExMjA1MH0.BwuZBjZXQcJlNsaQ_DYSj_n-IbMZswsgL_VuGOVMVs4';
+    const TMDB_KEY = '4dc76b66e8b41dd652e56c6cc3a425ab';
+    const HEADERS = { 'Content-Type': 'application/json', 'apikey': SK, 'Authorization': `Bearer ${SK}` };
+
+    let movies = [];
+    let editIndex = null;
+    let currentMediaType = 'movie';
+    let currentPoster = '';
+    let currentTmdbResults = [];
+    let currentLinks = []; // stockage temporaire
+
+    // Filtres
+    let qualityFilters = new Set();  // '4kr', '4kl', etc.
+    let mediaTypeFilters = new Set(); // 'movie', 'tv', 'collection', 'saga'
+    let genreInc = new Set();
+    let genreExc = new Set();
+    let searchQuery = '';
+
+    // DOM elements
+    const gridEl = document.getElementById('grid');
+    const movieCountEl = document.getElementById('movieCount');
+    const filtersBar = document.getElementById('filtersBar');
+    const genreBar = document.getElementById('genreBar');
+    const searchInput = document.getElementById('searchInput');
+    const addMovieBtn = document.getElementById('addMovieBtn');
+    const modal = document.getElementById('movieModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const movieTitleInput = document.getElementById('movieTitle');
+    const movieQualitySelect = document.getElementById('movieQuality');
+    const posterUrlInput = document.getElementById('posterUrl');
+    const searchTmdbBtn = document.getElementById('searchTmdbBtn');
+    const tmdbResultsDiv = document.getElementById('tmdbResults');
+    const currentPosterPreview = document.getElementById('currentPosterPreview');
+    const linksContainer = document.getElementById('linksContainer');
+    const addLinkBtn = document.getElementById('addLinkBtn');
+    const saveMovieBtn = document.getElementById('saveMovieBtn');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const deleteMovieBtn = document.getElementById('deleteMovieBtn');
+    const typeBtns = document.querySelectorAll('.type-btn');
+
+    // ---------- Chargement des films ----------
+    async function loadMovies() {
+        try {
+            const res = await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc`, { headers: HEADERS });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            movies = data.map(row => ({ ...row.data, _id: row.id }));
+            localStorage.setItem('movies_backup', JSON.stringify(movies));
+        } catch (e) {
+            console.warn('Supabase hors ligne, utilisation localStorage');
+            const backup = localStorage.getItem('movies_backup');
+            if (backup) movies = JSON.parse(backup);
+            else movies = [];
+        }
+        render();
+    }
+
+    async function saveMovieToDB(movie, isEdit, index) {
+        try {
+            if (isEdit) {
+                const id = movies[index]._id;
+                await fetch(`${SU}/rest/v1/movies?id=eq.${id}`, {
+                    method: 'PATCH',
+                    headers: HEADERS,
+                    body: JSON.stringify({ data: movie })
+                });
+                movies[index] = movie;
+            } else {
+                const res = await fetch(`${SU}/rest/v1/movies`, {
+                    method: 'POST',
+                    headers: { ...HEADERS, 'Prefer': 'return=representation' },
+                    body: JSON.stringify({ data: movie })
+                });
+                const newMovie = (await res.json())[0].data;
+                movies.push(newMovie);
             }
+            localStorage.setItem('movies_backup', JSON.stringify(movies));
+            render();
+        } catch (e) {
+            // Fallback local
+            if (isEdit) movies[index] = movie;
+            else movies.push(movie);
+            localStorage.setItem('movies_backup', JSON.stringify(movies));
+            render();
         }
-    </script>
+    }
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+    async function deleteMovieFromDB(index) {
+        const id = movies[index]._id;
+        try {
+            await fetch(`${SU}/rest/v1/movies?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
+        } catch(e) {}
+        movies.splice(index, 1);
+        localStorage.setItem('movies_backup', JSON.stringify(movies));
+        render();
+        closeModal();
+    }
 
-        // ---------- CONFIGURATION ----------
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050b1a);
-        scene.fog = new THREE.FogExp2(0x050b1a, 0.008);
+    // ---------- Rendu principal ----------
+    function render() {
+        let filtered = [...movies];
+        // Filtre qualité
+        if (qualityFilters.size) filtered = filtered.filter(m => qualityFilters.has(m.quality));
+        // Filtre type
+        if (mediaTypeFilters.size) filtered = filtered.filter(m => mediaTypeFilters.has(m.media_type || 'movie'));
+        // Filtre genres (inc/exc)
+        if (genreInc.size) filtered = filtered.filter(m => (m.tags || []).some(t => genreInc.has(t)));
+        if (genreExc.size) filtered = filtered.filter(m => !(m.tags || []).some(t => genreExc.has(t)));
+        // Recherche textuelle
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            filtered = filtered.filter(m => m.title.toLowerCase().includes(q));
+        }
 
-        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1.6, 3);
-        
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
-        
-        // CSS2DRenderer pour textes toujours face caméra
-        const labelRenderer = new CSS2DRenderer();
-        labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        labelRenderer.domElement.style.position = 'absolute';
-        labelRenderer.domElement.style.top = '0px';
-        labelRenderer.domElement.style.left = '0px';
-        labelRenderer.domElement.style.pointerEvents = 'none';
-        document.body.appendChild(labelRenderer.domElement);
-
-        // Lumières
-        const ambientLight = new THREE.AmbientLight(0x404060);
-        scene.add(ambientLight);
-        const mainLight = new THREE.DirectionalLight(0xfff5e0, 1);
-        mainLight.position.set(5, 10, 7);
-        mainLight.castShadow = true;
-        mainLight.receiveShadow = true;
-        scene.add(mainLight);
-        const fillLight = new THREE.PointLight(0x665588, 0.5);
-        fillLight.position.set(2, 3, 4);
-        scene.add(fillLight);
-        const backLight = new THREE.PointLight(0xffaa66, 0.4);
-        backLight.position.set(-3, 2, -4);
-        scene.add(backLight);
-        
-        // Sol
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x2a2018, roughness: 0.7, metalness: 0.1 });
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(15, 12), floorMat);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = -0.05;
-        floor.receiveShadow = true;
-        scene.add(floor);
-        
-        // Mur du fond
-        const backWall = new THREE.Mesh(new THREE.BoxGeometry(15, 5, 0.2), new THREE.MeshStandardMaterial({ color: 0x4a3520 }));
-        backWall.position.set(0, 2, -6);
-        backWall.receiveShadow = true;
-        scene.add(backWall);
-        
-        // ---------- DONNÉES FILMS (Supabase + fallback) ----------
-        let movies = [];
-        const SU = 'https://dnzrpvyeiyxplrcomsuo.supabase.co';
-        const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzYwNTAsImV4cCI6MjA5NTExMjA1MH0.BwuZBjZXQcJlNsaQ_DYSj_n-IbMZswsgL_VuGOVMVs4';
-        const H = {'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK};
-        
-        async function loadMovies() {
-            try {
-                const res = await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc`, { headers: H });
-                if (res.ok) {
-                    const data = await res.json();
-                    movies = data.map(row => ({ ...row.data, _id: row.id }));
-                    localStorage.setItem("videoclub_movies", JSON.stringify(movies));
-                } else throw new Error();
-            } catch(e) {
-                const local = localStorage.getItem("videoclub_movies");
-                if (local) movies = JSON.parse(local);
-                else movies = [];
-            }
-            renderCatalogGrid();
-        }
-        
-        function renderCatalogGrid() {
-            const grid = document.getElementById("catalogGrid");
-            if (!grid) return;
-            grid.innerHTML = "";
-            movies.forEach(m => {
-                const card = document.createElement("div");
-                card.className = "movie-card";
-                card.innerHTML = `
-                    <img src="${m.poster || 'https://via.placeholder.com/150x225?text=DVD'}" onerror="this.src='https://via.placeholder.com/150x225?text=DVD'">
-                    <div class="movie-title">${m.title}</div>
-                `;
-                card.onclick = () => {
-                    closeCatalog();
-                    startTakeAnimation(m.title);
-                };
-                grid.appendChild(card);
-            });
-        }
-        
-        function openCatalog() {
-            document.getElementById("catalogOverlay").classList.add("visible");
-        }
-        window.openCatalog = openCatalog;
-        function closeCatalog() {
-            document.getElementById("catalogOverlay").classList.remove("visible");
-        }
-        window.closeCatalog = closeCatalog;
-        
-        // Animation main qui attrape
-        function startTakeAnimation(movieTitle) {
-            const animDiv = document.createElement("div");
-            animDiv.style.position = "fixed";
-            animDiv.style.top = "0";
-            animDiv.style.left = "0";
-            animDiv.style.width = "100%";
-            animDiv.style.height = "100%";
-            animDiv.style.background = "rgba(0,0,0,0.85)";
-            animDiv.style.zIndex = "200";
-            animDiv.style.display = "flex";
-            animDiv.style.alignItems = "center";
-            animDiv.style.justifyContent = "center";
-            animDiv.style.backdropFilter = "blur(8px)";
-            animDiv.style.animation = "fadeIn 0.3s";
-            animDiv.innerHTML = `
-                <div style="text-align:center; background:#1e1712; padding:30px; border-radius:48px; border:2px solid #ffcc44;">
-                    <div style="font-size:80px; animation: grabHand 0.5s ease-out;">🖐️📀</div>
-                    <p style="margin-top:20px; font-size:24px; font-weight:bold;">${movieTitle}</p>
-                    <p>Vous prenez le DVD sur l'étagère</p>
-                    <button style="margin-top:20px; background:#ffcc44; border:none; padding:8px 20px; border-radius:40px; cursor:pointer;" onclick="this.parentElement.parentElement.remove()">Fermer</button>
+        movieCountEl.textContent = filtered.length;
+        gridEl.innerHTML = '';
+        filtered.forEach((movie, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div>
+                    ${movie.poster ? `<img class="poster" src="${movie.poster}" alt="${movie.title}" loading="lazy" onerror="this.src=''">` : `<div class="no-poster">🎬</div>`}
+                </div>
+                <div class="card-body">
+                    <div class="card-title">${movie.title}</div>
+                    <div class="card-meta">
+                        <span class="quality">${getQualityIcon(movie.quality)}</span>
+                        <span>${movie.release_date ? movie.release_date.slice(0,4) : ''}</span>
+                    </div>
                 </div>
             `;
-            document.body.appendChild(animDiv);
-            setTimeout(() => { if(animDiv.parentNode) animDiv.remove(); }, 3000);
-        }
-        window.startTakeAnimation = startTakeAnimation;
-        
-        // ---------- CRÉATION DU VIDÉO CLUB 3D ----------
-        // Panneau extérieur (façade)
-        const facadeGroup = new THREE.Group();
-        const facade = new THREE.Mesh(new THREE.BoxGeometry(6, 5, 0.3), new THREE.MeshStandardMaterial({ color: 0x8B5A2B, roughness: 0.4 }));
-        facade.position.set(0, 1.5, -4);
-        facade.castShadow = true;
-        scene.add(facade);
-        
-        // Enseigne
-        const signMat = new THREE.MeshStandardMaterial({ color: 0xff3366, emissive: 0x441122 });
-        const signBoard = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.6, 0.2), signMat);
-        signBoard.position.set(0, 3.2, -3.9);
-        scene.add(signBoard);
-        // Texte CSS2D sur enseigne
-        const signDiv = document.createElement('div');
-        signDiv.textContent = '📼 VIDEO CLUB';
-        signDiv.style.color = '#ffdd99';
-        signDiv.style.fontWeight = 'bold';
-        signDiv.style.fontSize = '20px';
-        signDiv.style.textShadow = '0 0 8px #ff3366';
-        const signLabel = new CSS2DObject(signDiv);
-        signLabel.position.set(0, 3.2, -3.8);
-        scene.add(signLabel);
-        
-        // Porte (avec animation)
-        const doorGroup = new THREE.Group();
-        const door = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 0.2), new THREE.MeshStandardMaterial({ color: 0xc28a5a }));
-        door.position.set(0, 1.1, 0);
-        door.castShadow = true;
-        doorGroup.add(door);
-        doorGroup.position.set(0, 0, -3.8);
-        scene.add(doorGroup);
-        
-        // Zone cliquable porte (raycaster)
-        const doorZone = new THREE.Mesh(new THREE.BoxGeometry(1.4, 2.4, 0.5), new THREE.MeshBasicMaterial({ visible: false }));
-        doorZone.position.set(0, 1.2, -3.7);
-        scene.add(doorZone);
-        
-        let doorOpen = false;
-        doorZone.userData = { action: () => {
-            if (!doorOpen) {
-                doorOpen = true;
-                doorGroup.rotation.y = -Math.PI / 2.2;
-                setTimeout(() => {
-                    document.getElementById("info").innerHTML = "🎬 À l'intérieur ! Cliquez sur les pancartes";
-                    document.getElementById("interact-message").innerHTML = "📀 ALLÉES | 🎞 CATALOGUE";
-                    // Afficher les allées après ouverture (création dynamique)
-                    createInterior();
-                }, 600);
-            }
-        }};
-        
-        // Création de l'intérieur (allées, étagères)
-        function createInterior() {
-            // Supprimer la façade extérieure de la vue pour pas gêner
-            facade.visible = false;
-            signBoard.visible = false;
-            signLabel.visible = false;
-            doorZone.visible = false;
-            
-            // Mur gauche avec pancarte CATALOGUE
-            const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 5), new THREE.MeshStandardMaterial({ color: 0x5a3a2a }));
-            leftWall.position.set(-4, 2, -2);
-            scene.add(leftWall);
-            
-            // Pancarte CATALOGUE cliquable
-            const catalogBoard = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1, 0.1), new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 }));
-            catalogBoard.position.set(-3.9, 2.2, -1.5);
-            scene.add(catalogBoard);
-            const catalogLabelDiv = document.createElement('div');
-            catalogLabelDiv.textContent = '📋 CATALOGUE';
-            catalogLabelDiv.style.backgroundColor = '#ffaa33';
-            catalogLabelDiv.style.padding = '5px 12px';
-            catalogLabelDiv.style.borderRadius = '30px';
-            catalogLabelDiv.style.fontWeight = 'bold';
-            catalogLabelDiv.style.cursor = 'pointer';
-            const catalogLabel = new CSS2DObject(catalogLabelDiv);
-            catalogLabel.position.set(-3.9, 2.2, -1.4);
-            scene.add(catalogLabel);
-            catalogLabel.userData = { action: () => openCatalog() };
-            
-            // Création des 4 allées (simplifiées avec étagères)
-            const aisles = [
-                { name: '💎 4K REMUX', quality: '4kr', x: -2, z: -1.5, color: 0xb87333 },
-                { name: '✨ 4K LIGHT', quality: '4kl', x: 0, z: -1.5, color: 0x88aaff },
-                { name: '🍀 1080P REMUX', quality: '1r', x: 2, z: -1.5, color: 0x66bb66 },
-                { name: '🎬 1080P LIGHT', quality: '1l', x: 4, z: -1.5, color: 0xdd88aa }
-            ];
-            
-            aisles.forEach(aisle => {
-                const shelfGroup = new THREE.Group();
-                // Étagères
-                for (let i = -1; i <= 1; i++) {
-                    const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.1, 0.8), new THREE.MeshStandardMaterial({ color: 0x8B5A2B }));
-                    shelf.position.set(0, 0.8 + i * 0.6, 0);
-                    shelf.castShadow = true;
-                    shelfGroup.add(shelf);
-                }
-                shelfGroup.position.set(aisle.x, 0.2, aisle.z);
-                scene.add(shelfGroup);
-                
-                // Panneau au-dessus
-                const signAisle = new THREE.Mesh(new THREE.BoxGeometry(1, 0.4, 0.1), new THREE.MeshStandardMaterial({ color: aisle.color, emissive: 0x221100 }));
-                signAisle.position.set(aisle.x, 1.6, aisle.z);
-                scene.add(signAisle);
-                const labelDiv = document.createElement('div');
-                labelDiv.textContent = aisle.name;
-                labelDiv.style.backgroundColor = '#000000aa';
-                labelDiv.style.padding = '3px 10px';
-                labelDiv.style.borderRadius = '20px';
-                labelDiv.style.fontSize = '12px';
-                labelDiv.style.fontWeight = 'bold';
-                labelDiv.style.color = '#ffdd99';
-                const labelObj = new CSS2DObject(labelDiv);
-                labelObj.position.set(aisle.x, 1.5, aisle.z);
-                scene.add(labelObj);
-                
-                // Ajout de DVD factices sur les étagères (représentés par des petits cubes colorés)
-                const moviesOfQuality = movies.filter(m => m.quality === aisle.quality && (m.media_type || 'movie') === 'movie');
-                for (let i = 0; i < Math.min(moviesOfQuality.length, 6); i++) {
-                    const dvd = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.22, 0.05), new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0x331100 }));
-                    dvd.position.set(aisle.x + (i % 3) * 0.35 - 0.35, 0.55 + Math.floor(i / 3) * 0.6, aisle.z + 0.2);
-                    dvd.castShadow = true;
-                    scene.add(dvd);
-                    // Interaction clic sur le DVD
-                    dvd.userData = { action: () => startTakeAnimation(moviesOfQuality[i]?.title || 'Film') };
-                }
-            });
-            
-            // Escalier à droite menant aux séries (étage)
-            const stairs = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 1.2), new THREE.MeshStandardMaterial({ color: 0xaa8866 }));
-            stairs.position.set(5.5, 0.15, -2);
-            scene.add(stairs);
-            const stairsLabel = document.createElement('div');
-            stairsLabel.textContent = '📺 SÉRIES ⬆';
-            stairsLabel.style.backgroundColor = '#ff8844';
-            stairsLabel.style.padding = '4px 12px';
-            stairsLabel.style.borderRadius = '30px';
-            stairsLabel.style.fontWeight = 'bold';
-            const stairsCSS = new CSS2DObject(stairsLabel);
-            stairsCSS.position.set(5.5, 0.9, -2);
-            scene.add(stairsCSS);
-            stairsCSS.userData = { action: () => createUpstairs() };
-        }
-        
-        function createUpstairs() {
-            // Nettoyer l'étage courant (simple: on recrée une scène au-dessus)
-            // Pour garder simple, on déplace la caméra et on cache le rez-de-chaussée
-            camera.position.set(0, 3.5, 3);
-            document.getElementById("info").innerHTML = "📺 ÉTAGE SÉRIES | Cliquez sur une allée";
-            // Créer un nouvel espace avec étagères pour séries
-            const seriesAisles = [
-                { name: '💎 4K SÉRIES', quality: '4kr', x: -2, z: -1, color: 0xb87333 },
-                { name: '✨ 4K LIGHT SÉRIES', quality: '4kl', x: 0, z: -1, color: 0x88aaff },
-                { name: '🍀 1080P SÉRIES', quality: '1r', x: 2, z: -1, color: 0x66bb66 }
-            ];
-            seriesAisles.forEach(aisle => {
-                const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: 0x8B5A2B }));
-                shelf.position.set(aisle.x, 0.8, aisle.z);
-                scene.add(shelf);
-                const sign = new THREE.Mesh(new THREE.BoxGeometry(1, 0.3, 0.1), new THREE.MeshStandardMaterial({ color: aisle.color }));
-                sign.position.set(aisle.x, 1.6, aisle.z);
-                scene.add(sign);
-                const labelDiv = document.createElement('div');
-                labelDiv.textContent = aisle.name;
-                labelDiv.style.backgroundColor = '#000000aa';
-                labelDiv.style.padding = '3px 10px';
-                labelDiv.style.borderRadius = '20px';
-                labelDiv.style.fontSize = '12px';
-                const labelObj = new CSS2DObject(labelDiv);
-                labelObj.position.set(aisle.x, 1.5, aisle.z);
-                scene.add(labelObj);
-                // DVD séries
-                const seriesMovies = movies.filter(m => m.quality === aisle.quality && m.media_type === 'tv');
-                for (let i = 0; i < Math.min(seriesMovies.length, 4); i++) {
-                    const dvd = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.22, 0.05), new THREE.MeshStandardMaterial({ color: 0x77aaff }));
-                    dvd.position.set(aisle.x + (i % 2) * 0.4 - 0.2, 0.9, aisle.z + 0.2);
-                    scene.add(dvd);
-                    dvd.userData = { action: () => startTakeAnimation(seriesMovies[i]?.title || 'Série') };
-                }
-            });
-            // Bouton retour
-            const backBtnDiv = document.createElement('div');
-            backBtnDiv.textContent = '⬇ RETOUR REZ-DE-CHAUSSÉE';
-            backBtnDiv.style.backgroundColor = '#ffaa33';
-            backBtnDiv.style.padding = '6px 15px';
-            backBtnDiv.style.borderRadius = '40px';
-            backBtnDiv.style.cursor = 'pointer';
-            const backBtn = new CSS2DObject(backBtnDiv);
-            backBtn.position.set(0, 0.5, 2.5);
-            scene.add(backBtn);
-            backBtn.userData = { action: () => { camera.position.set(0, 1.6, 3); document.getElementById("info").innerHTML = "🎬 Rez-de-chaussée"; setTimeout(() => { backBtn.visible = false; }, 100); } };
-        }
-        
-        // Raycaster pour interactions
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        
-        window.addEventListener('click', (event) => {
-            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(scene.children, true);
-            for (let obj of intersects) {
-                let current = obj.object;
-                while (current) {
-                    if (current.userData && typeof current.userData.action === 'function') {
-                        current.userData.action();
-                        return;
-                    }
-                    current = current.parent;
-                }
-            }
+            card.addEventListener('click', () => openDetail(movies.indexOf(movie)));
+            gridEl.appendChild(card);
         });
-        
-        // Animation et rendu
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
+        renderFilters();
+        renderGenres();
+    }
+
+    function getQualityIcon(q) {
+        const map = { '4kr': '💎', '4kl': '✨', '1r': '🍀', '1l': '🎬' };
+        return map[q] || '🎞️';
+    }
+
+    function renderFilters() {
+        const qualities = [
+            { key: '4kr', label: '💎 4K Remux' },
+            { key: '4kl', label: '✨ 4K Light' },
+            { key: '1r', label: '🍀 1080p Remux' },
+            { key: '1l', label: '🎬 1080p Light' }
+        ];
+        const types = [
+            { key: 'movie', label: '🎬 Films' },
+            { key: 'tv', label: '📺 Séries' },
+            { key: 'collection', label: '🎞 Collections' },
+            { key: 'saga', label: '⚡ Sagas' }
+        ];
+        filtersBar.innerHTML = '';
+        // Qualité
+        qualities.forEach(q => {
+            const chip = document.createElement('div');
+            chip.className = `chip ${qualityFilters.has(q.key) ? 'active' : ''}`;
+            chip.textContent = q.label;
+            chip.dataset.filter = q.key;
+            chip.addEventListener('click', () => {
+                if (qualityFilters.has(q.key)) qualityFilters.delete(q.key);
+                else qualityFilters.add(q.key);
+                render();
+            });
+            filtersBar.appendChild(chip);
+        });
+        // Séparateur
+        const sep = document.createElement('span');
+        sep.style.width = '1px';
+        sep.style.background = 'var(--border)';
+        sep.style.margin = '0 0.5rem';
+        filtersBar.appendChild(sep);
+        // Types
+        types.forEach(t => {
+            const chip = document.createElement('div');
+            chip.className = `chip ${mediaTypeFilters.has(t.key) ? 'active' : ''}`;
+            chip.textContent = t.label;
+            chip.dataset.filter = t.key;
+            chip.addEventListener('click', () => {
+                if (mediaTypeFilters.has(t.key)) mediaTypeFilters.delete(t.key);
+                else mediaTypeFilters.add(t.key);
+                render();
+            });
+            filtersBar.appendChild(chip);
+        });
+    }
+
+    function renderGenres() {
+        const allGenres = new Set();
+        movies.forEach(m => {
+            (m.tags || []).forEach(g => allGenres.add(g));
+        });
+        genreBar.innerHTML = '';
+        if (allGenres.size === 0) return;
+        const clearBtn = document.createElement('div');
+        clearBtn.className = 'genre-chip';
+        clearBtn.textContent = '✖ Effacer genres';
+        clearBtn.addEventListener('click', () => {
+            genreInc.clear();
+            genreExc.clear();
+            render();
+        });
+        genreBar.appendChild(clearBtn);
+        [...allGenres].sort().forEach(genre => {
+            const chip = document.createElement('div');
+            chip.className = 'genre-chip';
+            if (genreInc.has(genre)) chip.classList.add('inc');
+            if (genreExc.has(genre)) chip.classList.add('exc');
+            chip.textContent = genre;
+            chip.addEventListener('click', () => {
+                if (genreInc.has(genre)) {
+                    genreInc.delete(genre);
+                    genreExc.add(genre);
+                } else if (genreExc.has(genre)) {
+                    genreExc.delete(genre);
+                } else {
+                    genreInc.add(genre);
+                }
+                render();
+            });
+            genreBar.appendChild(chip);
+        });
+    }
+
+    // ---------- Détail d'un film ----------
+    function openDetail(index) {
+        const movie = movies[index];
+        const detailHtml = `
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <img src="${movie.poster || ''}" style="width: 120px; border-radius: 0.8rem;" onerror="this.src=''">
+                <div style="flex:1">
+                    <h3>${movie.title}</h3>
+                    <p>Qualité: ${getQualityIcon(movie.quality)} ${movie.quality}</p>
+                    <p>Année: ${movie.release_date?.slice(0,4) || 'N/A'}</p>
+                    <p>Note: ${movie.vote_average ? '⭐ ' + movie.vote_average.toFixed(1) : 'N/A'}</p>
+                    <p>Genres: ${(movie.tags || []).join(', ') || 'Aucun'}</p>
+                    ${(movie.links && movie.links.length) ? `<div>Liens: ${movie.links.map(l => `<a href="${l.url}" target="_blank" style="color:var(--accent)">${l.name || 'lien'}</a>`).join(', ')}</div>` : ''}
+                </div>
+            </div>
+            <div class="footer-buttons" style="margin-top: 1rem;">
+                <button id="editFromDetail">Modifier</button>
+                <button id="closeDetail">Fermer</button>
+            </div>
+        `;
+        const modalDetail = document.createElement('div');
+        modalDetail.className = 'modal active';
+        modalDetail.innerHTML = `<div class="modal-content">${detailHtml}</div>`;
+        document.body.appendChild(modalDetail);
+        modalDetail.querySelector('#closeDetail').addEventListener('click', () => modalDetail.remove());
+        modalDetail.querySelector('#editFromDetail').addEventListener('click', () => {
+            modalDetail.remove();
+            openEdit(index);
+        });
+        modalDetail.addEventListener('click', (e) => { if (e.target === modalDetail) modalDetail.remove(); });
+    }
+
+    // ---------- Modal d'édition / ajout ----------
+    function openEdit(index = null) {
+        editIndex = index;
+        const movie = index !== null ? movies[index] : null;
+        if (movie) {
+            modalTitle.innerText = 'Modifier le film';
+            movieTitleInput.value = movie.title;
+            movieQualitySelect.value = movie.quality;
+            currentPoster = movie.poster || '';
+            posterUrlInput.value = currentPoster;
+            currentPosterPreview.src = currentPoster;
+            currentMediaType = movie.media_type || 'movie';
+            currentLinks = movie.links ? [...movie.links] : [];
+            deleteMovieBtn.style.display = 'inline-block';
+        } else {
+            modalTitle.innerText = 'Ajouter un film';
+            movieTitleInput.value = '';
+            movieQualitySelect.value = '1l';
+            currentPoster = '';
+            posterUrlInput.value = '';
+            currentPosterPreview.src = '';
+            currentMediaType = 'movie';
+            currentLinks = [];
+            deleteMovieBtn.style.display = 'none';
         }
-        animate();
-        
-        loadMovies();
-    </script>
-    <style>
-        @keyframes grabHand {
-            0% { transform: scale(0.2) rotate(-20deg); opacity: 0; }
-            60% { transform: scale(1.2) rotate(10deg); }
-            100% { transform: scale(1) rotate(0deg); }
+        updateTypeBtns(currentMediaType);
+        renderLinks();
+        tmdbResultsDiv.innerHTML = '';
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        editIndex = null;
+    }
+
+    function updateTypeBtns(type) {
+        typeBtns.forEach(btn => {
+            const btnType = btn.dataset.type;
+            if (btnType === type) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    }
+
+    function renderLinks() {
+        linksContainer.innerHTML = '';
+        if (currentLinks.length === 0) currentLinks.push({ name: '', url: '' });
+        currentLinks.forEach((link, idx) => {
+            const row = document.createElement('div');
+            row.className = 'link-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Nom du lien" value="${escapeHtml(link.name)}" style="flex:1">
+                <input type="text" placeholder="URL" value="${escapeHtml(link.url)}" style="flex:2">
+                <button class="remove-link" data-idx="${idx}">✕</button>
+            `;
+            linksContainer.appendChild(row);
+        });
+        document.querySelectorAll('.remove-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                currentLinks.splice(idx, 1);
+                renderLinks();
+            });
+        });
+    }
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m) { if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
+
+    function collectLinks() {
+        const rows = linksContainer.querySelectorAll('.link-row');
+        const newLinks = [];
+        rows.forEach(row => {
+            const name = row.querySelector('input:first-child').value.trim();
+            const url = row.querySelector('input:last-child').value.trim();
+            if (url) newLinks.push({ name, url });
+        });
+        return newLinks;
+    }
+
+    async function searchTMDB() {
+        const title = movieTitleInput.value.trim();
+        if (!title) return;
+        const type = currentMediaType === 'tv' ? 'tv' : 'movie';
+        const url = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=fr-FR`;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            const results = data.results || [];
+            tmdbResultsDiv.innerHTML = '';
+            results.slice(0, 8).forEach(item => {
+                const posterPath = item.poster_path ? `https://image.tmdb.org/t/p/w154${item.poster_path}` : '';
+                const div = document.createElement('div');
+                div.className = 'poster-option';
+                div.innerHTML = `<img src="${posterPath}" style="width:100%; border-radius:0.5rem;" onerror="this.src=''">`;
+                div.addEventListener('click', () => {
+                    currentPoster = `https://image.tmdb.org/t/p/w342${item.poster_path}`;
+                    posterUrlInput.value = currentPoster;
+                    currentPosterPreview.src = currentPoster;
+                    tmdbResultsDiv.innerHTML = '';
+                    // Optionnel : remplir automatiquement les métadonnées
+                });
+                tmdbResultsDiv.appendChild(div);
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    async function saveMovie() {
+        const title = movieTitleInput.value.trim();
+        if (!title) { alert('Veuillez entrer un titre'); return; }
+        const quality = movieQualitySelect.value;
+        const poster = currentPoster || posterUrlInput.value.trim();
+        const links = collectLinks();
+        const movieData = {
+            title, quality, poster, links,
+            media_type: currentMediaType,
+            release_date: '',
+            popularity: 0,
+            vote_average: 0,
+            tags: [],
+            runtime: 0,
+            tmdb_id: null,
+            link: links[0]?.url || ''
+        };
+        if (editIndex !== null) {
+            await saveMovieToDB(movieData, true, editIndex);
+        } else {
+            await saveMovieToDB(movieData, false);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        closeModal();
+    }
+
+    async function deleteMovie() {
+        if (editIndex !== null && confirm('Supprimer définitivement ce film ?')) {
+            await deleteMovieFromDB(editIndex);
         }
-    </style>
+    }
+
+    // Export / Import
+    function exportData() {
+        const dataStr = JSON.stringify(movies, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'movies_backup.json';
+        a.click();
+    }
+
+    function importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            const text = await file.text();
+            const imported = JSON.parse(text);
+            for (const m of imported) {
+                await saveMovieToDB(m, false);
+            }
+            render();
+        };
+        input.click();
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', (e) => { searchQuery = e.target.value; render(); });
+    addMovieBtn.addEventListener('click', () => openEdit());
+    cancelModalBtn.addEventListener('click', closeModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    saveMovieBtn.addEventListener('click', saveMovie);
+    deleteMovieBtn.addEventListener('click', deleteMovie);
+    addLinkBtn.addEventListener('click', () => { currentLinks.push({ name: '', url: '' }); renderLinks(); });
+    searchTmdbBtn.addEventListener('click', searchTMDB);
+    typeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentMediaType = btn.dataset.type;
+            updateTypeBtns(currentMediaType);
+        });
+    });
+    posterUrlInput.addEventListener('input', (e) => { currentPoster = e.target.value; currentPosterPreview.src = currentPoster; });
+    document.getElementById('exportBtn').addEventListener('click', exportData);
+    document.getElementById('importBtn').addEventListener('click', importData);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // Init
+    loadMovies();
+</script>
 </body>
 </html>
