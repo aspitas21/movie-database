@@ -6,11 +6,7 @@
   <title>CinéVault · Smart Collections</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --bg: #05050a;
@@ -41,7 +37,6 @@
       overflow-x: hidden;
     }
 
-    /* animations globales */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -52,7 +47,7 @@
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    /* header */
+    /* Header */
     header {
       position: sticky;
       top: 0;
@@ -179,7 +174,7 @@
     }
     .btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(139,92,246,0.4); }
 
-    /* filter bar */
+    /* Filter bar */
     .filter-bar {
       position: sticky;
       top: 70px;
@@ -200,6 +195,7 @@
       font-size: 0.75rem;
       font-weight: 600;
       white-space: nowrap;
+      cursor: pointer;
     }
     .chip.active {
       background: var(--accent);
@@ -212,9 +208,10 @@
       border-radius: 40px;
       font-size: 0.75rem;
       border: 1px solid var(--border);
+      cursor: pointer;
     }
 
-    /* genre bar */
+    /* Genre bar */
     .genre-bar {
       padding: 0.5rem 2rem;
       display: flex;
@@ -235,7 +232,7 @@
     .gchip.inc { background: var(--accent-soft); color: var(--accent2); border-color: var(--accent-border); }
     .gchip.exc { background: rgba(239,68,68,0.1); color: #f87171; text-decoration: line-through; }
 
-    /* recent section */
+    /* Recent section (last 50, sorted by popularity) */
     .recent-section { padding: 1rem 2rem 0; }
     .recent-header {
       display: flex;
@@ -283,14 +280,14 @@
       text-overflow: ellipsis;
     }
 
-    /* results bar */
+    /* Results bar */
     .results-bar {
       padding: 0.6rem 2rem 0;
       font-size: 0.8rem;
       color: var(--muted2);
     }
 
-    /* grid */
+    /* Grid */
     .content {
       padding: 1.2rem 2rem 3rem;
     }
@@ -301,7 +298,7 @@
       animation: fadeUp 0.3s ease;
     }
 
-    /* cards */
+    /* Card */
     .card {
       background: var(--surface2);
       border-radius: var(--radius);
@@ -370,7 +367,7 @@
     }
     .card:hover .detail-btn { opacity: 1; }
 
-    /* modals */
+    /* Modals */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -423,11 +420,6 @@
       display: flex;
       gap: 8px;
     }
-    .link-row {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
     .posters-row {
       display: flex;
       gap: 8px;
@@ -452,7 +444,7 @@
       margin-top: 1.2rem;
     }
 
-    /* collection link picker */
+    /* Collection link picker */
     .collection-link-picker {
       background: var(--surface3);
       border-radius: 12px;
@@ -466,7 +458,7 @@
       margin-bottom: 6px;
     }
 
-    /* filmography list */
+    /* Filmography list */
     .filmography-list {
       max-height: 320px;
       overflow-y: auto;
@@ -494,7 +486,7 @@
       font-size: 0.7rem;
     }
 
-    /* smart collections */
+    /* Smart collections */
     .sc-group {
       background: var(--surface2);
       border-radius: 20px;
@@ -689,7 +681,6 @@
   const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzYwNTAsImV4cCI6MjA5NTExMjA1MH0.BwuZBjZXQcJlNsaQ_DYSj_n-IbMZswsgL_VuGOVMVs4';
   const TMDB_KEY = '4dc76b66e8b41dd652e56c6cc3a425ab';
   const HEADERS = { 'Content-Type': 'application/json', 'apikey': SK, 'Authorization': `Bearer ${SK}` };
-  const QUAL_LABEL = { '4kr':'4K Remux','4kl':'4K Light','1r':'1080p Remux','1l':'1080p Light' };
   const QUAL_ICON = { '4kr':'💎','4kl':'✨','1r':'🍀','1l':'🎬' };
 
   let movies = [];
@@ -698,19 +689,19 @@
   let currentPoster = '';
   let currentMetadata = {};
   let currentLinks = [];
-  let currentCollectionLinks = []; // pour l'import
+  let currentCollectionLinks = [];
   let currentFilmography = [];
   let currentPersonId = null;
   let currentPersonName = '';
 
-  // Filtres
+  // Filters
   let qualityFilters = new Set();
   let mediaTypeFilters = new Set();
   let genreInc = new Set();
   let genreExc = new Set();
   let searchQuery = '';
 
-  // ---------- DOM ----------
+  // DOM
   const gridContainer = document.getElementById('gridContainer');
   const filterBar = document.getElementById('filterBar');
   const genreBarEl = document.getElementById('genreBar');
@@ -720,7 +711,6 @@
   const syncDot = document.getElementById('syncDot');
   const syncLabel = document.getElementById('syncLabel');
 
-  // ---------- HELPERS ----------
   function setSync(status, text) {
     syncDot.className = `sync-dot ${status}`;
     syncLabel.innerText = text;
@@ -778,7 +768,7 @@
     closeModal();
   }
 
-  // ---------- RENDER GRID, FILTERS, GENRES ----------
+  // ---------- RENDER GRID, FILTERS, GENRES, RECENT ----------
   function render() {
     let filtered = [...movies];
     if (qualityFilters.size) filtered = filtered.filter(m => qualityFilters.has(m.quality));
@@ -790,7 +780,7 @@
     countBadge.innerText = filtered.length;
     resultLabel.innerHTML = `📀 ${filtered.length} film${filtered.length > 1 ? 's' : ''} trouvé(s)`;
 
-    // render grid
+    // grid
     if (!filtered.length) { gridContainer.innerHTML = '<div style="text-align:center; padding:3rem;"><div>🎬</div><div>Aucun film</div></div>'; }
     else {
       gridContainer.innerHTML = '';
@@ -804,7 +794,7 @@
             <button class="detail-btn" onclick="event.stopPropagation(); openDetail(${realIdx})">⋯</button>
           </div>
           <div class="card-body">
-            <div class="card-title">${m.title}</div>
+            <div class="card-title">${escapeHtml(m.title)}</div>
             <div class="card-meta">
               <span>${QUAL_ICON[m.quality] || ''}</span>
               <span>${m.release_date ? m.release_date.slice(0,4) : ''}</span>
@@ -831,6 +821,7 @@
     qualities.forEach(q => {
       const chip = document.createElement('div'); chip.className = `chip ${qualityFilters.has(q.key) ? 'active' : ''}`;
       chip.textContent = q.label;
+      chip.style.cursor = 'pointer';
       chip.onclick = () => { if (qualityFilters.has(q.key)) qualityFilters.delete(q.key); else qualityFilters.add(q.key); render(); };
       filterBar.appendChild(chip);
     });
@@ -843,6 +834,7 @@
     types.forEach(t => {
       const chip = document.createElement('div'); chip.className = `chip ${mediaTypeFilters.has(t.key) ? 'active' : ''}`;
       chip.textContent = t.label;
+      chip.style.cursor = 'pointer';
       chip.onclick = () => { if (mediaTypeFilters.has(t.key)) mediaTypeFilters.delete(t.key); else mediaTypeFilters.add(t.key); render(); };
       filterBar.appendChild(chip);
     });
@@ -875,15 +867,17 @@
     if (qualityFilters.size || genreInc.size || genreExc.size || mediaTypeFilters.size || searchQuery) {
       recentSection.innerHTML = ''; return;
     }
-    const recent = [...movies].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 12);
-    if (!recent.length) { recentSection.innerHTML = ''; return; }
+    // Prendre les 50 derniers ajoutés (par ordre d'insertion, on suppose que le tableau movies est dans l'ordre d'ajout)
+    const last50 = [...movies].slice(-50);
+    const popular = [...last50].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 12);
+    if (!popular.length) { recentSection.innerHTML = ''; return; }
     recentSection.innerHTML = `
-      <div class="recent-header"><div class="recent-title">🔥 POPULAIRES RÉCEMMENT AJOUTÉS</div><div class="recent-line"></div></div>
-      <div class="recent-grid">${recent.map(m => {
+      <div class="recent-header"><div class="recent-title">🔥 POPULAIRES — DERNIERS AJOUTS</div><div class="recent-line"></div></div>
+      <div class="recent-grid">${popular.map(m => {
         const idx = movies.indexOf(m);
         return `<div class="recent-card" onclick="openDetail(${idx})">
           ${m.poster ? `<img src="${m.poster}" loading="lazy">` : `<div class="rc-placeholder">🎬</div>`}
-          <div class="rc-title">${m.title}</div>
+          <div class="rc-title">${escapeHtml(m.title)}</div>
         </div>`;
       }).join('')}</div>`;
   }
@@ -902,16 +896,16 @@
       <div style="display:flex; gap:1.2rem; flex-wrap:wrap;">
         <div>${m.poster ? `<img src="${m.poster}" style="width:120px; border-radius:12px;">` : `<div style="width:120px; height:180px; background:var(--surface3); display:flex; align-items:center; justify-content:center;">🎬</div>`}</div>
         <div style="flex:1;">
-          <div class="modal-title" style="margin-bottom:0.2rem;">${m.title}</div>
+          <div class="modal-title" style="margin-bottom:0.2rem;">${escapeHtml(m.title)}</div>
           <div style="font-size:0.8rem; color:var(--muted2);">${year} ${runtime ? `· ${runtime}` : ''}</div>
           <div style="margin:6px 0;">${rating ? `<span class="quality-badge">${rating}</span>` : ''}</div>
-          <div>${(m.tags || []).map(t => `<span class="gchip" style="background:var(--surface3);">${t}</span>`).join('')}</div>
+          <div>${(m.tags || []).map(t => `<span class="gchip" style="background:var(--surface3);">${escapeHtml(t)}</span>`).join('')}</div>
           <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
             <a href="${lbUrl}" target="_blank" style="color:#00e0a6;">🎞 Letterboxd</a>
             <a href="${allocUrl}" target="_blank" style="color:#fbbf24;">🎬 Allociné</a>
             <a href="${subUrl}" target="_blank" style="color:#4ade80;">💬 Sous-titres</a>
           </div>
-          <div style="margin-top:10px;">${links.map(l => `<a href="${l.url}" target="_blank" style="display:inline-block; margin-right:10px;">▶ ${l.name || 'Lien'}</a>`).join('') || '<span class="no-link">Aucun lien personnalisé</span>'}</div>
+          <div style="margin-top:10px;">${links.map(l => `<a href="${l.url}" target="_blank" style="display:inline-block; margin-right:10px;">▶ ${escapeHtml(l.name || 'Lien')}</a>`).join('') || '<span class="no-link">Aucun lien personnalisé</span>'}</div>
         </div>
       </div>
       <div class="modal-actions" style="margin-top:1.2rem;">
@@ -924,13 +918,14 @@
   }
   function closeDetail() { document.getElementById('detailModal').classList.remove('open'); }
 
-  // ---------- MODAL ADD/EDIT ----------
+  // ---------- ADD/EDIT MODAL ----------
   function openAddModal() {
     editIndex = null;
     currentMediaType = 'movie';
     currentPoster = '';
     currentMetadata = {};
     currentLinks = [];
+    resetModalForm();
     document.getElementById('modalTitle').innerText = 'Ajouter un film';
     document.getElementById('titleInput').value = '';
     document.getElementById('qualitySelect').value = '1l';
@@ -954,6 +949,7 @@
     currentPoster = m.poster || '';
     currentMetadata = { ...m };
     currentLinks = m.links ? [...m.links] : [];
+    resetModalForm();
     document.getElementById('modalTitle').innerText = 'Modifier le film';
     document.getElementById('titleInput').value = m.title;
     document.getElementById('qualitySelect').value = m.quality;
@@ -969,6 +965,10 @@
     const btn = document.querySelector(`.type-btn[data-type="${currentMediaType}"]`);
     if (btn) btn.classList.add('active');
     document.getElementById('mainModal').classList.add('open');
+  }
+
+  function resetModalForm() {
+    // nothing extra
   }
 
   function closeModal() { document.getElementById('mainModal').classList.remove('open'); editIndex = null; currentFilmography = []; }
@@ -1048,7 +1048,7 @@
         else if (currentMediaType === 'saga') { posterUrl = `https://image.tmdb.org/t/p/w342${r.poster_path}`; name = r.name || r.title; }
         else { posterUrl = `https://image.tmdb.org/t/p/w342${r.poster_path}`; name = r.title || r.name; }
         const div = document.createElement('div'); div.style.cursor = 'pointer'; div.style.textAlign = 'center';
-        div.innerHTML = `<img src="${posterUrl}" style="width:70px; border-radius:8px;"><div style="font-size:9px;">${name.slice(0,15)}</div>`;
+        div.innerHTML = `<img src="${posterUrl}" style="width:70px; border-radius:8px;"><div style="font-size:9px;">${escapeHtml(name.slice(0,15))}</div>`;
         div.onclick = async () => {
           document.querySelectorAll('#postersRow img').forEach(i => i.style.border = 'none');
           div.querySelector('img').style.border = '2px solid #c084fc';
@@ -1064,7 +1064,6 @@
             currentMetadata = { tmdb_id: r.id, media_type: 'saga', title: name };
             document.getElementById('titleInput').value = name;
           } else {
-            // movie/tv
             const releaseDate = currentMediaType === 'tv' ? r.first_air_date : r.release_date;
             const tags = (r.genre_ids || []).map(g => `genre_${g}`);
             currentMetadata = {
@@ -1084,7 +1083,7 @@
                 currentMetadata.runtime = d.runtime || 0;
               } catch(e) {}
             }
-            document.getElementById('searchStatus').innerText = currentMetadata.runtime ? `⏱ ${Math.floor(currentMetadata.runtime/60)}h${currentMetadata.runtime%60}` : '';
+            status.innerText = currentMetadata.runtime ? `⏱ ${Math.floor(currentMetadata.runtime/60)}h${currentMetadata.runtime%60}` : '';
           }
         };
         postersRow.appendChild(div);
@@ -1120,7 +1119,7 @@
         <input type="checkbox" ${item.selected ? 'checked' : ''} style="width:18px;">
         <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" loading="lazy">
         <div class="filmo-info">
-          <div class="filmo-title">${m.title}</div>
+          <div class="filmo-title">${escapeHtml(m.title)}</div>
           <div class="filmo-year">${m.release_date ? m.release_date.slice(0,4) : 'N/A'}</div>
         </div>
         <div class="filmo-quality"><select><option value="4kr">💎 4K</option><option value="4kl">✨ 4K Light</option><option value="1r">🍀 1080p</option><option value="1l" selected>🎬 1080p Light</option></select></div>
@@ -1148,17 +1147,16 @@
     container.innerHTML = '<div style="margin-bottom:8px; font-size:0.7rem;">Sélectionnez les liens à ajouter aux films importés :</div>';
     defaultLinks.forEach(link => {
       const div = document.createElement('div'); div.className = 'link-option';
-      div.innerHTML = `<input type="checkbox" checked value="${link.url}" data-name="${link.name}"><span>${link.name} (${link.url})</span>`;
+      div.innerHTML = `<input type="checkbox" checked value="${escapeHtml(link.url)}" data-name="${escapeHtml(link.name)}"><span>${escapeHtml(link.name)} (${escapeHtml(link.url)})</span>`;
       container.appendChild(div);
     });
     // also add custom links from main links container
     const customLinks = getLinks();
     customLinks.forEach(l => {
       const div = document.createElement('div'); div.className = 'link-option';
-      div.innerHTML = `<input type="checkbox" checked value="${l.url}" data-name="${l.name || 'Lien'}"><span>${l.name || 'Lien'} (${l.url})</span>`;
+      div.innerHTML = `<input type="checkbox" checked value="${escapeHtml(l.url)}" data-name="${escapeHtml(l.name || 'Lien')}"><span>${escapeHtml(l.name || 'Lien')} (${escapeHtml(l.url)})</span>`;
       container.appendChild(div);
     });
-    currentCollectionLinks = Array.from(container.querySelectorAll('input:checked')).map(cb => ({ name: cb.dataset.name, url: cb.value }));
   }
 
   function getSelectedCollectionLinks() {
@@ -1232,7 +1230,7 @@
         if (!p.poster_path) return;
         const url = `https://image.tmdb.org/t/p/w342${p.poster_path}`;
         const div = document.createElement('div'); div.style.cursor = 'pointer'; div.style.textAlign = 'center';
-        div.innerHTML = `<img src="${url}" style="width:70px; border-radius:8px;"><div style="font-size:8px;">${p.title.slice(0,12)}</div>`;
+        div.innerHTML = `<img src="${url}" style="width:70px; border-radius:8px;"><div style="font-size:8px;">${escapeHtml(p.title.slice(0,12))}</div>`;
         div.onclick = () => { currentPoster = url; document.querySelectorAll('#sagaPostersGrid img').forEach(i => i.style.border = 'none'); div.querySelector('img').style.border = '2px solid #c084fc'; };
         container.appendChild(div);
       });
@@ -1241,7 +1239,7 @@
 
   // ---------- SMART COLLECTIONS ----------
   function openSmartCollections() {
-    const groups = new Map(); // key: person_id or collection_id
+    const groups = new Map();
     for (const m of movies) {
       if (m.person_id && !m.person_role) m.person_role = 'Artiste';
       if (m.person_id) {
@@ -1288,7 +1286,7 @@
     document.getElementById('smartModal').classList.add('open');
   }
 
-  // ---------- FILMOGRAPHY MODAL (standalone) ----------
+  // ---------- STANDALONE FILMOGRAPHY MODAL ----------
   let standaloneFilmoResults = [], standaloneFilmoSelected = new Set();
   function openFilmoModal() {
     standaloneFilmoResults = [];
@@ -1355,7 +1353,7 @@
           card.innerHTML = `
             <input type="checkbox" ${standaloneFilmoSelected.has(i) ? 'checked' : ''}>
             <img src="https://image.tmdb.org/t/p/w92${m.poster_path}">
-            <div class="filmo-info"><div class="filmo-title">${m.title}</div><div class="filmo-year">${m.release_date ? m.release_date.slice(0,4) : '?'}</div></div>
+            <div class="filmo-info"><div class="filmo-title">${escapeHtml(m.title)}</div><div class="filmo-year">${m.release_date ? m.release_date.slice(0,4) : '?'}</div></div>
             ${already ? '<span style="color:#4ade80;">✓ déjà importé</span>' : ''}
           `;
           const cb = card.querySelector('input');
@@ -1457,6 +1455,7 @@
 
   function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
 
+  // Global exports for onclick
   window.openDetail = openDetail;
   window.openAddModal = openAddModal;
   window.openEditModal = openEditModal;
