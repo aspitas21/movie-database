@@ -2205,7 +2205,7 @@ function buildSmartCollections() {
   const directorMap = {};
   const universeMap = {};
 
-  // Grouper par acteur/réalisateur via les fiches Collection existantes
+ // Grouper par acteur/réalisateur via person_id/person_name (films importés via Collection)
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
     if (!m.person_id && !m.person_name) return;
@@ -2228,16 +2228,33 @@ function buildSmartCollections() {
     if (target[key]) target[key].poster = m.poster || null;
   });
 
-  // Grouper par univers/saga via les fiches Saga existantes
+  // Détection via tags : si plusieurs films partagent un même tag, regrouper
+  const tagMap = {};
+  movies.forEach((m) => {
+    if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
+    (m.tags || []).forEach(tag => {
+      const key = tag.toLowerCase().trim();
+      if (!tagMap[key]) tagMap[key] = { name: tag, films: [], poster: null };
+      tagMap[key].films.push(m);
+    });
+  });
+
+  // Grouper par saga via les fiches Saga existantes (via person_id)
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
     if (!m.person_id) return;
-    // Trouver la saga correspondante
     const saga = movies.find(s => s.media_type === 'saga' && s.tmdb_id && String(s.tmdb_id) === String(m.person_id));
     if (!saga) return;
     const key = String(m.person_id);
     if (!universeMap[key]) universeMap[key] = { name: saga.title, films: [], poster: saga.poster || null };
     universeMap[key].films.push(m);
+  });
+
+  // Ajouter aussi les groupes détectés par tags dans les sagas (si pas déjà dans actorMap/directorMap)
+  Object.entries(tagMap).forEach(([key, g]) => {
+    if (g.films.length < 3) return;
+    if (actorMap[key] || directorMap[key]) return; // déjà traité
+    universeMap['tag_' + key] = { name: g.name, films: g.films, poster: null };
   });
 
   const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3);
@@ -2272,33 +2289,60 @@ function buildSmartCollections() {
 }
 
 function renderScGroup(g) {
-  // g.films peut être un tableau d'objets film (nouveau) ou d'index (ancien)
   const films = g.films.map(f => typeof f === 'number' ? movies[f] : f).filter(Boolean);
   const label = g.label || g.name || '?';
-  const filmCards = films.length
-    ? films.map(m => {
-        const idx = movies.indexOf(m);
-        return `<div class="sc-film" onclick="openDetail(event,${idx})" style="cursor:pointer;">
-          ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}">` : '<div style="width:28px;height:42px;background:var(--s3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;">🎬</div>'}
-          <div class="sc-film-info">
-            <div class="sc-film-title">${escapeHtml(m.title)}</div>
-            <div class="sc-film-year">${m.release_date ? m.release_date.slice(0,4) : ''}</div>
-          </div>
-        </div>`;
-      }).join('')
-    : `<div style="font-size:12px;color:var(--muted2);font-style:italic;padding:6px 0;">Aucun film lié.</div>`;
+  const posterSrc = g.poster || (films[0] && films[0].poster) || '';
 
-  return `<div class="sc-group">
+  // Grille de miniatures (max 6 affiches)
+  const thumbs = films.slice(0, 6).map(m => {
+    const idx = movies.indexOf(m);
+    return m.poster
+      ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}" title="${escapeHtml(m.title)}" style="width:48px;height:72px;object-fit:cover;border-radius:4px;flex-shrink:0;">`
+      : `<div style="width:48px;height:72px;background:var(--s3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;">🎬</div>`;
+  }).join('');
+
+  // Clic sur le groupe → filtre la grille principale par ce groupe
+  const filmIndices = films.map(m => movies.indexOf(m)).filter(i => i >= 0);
+
+  return `<div class="sc-group" onclick="filterByGroup(${JSON.stringify(filmIndices)})" style="cursor:pointer;">
     <div class="sc-group-header">
-      ${g.poster ? `<img class="sc-group-poster" src="${g.poster}" alt="${escapeHtml(label)}">` : '<div class="sc-group-poster-placeholder">🎭</div>'}
-      <div class="sc-group-name">${escapeHtml(label)}</div>
-      ${g.role ? `<span class="sc-group-type col">${escapeHtml(g.role)}</span>` : ''}
-      <span class="sc-group-count">${films.length} film${films.length !== 1 ? 's' : ''}</span>
+      ${posterSrc ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}">` : '<div class="sc-group-poster-placeholder">🎭</div>'}
+      <div style="flex:1;">
+        <div class="sc-group-name">${escapeHtml(label)}</div>
+        ${g.role ? `<span class="sc-group-type col" style="font-size:11px;opacity:0.7;">${escapeHtml(g.role)}</span>` : ''}
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px;">${films.length} film${films.length !== 1 ? 's' : ''}</div>
+      </div>
+      <span class="sc-group-count">${films.length}</span>
     </div>
-    <div class="sc-films">${filmCards}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">${thumbs}</div>
+    ${films.length > 6 ? `<div style="font-size:11px;color:var(--muted2);margin-top:6px;">+${films.length - 6} autres films</div>` : ''}
   </div>`;
 }
 
+  function filterByGroup(indices) {
+  closeSmartCollections();
+  // Stocker les indices et re-render en ne montrant que ces films
+  window._groupFilter = new Set(indices);
+  render();
+  // Afficher un bandeau pour sortir du filtre
+  let banner = document.getElementById('group-filter-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'group-filter-banner';
+    banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border2);border-radius:12px;padding:10px 20px;display:flex;align-items:center;gap:12px;z-index:200;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
+    document.body.appendChild(banner);
+  }
+  banner.innerHTML = `<span>Filtre collection actif — <strong>${indices.length} films</strong></span><button onclick="clearGroupFilter()" style="padding:4px 12px;background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:8px;color:#c4b5fd;font-size:12px;cursor:pointer;">✕ Effacer</button>`;
+  banner.style.display = 'flex';
+}
+
+function clearGroupFilter() {
+  window._groupFilter = null;
+  const banner = document.getElementById('group-filter-banner');
+  if (banner) banner.style.display = 'none';
+  render();
+}
+  
 function closeFilmo() { document.getElementById('fmod').classList.remove('open'); }
 document.getElementById('fmod').addEventListener('click', e => { if (e.target === document.getElementById('fmod')) closeFilmo(); });
 document.getElementById('filmo-search').addEventListener('keydown', e => { if (e.key === 'Enter') searchFilmo(); });
