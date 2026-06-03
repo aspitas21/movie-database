@@ -1332,7 +1332,7 @@ function render() {
 //  DETAIL MODAL
 // ══════════════════════════════════════════════════
 function openDetail(e, idx) {
-  e.preventDefault(); e.stopPropagation();
+  e.stopPropagation();
   const m    = movies[idx];
   const year = m.release_date ? m.release_date.slice(0,4) : '';
   const dur  = fmt(m.runtime);
