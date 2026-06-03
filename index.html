@@ -2319,15 +2319,13 @@ async function startEnrich() {
         if (p.profile_path) _person_photos[String(p.id)] = `https://image.tmdb.org/t/p/w185${p.profile_path}`;
       }
 
-      // Collection TMDB et mots-clés
+      // Collection TMDB
       let _tmdb_collection = null;
-      let _tmdb_keywords = [];
       try {
         const detailEndpoint = m.media_type === 'tv'
           ? `https://api.themoviedb.org/3/tv/${m.tmdb_id}?api_key=${TK}&language=fr-FR`
           : `https://api.themoviedb.org/3/movie/${m.tmdb_id}?api_key=${TK}&language=fr-FR`;
         const detailData = await (await fetch(detailEndpoint)).json();
-
         if (detailData.belongs_to_collection) {
           _tmdb_collection = {
             id:     detailData.belongs_to_collection.id,
@@ -2337,16 +2335,9 @@ async function startEnrich() {
               : null
           };
         }
-
-        const kwEndpoint = m.media_type === 'tv'
-          ? `https://api.themoviedb.org/3/tv/${m.tmdb_id}/keywords?api_key=${TK}`
-          : `https://api.themoviedb.org/3/movie/${m.tmdb_id}/keywords?api_key=${TK}`;
-        const kwData = await (await fetch(kwEndpoint)).json();
-        _tmdb_keywords = (kwData.keywords || kwData.results || []).slice(0, 20).map(k => ({ id: k.id, name: k.name }));
       } catch(e) {}
 
-      // UNE SEULE DÉCLARATION DE updated
-      const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection, _tmdb_keywords, _person_photos };
+      const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection, _person_photos };
       await updM(idx, updated);
 
     } catch(e) {
@@ -2465,22 +2456,17 @@ function buildSmartCollections() {
     if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
   });
 
-  // --- Regroupement par mots-clés (keywords) ---
-  const kwMap = {};
-  movies.forEach((m) => {
-    if (!m._tmdb_keywords || !m._tmdb_keywords.length) return;
-    m._tmdb_keywords.forEach(kw => {
-      const key = 'kw_' + kw.id;
-      if (!kwMap[key]) kwMap[key] = { name: '🎬 ' + kw.name, films: [], poster: null };
-      if (!kwMap[key].films.includes(m)) kwMap[key].films.push(m);
+  // --- Filtrage et tri ---
+  // Dédupliquer les films dans chaque groupe saga
+  Object.values(universeMap).forEach(g => {
+    const seen = new Set();
+    g.films = g.films.filter(m => {
+      const key = m.tmdb_id || m.title;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
   });
-  Object.entries(kwMap).forEach(([key, g]) => {
-    if (g.films.length < 2) return;
-    if (!universeMap[key]) universeMap[key] = { name: g.name, films: g.films, poster: g.films[0]?.poster || null };
-  });
-
-  // --- Filtrage et tri ---
   const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => b.films.length - a.films.length);
   const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
   const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
