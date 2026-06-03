@@ -2634,11 +2634,16 @@ function buildSmartCollections() {
       return true;
     });
   });
-  const avgPop = g => g.films.reduce((s, m) => s + (m.popularity || 0), 0) / (g.films.length || 1);
-  const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => avgPop(b) - avgPop(a));
-  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a,b) => avgPop(b) - avgPop(a));
-  const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2).sort((a,b) => avgPop(b) - avgPop(a));
-
+ const avgPop = g => g.films.reduce((s, m) => s + (m.popularity || 0), 0) / (g.films.length || 1);
+  const personPop = g => {
+    const fiche = movies.find(m => m.media_type === 'collection' && (String(m.tmdb_id) === String(g.id) || m.title.toLowerCase().trim() === String(g.name).toLowerCase().trim()));
+    return fiche ? (fiche.popularity || 0) : avgPop(g);
+  };
+  const maxPop = g => Math.max(...g.films.map(m => m.popularity || 0));
+  const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => personPop(b) - personPop(a));
+  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a,b) => personPop(b) - personPop(a));
+  const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2).sort((a,b) => maxPop(b) - maxPop(a));
+  
   // --- Construction des onglets ---
   const tabs = [
     { id: 'actors',    label: `🎭 Acteurs (${actorGroups.length})`,          groups: actorGroups },
