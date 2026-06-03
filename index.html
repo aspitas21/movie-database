@@ -2520,7 +2520,7 @@ function buildSmartCollections() {
 function renderScGroup(g) {
   const films = g.films.map(f => typeof f === 'number' ? movies[f] : f).filter(Boolean);
   const label = g.label || g.name || '?';
-  const posterSrc = g.poster || (films[0] && films[0].poster) || '';
+  const posterSrc = g.poster || '';
   const indicesJson = JSON.stringify(films.map(m => movies.indexOf(m)));
   const labelEsc = escapeHtml(label).replace(/'/g, "\\'");
   const posterEsc = escapeHtml(posterSrc);
