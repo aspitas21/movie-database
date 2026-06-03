@@ -2548,30 +2548,7 @@ function renderScGroup(g) {
   page.style.display = 'flex';
 }
 
-  // Récupérer tous les films TMDB de la saga si possible
-  // Pour l'instant on affiche les films owned triés chronologiquement
-  const films = indices.map(i => movies[i]).filter(Boolean);
-  films.sort((a,b) => (a.release_date||'').localeCompare(b.release_date||''));
-
-  document.getElementById('sc-detail-title').textContent = label;
-  document.getElementById('sc-detail-poster').src = posterSrc;
-  document.getElementById('sc-detail-poster').style.display = posterSrc ? 'block' : 'none';
-
-  const grid = document.getElementById('sc-detail-grid');
-  grid.innerHTML = films.map(m => {
-    const idx = movies.indexOf(m);
-    const year = m.release_date ? m.release_date.slice(0,4) : '?';
-    return `<div class="sc-detail-card" onclick="closeScDetail();openDetail(event,${idx})">
-      ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}" onerror="this.outerHTML='<div class=\\"sc-detail-no-poster\\">🎬</div>'">` : '<div class="sc-detail-no-poster">🎬</div>'}
-      <div class="sc-detail-card-title">${escapeHtml(m.title)}</div>
-      <div class="sc-detail-card-year">${year}</div>
-    </div>`;
-  }).join('');
-
-  page.style.display = 'flex';
-}
-
-function closeScDetail() {
+  function closeScDetail() {
   document.getElementById('sc-detail-page').style.display = 'none';
   document.getElementById('sc-page').style.display = 'flex';
 }
