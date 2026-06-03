@@ -2405,7 +2405,7 @@ function buildSmartCollections() {
       const role = (m.person_role || '').toLowerCase();
       const isDirector = role.includes('directing') || role.includes('réalisa');
       const target = isDirector ? directorMap : actorMap;
-      if (!target[key]) target[key] = { name, films: [], poster: null };
+      if (!target[key]) target[key] = { id: key, name, films: [], poster: null };
       if (!target[key].films.includes(m)) target[key].films.push(m);
     }
 
@@ -2416,7 +2416,7 @@ function buildSmartCollections() {
         const name = credit.name;
         const isDirector = (credit.role || '').toLowerCase().includes('directing');
         const target = isDirector ? directorMap : actorMap;
-        if (!target[key]) target[key] = { name, films: [], poster: null };
+        if (!target[key]) target[key] = { id: key, name, films: [], poster: null };
         if (!target[key].films.includes(m)) target[key].films.push(m);
       });
     }
@@ -2432,6 +2432,15 @@ function buildSmartCollections() {
     if (target[key]) target[key].poster = m.poster || null;
   });
 
+// Fallback : récupérer la photo depuis _person_photos (via l'ID)
+[actorMap, directorMap].forEach(map => {
+  Object.values(map).forEach(g => {
+    if (g.poster) return;
+    const film = g.films.find(f => f._person_photos && f._person_photos[g.id]);
+    if (film) g.poster = film._person_photos[g.id];
+  });
+});
+  
   // --- Regroupement par sagas (fiches Saga) ---
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
@@ -2693,6 +2702,7 @@ function exportLetterboxd() {
     const tags   = (m.tags || []).join('|');
     rows.push(`"${title}",${year},${tmdbId},,,,,"${tags}"`);
   });
+  
   const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'letterboxd-import.csv'; a.click();
 }
