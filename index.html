@@ -2607,28 +2607,6 @@ function buildSmartCollections() {
     if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
   });
 
-  // --- Regroupement par franchise titre (_title_franchise) ---
-  // Détectés automatiquement par mots communs dans les titres
-  const franchiseMap = {};
-  movies.forEach((m) => {
-    if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
-    if (!m._title_franchise || !m._title_franchise.length) return;
-    if (m._tmdb_collection) return; // déjà dans une vraie saga TMDB
-    m._title_franchise.forEach(word => {
-      const key = 'franchise_' + word;
-      if (!franchiseMap[key]) {
-        const label = m._franchise_label || word.charAt(0).toUpperCase() + word.slice(1);
-        franchiseMap[key] = { name: label, films: [], poster: null };
-      }
-      if (!franchiseMap[key].films.includes(m)) franchiseMap[key].films.push(m);
-    });
-  });
-  Object.entries(franchiseMap).forEach(([key, g]) => {
-    if (g.films.length < 3) return;
-    g.poster = g.films.find(f => f.poster)?.poster || null;
-    if (!universeMap[key]) universeMap[key] = g;
-  });
-
   // --- Filtrage et tri ---
   // Dédupliquer les films dans chaque groupe saga
   Object.values(universeMap).forEach(g => {
@@ -2640,19 +2618,19 @@ function buildSmartCollections() {
       return true;
     });
   });
- const avgPop = g => g.films.reduce((s, m) => s + (m.popularity || 0), 0) / (g.films.length || 1);
-  const personPop = g => {
+const personPop = g => {
     // 1. Fiche collection manuelle
-    const fiche = movies.find(m => m.media_type === 'collection' && (String(m.tmdb_id) === String(g.id) || m.title.toLowerCase().trim() === String(g.name).toLowerCase().trim()));
+    const fiche = movies.find(m => m.media_type === 'collection' &&
+      (String(m.tmdb_id) === String(g.id) || m.title.toLowerCase().trim() === g.name.toLowerCase().trim()));
     if (fiche && fiche.popularity) return fiche.popularity;
-    // 2. Popularité stockée dans _credits des films
+    // 2. Popularité dans _credits des films enrichis
     for (const film of g.films) {
       if (!film._credits) continue;
       const credit = film._credits.find(c => String(c.id) === String(g.id));
       if (credit && credit.popularity) return credit.popularity;
     }
-    // 3. Fallback moyenne films
-    return avgPop(g);
+    // 3. Fallback : nombre de films (simple et fiable)
+    return g.films.length * 10;
   };
   const maxPop = g => Math.max(...g.films.map(m => m.popularity || 0));
   const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => personPop(b) - personPop(a));
