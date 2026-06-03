@@ -2315,24 +2315,6 @@ async function startEnrich() {
         } catch(e) {}
       }
 
-     // Saga TMDB automatique (belongs_to_collection)
-      let _tmdb_collection = null;
-      if (m.media_type === 'movie') {
-        try {
-          const detailRes = await fetch(`https://api.themoviedb.org/3/movie/${m.tmdb_id}?api_key=${TK}&language=fr-FR`);
-          const detail    = await detailRes.json();
-          if (detail.belongs_to_collection) {
-            _tmdb_collection = {
-              id:     detail.belongs_to_collection.id,
-              name:   detail.belongs_to_collection.name,
-              poster: detail.belongs_to_collection.poster_path
-                ? `https://image.tmdb.org/t/p/w342${detail.belongs_to_collection.poster_path}`
-                : null
-            };
-          }
-        } catch(e) {}
-      }
-
       const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection };
       await updM(idx, updated);
 
