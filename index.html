@@ -1381,6 +1381,7 @@ function openDetail(e, idx) {
       <button class="btn-delete" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
       <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
     </div>`;
+  document.getElementById('dmod').classList.add('open');
 }
 function closeDet() { document.getElementById('dmod').classList.remove('open'); }
 document.getElementById('dmod').addEventListener('click', e => { if (e.target === document.getElementById('dmod')) closeDet(); });
