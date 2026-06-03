@@ -1874,7 +1874,8 @@ function renderFilmographyList() {
       item.selected = cb.checked;
       div.classList.toggle('selected', item.selected);
     });
-
+cb.addEventListener('click', e => e.stopPropagation());
+    
     div.appendChild(cb); div.appendChild(img); div.appendChild(info); div.appendChild(qualWrap);
     container.appendChild(div);
   });
