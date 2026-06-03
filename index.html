@@ -927,7 +927,23 @@ footer {
     </div>
   </div>
 </div>
-
+  
+    <!-- SAGA FILMOGRAPHY SECTION (import multiple) -->
+    <div id="saga-filmography-section" style="display:none;" class="field">
+      <label>Films de la saga (sélectionnez ceux à importer)</label>
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+        <button type="button" id="loadSagaFilmsBtn" class="sbtn" style="flex:1;">📀 Charger les films de la saga</button>
+        <select id="sagaDefaultQuality" class="bsel" style="flex:1;">
+          <option value="4kr">💎 4K Remux</option>
+          <option value="4kl">✨ 4K Light</option>
+          <option value="1r">🍀 1080p Remux</option>
+          <option value="1l" selected>🎬 1080p Light</option>
+        </select>
+      </div>
+      <div id="saga-films-list" class="filmography-list"></div>
+      <button type="button" id="importSelectedSagaFilmsBtn" class="btn-import-selected">⬇ Importer les films sélectionnés</button>
+    </div>
+  
 <!-- ═══ ADD / EDIT MODAL ═══ -->
 <div class="mbg" id="modal">
   <div class="modal">
@@ -1484,13 +1500,28 @@ function openEdit(e, idx) {
 
   const sagaSection = document.getElementById('saga-poster-section');
   const colSection  = document.getElementById('collection-filmography-section');
-  if (mediaType === 'saga') {
-    sagaSection.style.display = 'block'; colSection.style.display = 'none';
-    document.getElementById('saga-posters-grid').innerHTML = '';
-    const loadBtn = document.getElementById('loadSagaPostersBtn');
-    const newBtn  = loadBtn.cloneNode(true);
-    loadBtn.parentNode.replaceChild(newBtn, loadBtn);
-    newBtn.addEventListener('click', loadSagaPosters);
+    if (mediaType === 'saga') {
+    const sagaFilmographySection = document.getElementById('saga-filmography-section');
+    const sagaPosterSection = document.getElementById('saga-poster-section');
+    const colSection = document.getElementById('collection-filmography-section');
+    if (sagaFilmographySection) sagaFilmographySection.style.display = 'block';
+    if (sagaPosterSection) sagaPosterSection.style.display = 'none';
+    if (colSection) colSection.style.display = 'none';
+    document.getElementById('saga-films-list').innerHTML = '';
+    currentSagaFilms = [];
+    const loadBtn = document.getElementById('loadSagaFilmsBtn');
+    if (loadBtn) {
+      const newBtn = loadBtn.cloneNode(true);
+      loadBtn.parentNode.replaceChild(newBtn, loadBtn);
+      newBtn.addEventListener('click', loadSagaFilms);
+    }
+    const importBtn = document.getElementById('importSelectedSagaFilmsBtn');
+    if (importBtn) {
+      const newImportBtn = importBtn.cloneNode(true);
+      importBtn.parentNode.replaceChild(newImportBtn, importBtn);
+      newImportBtn.addEventListener('click', importSelectedSagaFilms);
+    }
+  }
   } else if (mediaType === 'collection') {
     colSection.style.display  = 'block'; sagaSection.style.display = 'none';
     document.getElementById('filmography-list').innerHTML = '';
@@ -1544,7 +1575,14 @@ function setType(t) {
   if (editIdx < 0) selPoster = '';
   const sagaSection = document.getElementById('saga-poster-section');
   const colSection  = document.getElementById('collection-filmography-section');
-  if (t === 'saga')       { sagaSection.style.display = 'block'; colSection.style.display = 'none'; }
+    if (t === 'saga') {
+    const sagaFilmographySection = document.getElementById('saga-filmography-section');
+    const sagaPosterSection = document.getElementById('saga-poster-section');
+    const colSection = document.getElementById('collection-filmography-section');
+    if (sagaFilmographySection) sagaFilmographySection.style.display = 'block';
+    if (sagaPosterSection) sagaPosterSection.style.display = 'none';
+    if (colSection) colSection.style.display = 'none';
+  }
   else if (t === 'collection') {
     colSection.style.display  = 'block'; sagaSection.style.display = 'none';
     rebindCollectionButtons();
@@ -1962,6 +2000,117 @@ async function loadSagaPosters() {
   } catch(e) { alert('Erreur lors du chargement des films de la saga.'); }
 }
 
+// ==================== SAGA FILMOGRAPHY (import multiple) ====================
+let currentSagaFilms = [];
+
+async function loadSagaFilms() {
+  const sagaId = meta.tmdb_id;
+  if (!sagaId) { alert('Aucun TMDB ID pour cette saga. Veuillez d\'abord rechercher la saga via le bouton Chercher.'); return; }
+  const st = document.getElementById('status');
+  st.textContent = 'Chargement des films de la saga...';
+  try {
+    const res = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=fr-FR`);
+    const data = await res.json();
+    let parts = data.parts || [];
+    parts.sort((a,b) => (b.release_date||'').localeCompare(a.release_date||''));
+    parts = parts.slice(0, 100);
+    if (!parts.length) { st.textContent = 'Aucun film trouvé dans cette saga.'; return; }
+    currentSagaFilms = parts.map(movie => ({ movie, selected: false, quality: '1l' }));
+    renderSagaFilmsList();
+    st.textContent = `${parts.length} films trouvés — triés du plus récent au plus ancien. Doublons autorisés.`;
+  } catch(e) {
+    st.textContent = 'Erreur lors du chargement.';
+  }
+}
+
+function renderSagaFilmsList() {
+  const container = document.getElementById('saga-films-list');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!currentSagaFilms.length) {
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted2)">Aucun film trouvé</div>';
+    return;
+  }
+  currentSagaFilms.forEach((item, idx) => {
+    const movie = item.movie;
+    const div = document.createElement('div');
+    div.className = 'filmo-item' + (item.selected ? ' selected' : '');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = item.selected;
+    cb.addEventListener('change', () => {
+      item.selected = cb.checked;
+      div.classList.toggle('selected', item.selected);
+    });
+    const img = document.createElement('img');
+    img.src = `https://image.tmdb.org/t/p/w92${movie.poster_path}`;
+    img.alt = movie.title;
+    img.loading = 'lazy';
+    const info = document.createElement('div');
+    info.className = 'filmo-item-info';
+    info.innerHTML = `<div class="filmo-item-title">${movie.title}</div><div class="filmo-item-year">${movie.release_date ? movie.release_date.slice(0,4) : 'N/A'}</div>`;
+    const qualWrap = document.createElement('div');
+    qualWrap.className = 'filmo-item-quality';
+    const sel = document.createElement('select');
+    sel.innerHTML = `
+      <option value="4kr" ${item.quality==='4kr'?'selected':''}>💎 4K Remux</option>
+      <option value="4kl" ${item.quality==='4kl'?'selected':''}>✨ 4K Light</option>
+      <option value="1r"  ${item.quality==='1r'?'selected':''}>🍀 1080p Remux</option>
+      <option value="1l"  ${item.quality==='1l'?'selected':''}>🎬 1080p Light</option>`;
+    sel.addEventListener('change', () => { item.quality = sel.value; });
+    qualWrap.appendChild(sel);
+    div.addEventListener('click', e => {
+      if (e.target === cb || e.target === sel || e.target.tagName === 'OPTION') return;
+      cb.checked = !cb.checked;
+      item.selected = cb.checked;
+      div.classList.toggle('selected', item.selected);
+    });
+    div.appendChild(cb); div.appendChild(img); div.appendChild(info); div.appendChild(qualWrap);
+    container.appendChild(div);
+  });
+}
+
+async function importSelectedSagaFilms() {
+  const toImport = currentSagaFilms.filter(item => item.selected);
+  if (!toImport.length) { alert('Aucun film sélectionné.'); return; }
+  let imported = 0;
+  ss('loading', `Import 0/${toImport.length}...`);
+  for (const item of toImport) {
+    const movie = item.movie;
+    const quality = item.quality;
+    const poster = movie.poster_path ? `https://image.tmdb.org/t/p/w342${movie.poster_path}` : '';
+    let runtime = 0;
+    try {
+      const d = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TK}`);
+      const data = await d.json();
+      runtime = data.runtime || 0;
+    } catch(e) {}
+    const newMovie = {
+      title: movie.title,
+      link: '',
+      links: [],
+      quality,
+      poster,
+      release_date: movie.release_date || '',
+      popularity: movie.popularity || 0,
+      vote_average: movie.vote_average || 0,
+      tags: [],
+      runtime,
+      tmdb_id: movie.id,
+      media_type: 'movie',
+      person_role: ''
+    };
+    await addM(newMovie);
+    imported++;
+    ss('loading', `Import ${imported}/${toImport.length}...`);
+  }
+  ss('ok', `${imported} film(s) importé(s) !`);
+  alert(`✅ ${imported} film(s) importé(s) depuis la saga.`);
+  currentSagaFilms = [];
+  document.getElementById('saga-films-list').innerHTML = '';
+  document.getElementById('status').textContent = '';
+  render();
+}
+  
 // ══════════════════════════════════════════════════
 //  SMART COLLECTIONS TAB
 // ══════════════════════════════════════════════════
