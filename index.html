@@ -2415,8 +2415,7 @@ function buildSmartCollections() {
     }
 
     // Nouvelle méthode (enrichissement TMDB via _credits)
-    if (m._credits && m._credits.length) {
-    if (m._credits && m._credits.length) {
+       if (m._credits && m._credits.length) {
       m._credits.forEach(credit => {
         const key  = String(credit.id);
         const name = credit.name;
