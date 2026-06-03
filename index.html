@@ -2265,15 +2265,15 @@ async function startEnrich() {
   enrichRunning = true;
 
   const toEnrich = movies.filter(m =>
-  (m.media_type === 'movie' || m.media_type === 'tv') &&
-  m.tmdb_id &&
-  (!m._enriched || !m._person_photos)
-);
+    (m.media_type === 'movie' || m.media_type === 'tv') &&
+    m.tmdb_id &&
+    (!m._enriched || !m._person_photos)
+  );
 
-  const bar      = document.getElementById('enrich-bar');
-  const prog     = document.getElementById('enrich-progress');
-  const status   = document.getElementById('enrich-status');
-  const detail   = document.getElementById('enrich-detail');
+  const bar    = document.getElementById('enrich-bar');
+  const prog   = document.getElementById('enrich-progress');
+  const status = document.getElementById('enrich-status');
+  const detail = document.getElementById('enrich-detail');
 
   bar.style.display = 'block';
 
@@ -2294,10 +2294,9 @@ async function startEnrich() {
     detail.textContent = `"${m.title}"`;
 
     try {
-    const endpoint = m.media_type === 'tv'
+      const endpoint = m.media_type === 'tv'
         ? `https://api.themoviedb.org/3/tv/${m.tmdb_id}/credits?api_key=${TK}&language=fr-FR`
         : `https://api.themoviedb.org/3/movie/${m.tmdb_id}/credits?api_key=${TK}&language=fr-FR`;
-
       const res  = await fetch(endpoint);
       const data = await res.json();
 
@@ -2315,55 +2314,51 @@ async function startEnrich() {
         .map(p => ({ id: p.id, name: p.name, role: 'Directing' }));
 
       const credits = [...cast, ...directors];
-      // Stocker les photos des personnes
-      const _person_photos = {};
-for (const p of [...(data.cast||[]).slice(0,5), ...(data.crew||[]).filter(p=>p.job==='Director').slice(0,2)]) {
-  if (p.profile_path) _person_photos[String(p.id)] = `https://image.tmdb.org/t/p/w185${p.profile_path}`;
-}
-const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection, _tmdb_keywords, _person_photos };
 
-     // Saga TMDB automatique (belongs_to_collection) + keywords
+      // Photos des personnes
+      const _person_photos = {};
+      for (const p of [...(data.cast || []).slice(0,5), ...(data.crew || []).filter(p => p.job === 'Director').slice(0,2)]) {
+        if (p.profile_path) _person_photos[String(p.id)] = `https://image.tmdb.org/t/p/w185${p.profile_path}`;
+      }
+
+      // Collection TMDB et mots-clés
       let _tmdb_collection = null;
       let _tmdb_keywords = [];
       try {
-        const endpoint = m.media_type === 'tv'
+        const detailEndpoint = m.media_type === 'tv'
           ? `https://api.themoviedb.org/3/tv/${m.tmdb_id}?api_key=${TK}&language=fr-FR`
           : `https://api.themoviedb.org/3/movie/${m.tmdb_id}?api_key=${TK}&language=fr-FR`;
-        const detail = await (await fetch(endpoint)).json();
+        const detailData = await (await fetch(detailEndpoint)).json();
 
-        // belongs_to_collection (films uniquement)
-        if (detail.belongs_to_collection) {
+        if (detailData.belongs_to_collection) {
           _tmdb_collection = {
-            id:     detail.belongs_to_collection.id,
-            name:   detail.belongs_to_collection.name,
-            poster: detail.belongs_to_collection.poster_path
-              ? `https://image.tmdb.org/t/p/w342${detail.belongs_to_collection.poster_path}`
+            id:     detailData.belongs_to_collection.id,
+            name:   detailData.belongs_to_collection.name,
+            poster: detailData.belongs_to_collection.poster_path
+              ? `https://image.tmdb.org/t/p/w342${detailData.belongs_to_collection.poster_path}`
               : null
           };
         }
 
-        // Keywords
         const kwEndpoint = m.media_type === 'tv'
           ? `https://api.themoviedb.org/3/tv/${m.tmdb_id}/keywords?api_key=${TK}`
           : `https://api.themoviedb.org/3/movie/${m.tmdb_id}/keywords?api_key=${TK}`;
         const kwData = await (await fetch(kwEndpoint)).json();
-        _tmdb_keywords = (kwData.keywords || kwData.results || []).map(k => ({ id: k.id, name: k.name })).slice(0, 20);
-
+        _tmdb_keywords = (kwData.keywords || kwData.results || []).slice(0, 20).map(k => ({ id: k.id, name: k.name }));
       } catch(e) {}
 
+      // UNE SEULE DÉCLARATION DE updated
       const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection, _tmdb_keywords, _person_photos };
       await updM(idx, updated);
 
     } catch(e) {
-      // on passe au suivant si erreur réseau
+      // erreur silencieuse
     }
 
     done++;
     const pct = Math.round((done / toEnrich.length) * 100);
     prog.style.width   = pct + '%';
     status.textContent = `${done} / ${toEnrich.length}`;
-
-    // Petite pause pour ne pas spammer l'API
     await new Promise(r => setTimeout(r, 260));
   }
 
