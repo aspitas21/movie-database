@@ -1126,6 +1126,10 @@ function toggleSortDir() {
 
 function setMediaFilter(t) {
   mediaFilt = (mediaFilt === t) ? '' : t;
+  ['movie','tv','collection','saga'].forEach(x => {
+    const el = document.getElementById('filter-' + (x === 'collection' ? 'col' : x));
+    if (el) el.classList.toggle('active', x === mediaFilt);
+  });
   render();
 }
 
@@ -2268,56 +2272,33 @@ function buildSmartCollections() {
 }
 
 function renderScGroup(g) {
-  const films = g.films.map(idx => movies[idx]).filter(Boolean);
-  const filmCards = films.length
-    ? films.map((m, fi) => {
-        const idx = movies.indexOf(m);
-        return `<div class="sc-film" onclick="openDetail(event,${idx})" style="cursor:pointer;">
-          ${m.poster ? `<img src="${m.poster}" alt="${m.title}">` : '<div style="width:28px;height:42px;background:var(--s3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;">🎬</div>'}
-          <div class="sc-film-info">
-            <div class="sc-film-title">${m.title}</div>
-            <div class="sc-film-year">${m.release_date ? m.release_date.slice(0,4) : ''}</div>
-          </div>
-        </div>`;
-      }).join('')
-    : `<div style="font-size:12px;color:var(--muted2);font-style:italic;padding:6px 0;">Aucun film lié. Importez des films depuis cette collection.</div>`;
-
-  return `<div class="sc-group">
-    <div class="sc-group-header">
-      ${g.poster ? `<img class="sc-group-poster" src="${g.poster}" alt="${g.label}">` : '<div class="sc-group-poster-placeholder">🎭</div>'}
-      <div class="sc-group-name">${g.label}</div>
-      ${g.role ? `<span class="sc-group-type col">${g.role}</span>` : ''}
-      <span class="sc-group-count">${films.length} film${films.length !== 1 ? 's' : ''}</span>
-    </div>
-    <div class="sc-films">${filmCards}</div>
-  </div>`;
-}
-
-function renderScGroup(g) {
-  const films = g.films;
+  // g.films peut être un tableau d'objets film (nouveau) ou d'index (ancien)
+  const films = g.films.map(f => typeof f === 'number' ? movies[f] : f).filter(Boolean);
+  const label = g.label || g.name || '?';
   const filmCards = films.length
     ? films.map(m => {
         const idx = movies.indexOf(m);
         return `<div class="sc-film" onclick="openDetail(event,${idx})" style="cursor:pointer;">
-          ${m.poster ? `<img src="${m.poster}" alt="${m.title}">` : '<div style="width:28px;height:42px;background:var(--s3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;">🎬</div>'}
+          ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}">` : '<div style="width:28px;height:42px;background:var(--s3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;">🎬</div>'}
           <div class="sc-film-info">
-            <div class="sc-film-title">${m.title}</div>
+            <div class="sc-film-title">${escapeHtml(m.title)}</div>
             <div class="sc-film-year">${m.release_date ? m.release_date.slice(0,4) : ''}</div>
           </div>
         </div>`;
       }).join('')
-    : '';
+    : `<div style="font-size:12px;color:var(--muted2);font-style:italic;padding:6px 0;">Aucun film lié.</div>`;
 
   return `<div class="sc-group">
     <div class="sc-group-header">
-      ${g.poster ? `<img class="sc-group-poster" src="${g.poster}" alt="${g.name}">` : '<div class="sc-group-poster-placeholder">🎭</div>'}
-      <div class="sc-group-name">${g.name}</div>
+      ${g.poster ? `<img class="sc-group-poster" src="${g.poster}" alt="${escapeHtml(label)}">` : '<div class="sc-group-poster-placeholder">🎭</div>'}
+      <div class="sc-group-name">${escapeHtml(label)}</div>
+      ${g.role ? `<span class="sc-group-type col">${escapeHtml(g.role)}</span>` : ''}
       <span class="sc-group-count">${films.length} film${films.length !== 1 ? 's' : ''}</span>
     </div>
     <div class="sc-films">${filmCards}</div>
   </div>`;
 }
-}
+
 function closeFilmo() { document.getElementById('fmod').classList.remove('open'); }
 document.getElementById('fmod').addEventListener('click', e => { if (e.target === document.getElementById('fmod')) closeFilmo(); });
 document.getElementById('filmo-search').addEventListener('keydown', e => { if (e.key === 'Enter') searchFilmo(); });
