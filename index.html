@@ -1757,40 +1757,43 @@ async function searchPosters() {
         row.appendChild(wrap);
       });
     } else if (mediaType === 'saga') {
+      // TMDB collections + movies
       const [resCol, resMovie] = await Promise.all([
         fetch(`https://api.themoviedb.org/3/search/collection?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`),
         fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`)
       ]);
       const [dataCol, dataMovie] = await Promise.all([resCol.json(), resMovie.json()]);
 
-      // AniList search
+      // AniList : plusieurs résultats
       let aniResults = [];
       try {
         const aniRes = await fetch('https://graphql.anilist.co', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: `query($s:String){Media(search:$s,type:ANIME,format_in:[TV,MOVIE,OVA,ONA]){id title{romaji english native} coverImage{large} popularity}}`, variables: { s: title } })
+          body: JSON.stringify({
+            query: `query($s:String){Page(perPage:5){media(search:$s,type:ANIME,sort:POPULARITY_DESC){id title{romaji english french}coverImage{large}popularity startDate{year}}}}`,
+            variables: { s: title }
+          })
         });
         const aniData = await aniRes.json();
-        const m = aniData?.data?.Media;
-        if (m?.coverImage?.large) {
-          aniResults = [{
-            _anilist: true,
-            id: m.id,
-            poster_path: null,
-            _poster_url: m.coverImage.large,
-            name: m.title.french || m.title.english || m.title.romaji,
-            popularity: m.popularity || 0
-          }];
-        }
+        aniResults = (aniData?.data?.Page?.media || []).map(m => ({
+          _anilist: true,
+          _anilist_id: m.id,
+          id: null,
+          poster_path: null,
+          _poster_url: m.coverImage?.large || '',
+          name: m.title.french || m.title.english || m.title.romaji || '',
+          release_date: m.startDate?.year ? `${m.startDate.year}-01-01` : '',
+          popularity: m.popularity || 0
+        })).filter(r => r._poster_url && r.name);
       } catch(e) {}
 
       const tmdbResults = [
-        ...(dataCol.results||[]).filter(r => r.poster_path).slice(0,5),
-        ...(dataMovie.results||[]).filter(r => r.poster_path).slice(0,3)
+        ...(dataCol.results||[]).filter(r => r.poster_path).slice(0,4),
+        ...(dataMovie.results||[]).filter(r => r.poster_path).slice(0,2)
       ];
 
-      const combined = [...tmdbResults, ...aniResults].slice(0, 10);
+      const combined = [...tmdbResults, ...aniResults].slice(0, 12);
       if (!combined.length) { st.textContent = 'Aucune saga trouvée.'; return; }
       st.textContent = 'Sélectionne une affiche :';
       combined.forEach(r => {
@@ -1801,8 +1804,8 @@ async function searchPosters() {
         const img  = document.createElement('img');
         img.className = 'poster-opt'; img.src = url; img.alt = name;
         const badge = document.createElement('div');
-        badge.style.cssText = 'font-size:8px;color:var(--accent);font-weight:700;text-align:center;';
-        badge.textContent = r._anilist ? '🎌 AniList' : '';
+        badge.style.cssText = 'font-size:8px;font-weight:700;text-align:center;color:' + (r._anilist ? '#e879f9' : 'var(--muted2)') + ';';
+        badge.textContent = r._anilist ? '🎌 AniList' : '🎬 TMDB';
         const lbl = document.createElement('div');
         lbl.style.cssText = 'font-size:9px;color:var(--muted2);font-weight:600;text-align:center;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
         lbl.textContent = name.length > 12 ? name.slice(0,12)+'…' : name;
@@ -1810,8 +1813,19 @@ async function searchPosters() {
           document.querySelectorAll('.poster-opt').forEach(i => i.classList.remove('sel'));
           img.classList.add('sel'); selPoster = url;
           showCurrentPoster(url);
-          meta = { release_date: r.release_date||'', popularity: r.popularity||0, vote_average: r.vote_average||0, tags: r._anilist ? ['Anime'] : [], runtime:0, tmdb_id: r._anilist ? null : (r.id||null), media_type:'saga' };
-          document.getElementById('ititle').value = name; refreshSagaLinkPicker();
+          meta = {
+            release_date: r.release_date || '',
+            popularity:   r.popularity   || 0,
+            vote_average: r.vote_average || 0,
+            tags:         r._anilist ? ['Anime'] : [],
+            runtime:      0,
+            tmdb_id:      r._anilist ? null : (r.id || null),
+            anilist_id:   r._anilist ? r._anilist_id : null,
+            media_type:   'saga',
+            _source:      r._anilist ? 'anilist' : 'tmdb'
+          };
+          document.getElementById('ititle').value = name;
+          refreshSagaLinkPicker();
           st.textContent = '';
         };
         wrap.appendChild(img); wrap.appendChild(badge); wrap.appendChild(lbl);
@@ -1942,7 +1956,7 @@ function renderFilmographyList() {
     });
 
     const img = document.createElement('img');
-    img.src   = `https://image.tmdb.org/t/p/w92${movie.poster_path}`;
+    img.src     = movie._anilist ? (movie._poster_url || '') : `https://image.tmdb.org/t/p/w92${movie.poster_path}`;
     img.alt   = movie.title;
     img.loading = 'lazy';
 
@@ -2028,7 +2042,7 @@ async function importSelectedFilms() {
   for (const item of toImport) {
     const movie   = item.movie;
     const quality = item.quality;
-    const poster  = movie.poster_path ? `https://image.tmdb.org/t/p/w342${movie.poster_path}` : '';
+    const poster  = movie._anilist ? (movie._poster_url || '') : (movie.poster_path ? `https://image.tmdb.org/t/p/w342${movie.poster_path}` : '');
     let runtime   = 0;
     try {
       const d    = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TK}`);
@@ -2136,10 +2150,60 @@ function refreshSagaLinkPicker() {
 }
 
 async function loadFilmographyForSaga() {
-  const sagaId = meta.tmdb_id;
-  if (!sagaId) { alert('Aucun TMDB ID pour cette saga. Cherchez d\'abord via le bouton Chercher.'); return; }
   const st = document.getElementById('status');
-  st.textContent = 'Chargement des films de la saga...';
+
+  // ── AniList source ──────────────────────────────
+  if (meta._source === 'anilist' && meta.anilist_id) {
+    st.textContent = 'Chargement depuis AniList...';
+    try {
+      const aniRes = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `query($id:Int){Media(id:$id,type:ANIME){relations{edges{relationType(version:2) node{id title{romaji english french}coverImage{large}startDate{year}episodes type format popularity}}}}}`,
+          variables: { id: meta.anilist_id }
+        })
+      });
+      const aniData = await aniRes.json();
+      const edges = aniData?.data?.Media?.relations?.edges || [];
+      // Garde seulement les séquelles, prequels, side stories du même univers
+      const keep = ['SEQUEL','PREQUEL','SIDE_STORY','ALTERNATIVE','SPIN_OFF','PARENT','SUMMARY'];
+      let related = edges
+        .filter(e => keep.includes(e.relationType) && ['TV','MOVIE','OVA','ONA','SPECIAL'].includes(e.node.format))
+        .map(e => e.node);
+      // Ajoute le média principal lui-même
+      related.unshift({ id: meta.anilist_id, title: { french: document.getElementById('ititle').value.trim() }, coverImage: { large: selPoster }, startDate: { year: meta.release_date?.slice(0,4) || '' }, format: 'TV' });
+      // Déduplique par id
+      related = related.filter((m, i, arr) => arr.findIndex(x => x.id === m.id) === i);
+      related.sort((a,b) => (a.startDate?.year||9999) - (b.startDate?.year||9999));
+
+      currentSagaFilmography = related.map(m => ({
+        movie: {
+          id:           m.id,
+          title:        m.title.french || m.title.english || m.title.romaji || '?',
+          poster_path:  null,
+          _poster_url:  m.coverImage?.large || '',
+          release_date: m.startDate?.year ? `${m.startDate.year}-01-01` : '',
+          popularity:   m.popularity || 0,
+          vote_average: 0,
+          _anilist:     true
+        },
+        selected: false,
+        quality: '1l'
+      }));
+      renderSagaFilmographyList();
+      st.textContent = `${currentSagaFilmography.length} entrée(s) trouvée(s) sur AniList.`;
+      refreshSagaLinkPicker();
+    } catch(e) {
+      st.textContent = 'Erreur AniList.';
+    }
+    return;
+  }
+
+  // ── TMDB source ─────────────────────────────────
+  const sagaId = meta.tmdb_id;
+  if (!sagaId) { alert('Aucun ID trouvé. Cherche d\'abord via le bouton Chercher.'); return; }
+  st.textContent = 'Chargement depuis TMDB...';
   try {
     const res  = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
