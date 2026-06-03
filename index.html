@@ -2432,12 +2432,24 @@ function buildSmartCollections() {
     if (target[key]) target[key].poster = m.poster || null;
   });
 
-// Fallback : récupérer la photo depuis _person_photos (via l'ID)
+// Fallback : récupérer la photo depuis l'API TMDB pour les acteurs sans poster
 [actorMap, directorMap].forEach(map => {
   Object.values(map).forEach(g => {
     if (g.poster) return;
-    const film = g.films.find(f => f._person_photos && f._person_photos[g.id]);
-    if (film) g.poster = film._person_photos[g.id];
+    // Si l'id est numérique c'est un vrai ID TMDB → on peut fetch
+    if (!isNaN(g.id) && g.id) {
+      fetch(`https://api.themoviedb.org/3/person/${g.id}?api_key=${TK}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.profile_path) {
+            g.poster = `https://image.tmdb.org/t/p/w185${data.profile_path}`;
+            // Mettre à jour la carte dans le DOM sans tout re-render
+            const img = document.querySelector(`[data-person-id="${g.id}"]`);
+            if (img) img.src = g.poster;
+          }
+        })
+        .catch(() => {});
+    }
   });
 });
   
@@ -2520,8 +2532,9 @@ function renderScGroup(g, isPeople = false) {
   return `<div class="sc-group" onclick="openScDetail(${indicesJson},'${labelEsc}','${posterEsc}',${tmdbColId})">
     <div class="sc-group-poster-wrap ${wrapClass}">
       ${posterSrc
-        ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" onerror="this.parentElement.innerHTML='<div class=\\"sc-group-poster-placeholder\\">🎭</div>'">`
-        : `<div class="sc-group-poster-placeholder">${isPeople ? '🎭' : '🎬'}</div>`}
+        ${posterSrc
+        ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" data-person-id="${g.id||''}" onerror="this.parentElement.innerHTML='<div class=\\"sc-group-poster-placeholder\\">🎭</div>'">`
+        : `<div class="sc-group-poster-placeholder" data-person-id="${g.id||''}" style="min-height:110px;">${isPeople ? '🎭' : '🎬'}</div>`}
     </div>
     <div class="sc-group-overlay">
       <div class="sc-group-name">${escapeHtml(label)}</div>
