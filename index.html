@@ -2509,7 +2509,9 @@ function buildSmartCollections() {
 function renderScGroup(g, isPeople = false) {
   const films = g.films.map(f => typeof f === 'number' ? movies[f] : f).filter(Boolean);
   const label = g.label || g.name || '?';
-  const posterSrc = g.poster || '';
+  const posterSrc = g.poster
+    ? (g.poster.startsWith('/') ? `https://image.tmdb.org/t/p/w185${g.poster}` : g.poster)
+    : '';
   const indicesJson = JSON.stringify(films.map(m => movies.indexOf(m)));
   const labelEsc = escapeHtml(label).replace(/'/g, "\\'");
   const posterEsc = escapeHtml(posterSrc);
@@ -2541,7 +2543,11 @@ function renderScGroup(g, isPeople = false) {
   const grid = document.getElementById('sc-detail-grid');
   grid.innerHTML = '<div style="color:var(--muted2);font-size:12px;padding:1rem;">Chargement...</div>';
 
-  let allFilms = ownedFilms.map(m => ({ ...m, _owned: true }));
+// Garder les indices originaux pour pouvoir ouvrir le détail
+  const ownedIndices = {};
+  ownedFilms.forEach((m, i) => { ownedIndices[m.tmdb_id || m.title] = indices[i]; });
+
+  let allFilms = ownedFilms.map(m => ({ ...m, _owned: true, _origIdx: movies.indexOf(m) }));
 
   // Si on a un ID de collection TMDB, récupérer TOUS les films de la saga
   if (tmdbCollectionId) {
@@ -2549,14 +2555,13 @@ function renderScGroup(g, isPeople = false) {
       const res  = await fetch(`https://api.themoviedb.org/3/collection/${tmdbCollectionId}?api_key=${TK}&language=fr-FR`);
       const data = await res.json();
       const parts = data.parts || [];
-      // Fusionner avec les films owned
       parts.forEach(p => {
         const owned = ownedFilms.find(m => m.tmdb_id === p.id);
         if (!owned) {
           allFilms.push({
             title: p.title, release_date: p.release_date || '',
             poster: p.poster_path ? `https://image.tmdb.org/t/p/w342${p.poster_path}` : '',
-            _owned: false, tmdb_id: p.id
+            _owned: false, _origIdx: -1, tmdb_id: p.id
           });
         }
       });
@@ -2566,9 +2571,10 @@ function renderScGroup(g, isPeople = false) {
   allFilms.sort((a,b) => (a.release_date||'').localeCompare(b.release_date||''));
 
   grid.innerHTML = allFilms.map(m => {
-    const idx = movies.indexOf(m);
+    const idx = m._origIdx;
     const year = m.release_date ? m.release_date.slice(0,4) : '?';
-    return `<div class="sc-detail-card${m._owned ? '' : ' sc-detail-unavailable'}" ${m._owned ? `onclick="closeScDetail();openDetail(event,${idx})"` : ''}>
+    const clickable = m._owned && idx >= 0;
+    return `<div class="sc-detail-card${m._owned ? '' : ' sc-detail-unavailable'}" ${clickable ? `onclick="closeScDetail();openDetail(event,${idx})"` : ''}>
       ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}">` : '<div class="sc-detail-no-poster">🎬</div>'}
       ${!m._owned ? '<div class="sc-detail-lock">🔒</div>' : ''}
       <div class="sc-detail-card-title">${escapeHtml(m.title)}</div>
