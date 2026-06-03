@@ -1728,7 +1728,7 @@ async function searchPosters() {
     if (mediaType === 'collection') {
       const res  = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`);
       const data = await res.json();
-      results = (data.results || []).filter(r => r.profile_path).slice(0, 8);
+      results = (data.results || []).filter(r => r.profile_path).sort((a,b) => (b.popularity||0)-(a.popularity||0)).slice(0, 8);
       if (!results.length) { st.textContent = 'Aucune personne trouvée.'; return; }
       st.textContent = 'Sélectionne une personne :';
       results.forEach(r => {
@@ -1762,19 +1762,47 @@ async function searchPosters() {
         fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`)
       ]);
       const [dataCol, dataMovie] = await Promise.all([resCol.json(), resMovie.json()]);
-      const combined = [
+
+      // AniList search
+      let aniResults = [];
+      try {
+        const aniRes = await fetch('https://graphql.anilist.co', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: `query($s:String){Media(search:$s,type:ANIME,format_in:[TV,MOVIE,OVA,ONA]){id title{romaji english native} coverImage{large} popularity}}`, variables: { s: title } })
+        });
+        const aniData = await aniRes.json();
+        const m = aniData?.data?.Media;
+        if (m?.coverImage?.large) {
+          aniResults = [{
+            _anilist: true,
+            id: m.id,
+            poster_path: null,
+            _poster_url: m.coverImage.large,
+            name: m.title.french || m.title.english || m.title.romaji,
+            popularity: m.popularity || 0
+          }];
+        }
+      } catch(e) {}
+
+      const tmdbResults = [
         ...(dataCol.results||[]).filter(r => r.poster_path).slice(0,5),
-        ...(dataMovie.results||[]).filter(r => r.poster_path).slice(0,5)
-      ].slice(0,10);
+        ...(dataMovie.results||[]).filter(r => r.poster_path).slice(0,3)
+      ];
+
+      const combined = [...tmdbResults, ...aniResults].slice(0, 10);
       if (!combined.length) { st.textContent = 'Aucune saga trouvée.'; return; }
       st.textContent = 'Sélectionne une affiche :';
       combined.forEach(r => {
-        const url  = `https://image.tmdb.org/t/p/w342${r.poster_path}`;
+        const url  = r._anilist ? r._poster_url : `https://image.tmdb.org/t/p/w342${r.poster_path}`;
         const name = r.name || r.title || '';
         const wrap = document.createElement('div');
         wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;';
         const img  = document.createElement('img');
         img.className = 'poster-opt'; img.src = url; img.alt = name;
+        const badge = document.createElement('div');
+        badge.style.cssText = 'font-size:8px;color:var(--accent);font-weight:700;text-align:center;';
+        badge.textContent = r._anilist ? '🎌 AniList' : '';
         const lbl = document.createElement('div');
         lbl.style.cssText = 'font-size:9px;color:var(--muted2);font-weight:600;text-align:center;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
         lbl.textContent = name.length > 12 ? name.slice(0,12)+'…' : name;
@@ -1782,11 +1810,11 @@ async function searchPosters() {
           document.querySelectorAll('.poster-opt').forEach(i => i.classList.remove('sel'));
           img.classList.add('sel'); selPoster = url;
           showCurrentPoster(url);
-          meta = { release_date: r.release_date||'', popularity: r.popularity||0, vote_average: r.vote_average||0, tags:[], runtime:0, tmdb_id: r.id||null, media_type:'saga' };
-          document.getElementById('ititle').value = name;refreshSagaLinkPicker();
+          meta = { release_date: r.release_date||'', popularity: r.popularity||0, vote_average: r.vote_average||0, tags: r._anilist ? ['Anime'] : [], runtime:0, tmdb_id: r._anilist ? null : (r.id||null), media_type:'saga' };
+          document.getElementById('ititle').value = name; refreshSagaLinkPicker();
           st.textContent = '';
         };
-        wrap.appendChild(img); wrap.appendChild(lbl);
+        wrap.appendChild(img); wrap.appendChild(badge); wrap.appendChild(lbl);
         row.appendChild(wrap);
       });
     } else {
