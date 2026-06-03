@@ -2265,7 +2265,7 @@ async function startEnrich() {
   const toEnrich = movies.filter(m =>
     (m.media_type === 'movie' || m.media_type === 'tv') &&
     m.tmdb_id &&
-    (!m._enriched || !m._person_photos)
+    (!m._enriched || !m._person_photos || Object.keys(m._person_photos || {}).length === 0)
   );
 
   const bar    = document.getElementById('enrich-bar');
