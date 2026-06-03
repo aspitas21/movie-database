@@ -1137,7 +1137,8 @@ let filmoSel     = new Set();
 
 // Collection inline filmography
 let currentFilmography = [];
-
+let currentSagaFilmography = [];
+  
 // ══════════════════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════════════════
@@ -1764,7 +1765,7 @@ async function searchPosters() {
           img.classList.add('sel'); selPoster = url;
           showCurrentPoster(url);
           meta = { release_date: r.release_date||'', popularity: r.popularity||0, vote_average: r.vote_average||0, tags:[], runtime:0, tmdb_id: r.id||null, media_type:'saga' };
-          document.getElementById('ititle').value = name;
+          document.getElementById('ititle').value = name;refreshSagaLinkPicker();
           st.textContent = '';
         };
         wrap.appendChild(img); wrap.appendChild(lbl);
@@ -2323,15 +2324,28 @@ function openSmartCollections() {
   buildSmartCollections();
 }
 
+function switchScTab(tabId) {
+  scActiveTab = tabId;
+  document.querySelectorAll('.sc-tab-panel').forEach(panel => panel.style.display = 'none');
+  const targetPanel = document.getElementById('sc-tab-' + tabId);
+  if (targetPanel) targetPanel.style.display = 'block';
+  document.querySelectorAll('.sc-tab-btn').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.querySelector(`.sc-tab-btn[onclick*="${tabId}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+  
 function closeSmartCollections() {
   document.getElementById('sc-page').style.display = 'none';
+  const enrichBar = document.getElementById('enrich-bar');
+  if (enrichBar) enrichBar.style.display = 'none';
+  enrichRunning = false;
 }
 function buildSmartCollections() {
   const actorMap    = {};
   const directorMap = {};
   const universeMap = {};
 
-  // ── 1. Grouper par acteur/réalisateur via person_id ou person_name ──
+   // ── 1. Grouper par acteur/réalisateur via person_id ou person_name ──
   // ── Grouper via les crédits enrichis (_credits) ──
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
@@ -2358,7 +2372,8 @@ function buildSmartCollections() {
         if (!target[key].films.includes(m)) target[key].films.push(m);
       });
     }
-    
+  }); // fermeture du premier forEach
+
   // Chercher le poster depuis la fiche Collection correspondante
   movies.forEach((m) => {
     if (m.media_type !== 'collection') return;
@@ -2542,8 +2557,7 @@ function renderScGroup(g) {
     banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border2);border-radius:12px;padding:10px 20px;display:flex;align-items:center;gap:12px;z-index:200;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
     document.body.appendChild(banner);
   }
-  banner.innerHTML = `<span>Filtre collection actif — <strong>${indices.length} films</strong></span><button onclick="openSmartCollections()" style="padding:4px 12px;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:12px;cursor:pointer;margin-right:6px;">← Retour CVC</button><button onclick="clearGroupFilter()" style="padding:4px 12px;background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:8px;color:#c4b5fd;font-size:12px;cursor:pointer;">✕ Effacer</button>`;
-  banner.style.display = 'flex';
+  banner.innerHTML = `<span>Filtre collection actif — <strong>${indices.length} films</strong></span><button onclick="clearGroupFilter()" style="padding:4px 12px;background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:8px;color:#c4b5fd;font-size:12px;cursor:pointer;">✕ Effacer le filtre</button>`;
 }
 
 function clearGroupFilter() {
