@@ -2432,26 +2432,19 @@ function buildSmartCollections() {
     if (target[key]) target[key].poster = m.poster || null;
   });
 
-// Fallback : récupérer la photo depuis l'API TMDB pour les acteurs sans poster
-[actorMap, directorMap].forEach(map => {
-  Object.values(map).forEach(g => {
-    if (g.poster) return;
-    // Si l'id est numérique c'est un vrai ID TMDB → on peut fetch
-    if (!isNaN(g.id) && g.id) {
-      fetch(`https://api.themoviedb.org/3/person/${g.id}?api_key=${TK}`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.profile_path) {
-            g.poster = `https://image.tmdb.org/t/p/w185${data.profile_path}`;
-            // Mettre à jour la carte dans le DOM sans tout re-render
-            const img = document.querySelector(`[data-person-id="${g.id}"]`);
-            if (img) img.src = g.poster;
-          }
-        })
-        .catch(() => {});
-    }
+  // Récupérer les photos depuis _person_photos déjà stocké sur les films (pas d'appel API)
+  [actorMap, directorMap].forEach(map => {
+    Object.values(map).forEach(g => {
+      if (g.poster) return;
+      // Chercher dans tous les films du groupe
+      for (const film of g.films) {
+        if (film._person_photos && film._person_photos[String(g.id)]) {
+          g.poster = film._person_photos[String(g.id)];
+          break;
+        }
+      }
+    });
   });
-});
   
   // --- Regroupement par sagas (fiches Saga) ---
   movies.forEach((m) => {
@@ -2532,7 +2525,6 @@ function renderScGroup(g, isPeople = false) {
   return `<div class="sc-group" onclick="openScDetail(${indicesJson},'${labelEsc}','${posterEsc}',${tmdbColId})">
     <div class="sc-group-poster-wrap ${wrapClass}">
       ${posterSrc
-        ${posterSrc
         ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" data-person-id="${g.id||''}" onerror="this.parentElement.innerHTML='<div class=\\"sc-group-poster-placeholder\\">🎭</div>'">`
         : `<div class="sc-group-poster-placeholder" data-person-id="${g.id||''}" style="min-height:110px;">${isPeople ? '🎭' : '🎬'}</div>`}
     </div>
