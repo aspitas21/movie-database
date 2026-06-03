@@ -1270,7 +1270,7 @@ function render() {
     const dur    = fmt(m.runtime);
     const rating = m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : '';
     const sub    = [year, dur].filter(Boolean).join(' · ');
-    const tagsHtml = m.tags && m.tags.length ? m.tags.slice(0,2).map(t => `<span class="ctag">${escapeHtml(t)}</span>`).join('') : '';
+    const tagsHtml = m.tags && m.tags.length ? m.tags.slice(0,2).map(t => `<span class="ctag">${t}</span>`).join('') : '';
     const isCol  = m.media_type === 'collection';
     const isSaga = m.media_type === 'saga';
     const typeIcon = isCol ? '🎞' : isSaga ? '⚡' : m.media_type === 'tv' ? '📺' : '';
@@ -1299,13 +1299,13 @@ function render() {
         + `</div>`;
     }
 
-  card.innerHTML = posterHtml
+    card.innerHTML = posterHtml
       + `<div class="cbody">`
-      + `<div class="ctitle">${typeIcon ? typeIcon + ' ' : ''}${escapeHtml(m.title)}</div>`
+      + `<div class="ctitle">${typeIcon ? typeIcon + ' ' : ''}${m.title}</div>`
       + (sub && !isCol && !isSaga ? `<div class="csub">${sub}</div>` : '')
       + `<div class="cfoot"><div class="ctags">${tagsHtml}</div><span class="qbadge ${m.quality}" title="${QLABEL[m.quality]||''}">${QICON[m.quality]||''}</span></div>`
       + `</div>`
-      + `<button class="detail-btn" onclick="openDetail(event,${idx})">⋯</button>`; 
+      + `<button class="detail-btn" onclick="openDetail(event,${idx})">⋯</button>`;
 
     frag.appendChild(card);
   });
@@ -1337,28 +1337,28 @@ function openDetail(e, idx) {
   const links = rawLinks;
   const linksHtml = links.length
     ? `<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">`
-      + links.map(l => `<a class="dbtn watch" href="${l.url}" target="_blank" rel="noopener noreferrer">▶ ${escapeHtml(l.name || 'Ouvrir le lien')}</a>`).join('')
+      + links.map(l => `<a class="dbtn watch" href="${l.url}" target="_blank">▶ ${l.name || 'Ouvrir le lien'}</a>`).join('')
       + `</div>`
     : `<span class="no-link">Aucun lien ajouté</span>`;
 
   document.getElementById('dcont').innerHTML = `
     <div class="detail-body">
       <div class="detail-poster-wrap">
-        ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}">` : `<div class="detail-no-poster">${isTV ? '📺' : '🎬'}</div>`}
+        ${m.poster ? `<img src="${m.poster}" alt="${m.title}">` : `<div class="detail-no-poster">${isTV ? '📺' : '🎬'}</div>`}
       </div>
       <div class="detail-info">
-        <div class="detail-title">${isTV ? '📺 ' : ''}${escapeHtml(m.title)}</div>
+        <div class="detail-title">${isTV ? '📺 ' : ''}${m.title}</div>
         ${year ? `<div class="detail-year">${year}</div>` : ''}
         <span class="detail-qbadge ${m.quality}">${qi} ${ql}</span>
         <div class="detail-badges">
           ${rating ? `<span class="detail-badge r">${rating}</span>` : ''}
           ${dur    ? `<span class="detail-badge d">⏱ ${dur}</span>` : ''}
         </div>
-        ${m.tags && m.tags.length ? `<div class="detail-tags">${m.tags.map(t => `<span class="gpill">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+        ${m.tags && m.tags.length ? `<div class="detail-tags">${m.tags.map(t => `<span class="gpill">${t}</span>`).join('')}</div>` : ''}
         <div class="detail-btns">
-          ${lbUrl ? `<a class="dbtn lb" href="${lbUrl}" target="_blank" rel="noopener noreferrer">🎞 Letterboxd</a>` : ''}
-          <a class="dbtn alloc" href="${allocUrl}" target="_blank" rel="noopener noreferrer">🎬 Allociné</a>
-          <a class="dbtn sub"   href="${subUrl}"   target="_blank" rel="noopener noreferrer">💬 Sous-titres</a>
+          ${lbUrl ? `<a class="dbtn lb" href="${lbUrl}" target="_blank">🎞 Letterboxd</a>` : ''}
+          <a class="dbtn alloc" href="${allocUrl}" target="_blank">🎬 Allociné</a>
+          <a class="dbtn sub"   href="${subUrl}"   target="_blank">💬 Sous-titres</a>
         </div>
         ${linksHtml}
       </div>
@@ -1367,6 +1367,7 @@ function openDetail(e, idx) {
       <button class="btn-delete" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
       <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
     </div>`;
+  document.getElementById('dmod').classList.add('open');
 }
 function closeDet() { document.getElementById('dmod').classList.remove('open'); }
 document.getElementById('dmod').addEventListener('click', e => { if (e.target === document.getElementById('dmod')) closeDet(); });
@@ -1773,9 +1774,7 @@ async function saveMovie() {
     runtime:      meta.runtime       || orig.runtime       || 0,
     tmdb_id:      meta.tmdb_id       || orig.tmdb_id       || null,
     media_type:   meta.media_type    || orig.media_type    || mediaType || 'movie',
-    person_role:  meta.person_role   || orig.person_role   || '',
-    person_id:    meta.tmdb_id       || orig.person_id     || null,
-    person_name:  meta.media_type === 'collection' ? (document.getElementById('ititle').value.trim() || orig.person_name || '') : (orig.person_name || '')
+    person_role:  meta.person_role   || orig.person_role   || ''
   };
   closeModal();
   if (editIdx >= 0) await updM(editIdx, m); else await addM(m);
@@ -1861,48 +1860,33 @@ function renderFilmographyList() {
 function refreshCollectionLinkPicker() {
   const picker = document.getElementById('collection-link-picker');
   if (!picker) return;
-  const personName = document.getElementById('ititle').value.trim();
-  const personId   = meta.tmdb_id;
-
-  const autoLinks = personName ? [
-    { name: 'Letterboxd', url: `https://letterboxd.com/search/${encodeURIComponent(personName)}/` },
-    { name: 'Allociné',   url: `https://www.allocine.fr/rechercher/?q=${encodeURIComponent(personName)}` },
-    { name: 'TMDB',       url: personId ? `https://www.themoviedb.org/person/${personId}` : '' },
-    { name: 'Wikipedia',  url: `https://fr.wikipedia.org/wiki/${encodeURIComponent(personName)}` }
-  ].filter(l => l.url) : [];
-
-  const manualLinks = getLinks();
-  const allLinks = [...autoLinks, ...manualLinks];
-
-  if (!allLinks.length) {
-    picker.innerHTML = '<div class="link-picker-none">Recherche un acteur/réalisateur pour voir les liens disponibles.</div>';
+  const links = getLinks();
+  if (!links.length) {
+    picker.innerHTML = '<div class="link-picker-none">Aucun lien ajouté ci-dessus. Ajoute d\'abord des liens dans le champ "Lien(s)".</div>';
     return;
   }
-
   picker.innerHTML = '<div class="link-picker-label">Quel lien attacher à chaque film importé ?</div>'
-    + allLinks.map((l, i) => `
+    + links.map((l, i) => `
       <label class="link-picker-option">
         <input type="radio" name="col-link-pick" value="${i}" ${i===0?'checked':''}>
         <div>
-          <div class="link-picker-option-text">${escapeHtml(l.name)}</div>
-          <div class="link-picker-option-url">${escapeHtml(l.url)}</div>
+          <div class="link-picker-option-text">${l.name || 'Lien ' + (i+1)}</div>
+          <div class="link-picker-option-url">${l.url}</div>
         </div>
       </label>`).join('');
-
-  picker._allLinks = allLinks;
 }
 
 async function importSelectedFilms() {
   const toImport = currentFilmography.filter(item => item.selected);
   if (!toImport.length) { alert('Aucun film sélectionné.'); return; }
 
-  const picker   = document.getElementById('collection-link-picker');
-  const allLinks = picker._allLinks || getLinks();
+  // Get the chosen link from the picker
+  const allLinks = getLinks();
   let chosenLink = null;
   if (allLinks.length) {
     const picked = document.querySelector('input[name="col-link-pick"]:checked');
-    const idx    = picked ? parseInt(picked.value) : 0;
-    chosenLink   = allLinks[idx] || allLinks[0];
+    const idx = picked ? parseInt(picked.value) : 0;
+    chosenLink = allLinks[idx] || allLinks[0];
   }
 
   let imported = 0;
@@ -1931,16 +1915,14 @@ async function importSelectedFilms() {
       runtime,
       tmdb_id:      movie.id,
       media_type:   'movie',
-      person_role:  '',
-      person_id:    meta.tmdb_id || null,
-      person_name:  document.getElementById('ititle').value.trim() || ''
+      person_role:  ''
     };
     await addM(newMovie);
     imported++;
     ss('loading', `Import ${imported}/${toImport.length}...`);
   }
   ss('ok', `${imported} film(s) importé(s) !`);
-  alert(`✅ ${imported} film(s) importé(s).${chosenLink ? ' Lien "' + escapeHtml(chosenLink.name || chosenLink.url) + '" attaché à chacun.' : ''}`);
+  alert(`✅ ${imported} film(s) importé(s).${chosenLink ? ' Lien "' + (chosenLink.name||chosenLink.url) + '" attaché à chacun.' : ''}`);
   currentFilmography = [];
   document.getElementById('filmography-list').innerHTML = '';
   document.getElementById('status').textContent = '';
@@ -1995,7 +1977,29 @@ function closeSmartCollections() {
 }
 
 function buildSmartCollections() {
-  const linkGroupMap = {};
+  // --- Group by actor (person_role not Director) ---
+  const actorMap = {};
+  const directorMap = {};
+  const sagaMap = {};
+
+  movies.forEach((m, idx) => {
+    if (m.media_type === 'collection') {
+      const key = m.title.trim().toLowerCase();
+      if (!actorMap[key]) actorMap[key] = { label: m.title, poster: m.poster, films: [], role: m.person_role || '' };
+      // find all movies that share tmdb_id links or were imported from this collection
+      // We detect films linked to this collection by shared link URLs
+    }
+    if (m.media_type === 'saga') {
+      const key = m.title.trim().toLowerCase();
+      if (!sagaMap[key]) sagaMap[key] = { label: m.title, poster: m.poster, films: [] };
+    }
+  });
+
+  // Auto-detect: group movies sharing same cast/director by tmdb — but we don't have that metadata.
+  // Instead: scan for actors (person_role includes Acting/Acting) and directors by person_role
+  // and count movies that have the same import link as a collection entry.
+  // APPROACH: group regular movies by shared link URL (= they were imported from same collection)
+  const linkGroupMap = {}; // url -> list of movie indices
   movies.forEach((m, idx) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
     const links = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
@@ -2006,58 +2010,48 @@ function buildSmartCollections() {
     });
   });
 
-  const collectionEntries = movies.map((m, idx) => ({ m, idx })).filter(({ m }) => m.media_type === 'collection');
-  const sagaEntries       = movies.map((m, idx) => ({ m, idx })).filter(({ m }) => m.media_type === 'saga');
+  // Find collection entries and their link
+  const collectionEntries = movies
+    .map((m, idx) => ({ m, idx }))
+    .filter(({ m }) => m.media_type === 'collection');
+
+  const sagaEntries = movies
+    .map((m, idx) => ({ m, idx }))
+    .filter(({ m }) => m.media_type === 'saga');
+
+  // Build actor groups: collection entries where person_role is not Director
   const actorGroups = [];
   const directorGroups = [];
 
   collectionEntries.forEach(({ m }) => {
-    const role       = (m.person_role || '').toLowerCase();
+    const role = (m.person_role || '').toLowerCase();
     const isDirector = role.includes('directing') || role.includes('réalisa') || role === 'directing';
-
-    // Méthode 1 : films qui ont person_id = tmdb_id de cette collection
-    let linkedFilms = movies
-      .map((mv, i) => ({ mv, i }))
-      .filter(({ mv }) =>
-        (mv.media_type === 'movie' || mv.media_type === 'tv') &&
-        mv.person_id && m.tmdb_id &&
-        String(mv.person_id) === String(m.tmdb_id)
-      )
-      .map(({ i }) => i);
-
-    // Méthode 2 (fallback) : films partageant une URL avec cette collection
-    if (!linkedFilms.length) {
-      const allLinks = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
-      allLinks.forEach(l => {
-        if (l.url && linkGroupMap[l.url]) {
-          linkGroupMap[l.url].forEach(i => { if (!linkedFilms.includes(i)) linkedFilms.push(i); });
-        }
-      });
+    // find movies linked to this collection via shared link
+    const allLinks = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
+    let linkedFilms = [];
+    allLinks.forEach(l => {
+      if (l.url && linkGroupMap[l.url]) {
+        linkGroupMap[l.url].forEach(i => { if (!linkedFilms.includes(i)) linkedFilms.push(i); });
+      }
+    });
+    // Also scan all movies for name match in title (fallback)
+    if (linkedFilms.length < 2) {
+      // no link-based match, skip auto-detection
     }
-
     const group = { label: m.title, poster: m.poster, role: m.person_role || '', films: linkedFilms };
     if (isDirector) directorGroups.push(group);
     else actorGroups.push(group);
   });
 
+  // Build saga groups
   const sagaGroups = sagaEntries.map(({ m }) => {
-    let linkedFilms = movies
-      .map((mv, i) => ({ mv, i }))
-      .filter(({ mv }) =>
-        (mv.media_type === 'movie' || mv.media_type === 'tv') &&
-        mv.person_id && m.tmdb_id &&
-        String(mv.person_id) === String(m.tmdb_id)
-      )
-      .map(({ i }) => i);
-
-    if (!linkedFilms.length) {
-      const allLinks = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
-      allLinks.forEach(l => {
-        if (l.url && linkGroupMap[l.url]) {
-          linkGroupMap[l.url].forEach(i => { if (!linkedFilms.includes(i)) linkedFilms.push(i); });
-        }
-      });
-    }
+    const allLinks = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
+    let linkedFilms = [];
+    allLinks.forEach(l => {
+      if (l.url && linkGroupMap[l.url]) {
+        linkGroupMap[l.url].forEach(i => { if (!linkedFilms.includes(i)) linkedFilms.push(i); });
+      }
+    });
     return { label: m.title, poster: m.poster, films: linkedFilms };
   });
 
@@ -2328,11 +2322,7 @@ document.getElementById('links-container').addEventListener('input', () => {
   }
 });
 
-// ── Boot ─────────────────────
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, m =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+// ── Boot ───────────────────────────────────────────
 load();
 </script>
 </body>
