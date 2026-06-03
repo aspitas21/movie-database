@@ -1265,6 +1265,10 @@ function render() {
   if (genreInc.size > 0) list = list.filter(m => [...genreInc].every(g => (m.tags||[]).includes(g)));
   if (genreExc.size > 0) list = list.filter(m => [...genreExc].every(g => !(m.tags||[]).includes(g)));
   if (q) list = list.filter(m => m.title.toLowerCase().includes(q));
+    // Appliquer le filtre de la smart collection si actif
+  if (window._groupFilter && window._groupFilter.size) {
+    list = list.filter(m => window._groupFilter.has(movies.indexOf(m)));
+  }
   list = sorted(list);
 
   const filtLabel = filts.size > 0 ? [...filts].map(f => QLABEL[f]).join(', ') : '';
