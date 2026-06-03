@@ -2474,7 +2474,7 @@ async function startEnrich() {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
     if (m._tmdb_collection) return; // déjà groupé
     const words = m.title.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/)
-      .filter(w => w.length > 4 && !stopWords2.has(w) && !/^\d+$/.test(w));
+      .filter(w => w.length > 6 && !stopWords2.has(w) && !/^\d+$/.test(w));
     words.forEach(w => {
       if (!titleGroupMap[w]) titleGroupMap[w] = [];
       if (!titleGroupMap[w].includes(m)) titleGroupMap[w].push(m);
@@ -2483,6 +2483,12 @@ async function startEnrich() {
   // Sauvegarder les groupes de titres détectés sur chaque film
   for (const [word, films] of Object.entries(titleGroupMap)) {
     if (films.length < 3) continue;
+    // Vérifier que le mot est au début du titre (premier ou deuxième mot) pour éviter les faux positifs
+    const allStartWithWord = films.every(f => {
+      const firstWords = f.title.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/).slice(0,2);
+      return firstWords.some(w => w === word);
+    });
+    if (!allStartWithWord) continue;
     // Trouver le titre le plus représentatif (le plus court contenant le mot)
     const representative = films.sort((a,b) => a.title.length - b.title.length)[0];
     for (const fm of films) {
