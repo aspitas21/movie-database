@@ -1503,6 +1503,7 @@ function openModal() {
     </div>`;
   document.getElementById('saga-poster-section').style.display = 'none';
   document.getElementById('collection-filmography-section').style.display = 'none';
+  document.getElementById('saga-filmography-section').style.display = 'none';
   document.getElementById('modal').classList.add('open');
   setTimeout(() => document.getElementById('ititle').focus(), 100);
 }
@@ -1546,7 +1547,7 @@ function openEdit(e, idx) {
 
   const sagaSection = document.getElementById('saga-poster-section');
   const colSection  = document.getElementById('collection-filmography-section');
-if (mediaType === 'saga') {
+  if (mediaType === 'saga') {
     sagaSection.style.display = 'block'; colSection.style.display = 'none';
     document.getElementById('saga-filmography-section').style.display = 'block';
     document.getElementById('saga-posters-grid').innerHTML = '';
@@ -2055,7 +2056,6 @@ async function loadSagaPosters() {
 // ══════════════════════════════════════════════════
 //  SAGA FILMOGRAPHY (inline in add/edit modal)
 // ══════════════════════════════════════════════════
-let currentSagaFilmography = [];
 
 function refreshSagaLinkPicker() {
   const picker = document.getElementById('saga-link-picker');
@@ -2275,7 +2275,7 @@ async function startEnrich() {
     detail.textContent = `"${m.title}"`;
 
     try {
-      const endpoint = m.media_type === 'tv'
+    const endpoint = m.media_type === 'tv'
         ? `https://api.themoviedb.org/3/tv/${m.tmdb_id}/credits?api_key=${TK}&language=fr-FR`
         : `https://api.themoviedb.org/3/movie/${m.tmdb_id}/credits?api_key=${TK}&language=fr-FR`;
 
@@ -2297,7 +2297,43 @@ async function startEnrich() {
 
       const credits = [...cast, ...directors];
 
-      const updated = { ...m, _enriched: true, _credits: credits };
+      // Saga TMDB automatique (belongs_to_collection)
+      let _tmdb_collection = null;
+      if (m.media_type === 'movie') {
+        try {
+          const detailRes = await fetch(`https://api.themoviedb.org/3/movie/${m.tmdb_id}?api_key=${TK}&language=fr-FR`);
+          const detail    = await detailRes.json();
+          if (detail.belongs_to_collection) {
+            _tmdb_collection = {
+              id:     detail.belongs_to_collection.id,
+              name:   detail.belongs_to_collection.name,
+              poster: detail.belongs_to_collection.poster_path
+                ? `https://image.tmdb.org/t/p/w342${detail.belongs_to_collection.poster_path}`
+                : null
+            };
+          }
+        } catch(e) {}
+      }
+
+     // Saga TMDB automatique (belongs_to_collection)
+      let _tmdb_collection = null;
+      if (m.media_type === 'movie') {
+        try {
+          const detailRes = await fetch(`https://api.themoviedb.org/3/movie/${m.tmdb_id}?api_key=${TK}&language=fr-FR`);
+          const detail    = await detailRes.json();
+          if (detail.belongs_to_collection) {
+            _tmdb_collection = {
+              id:     detail.belongs_to_collection.id,
+              name:   detail.belongs_to_collection.name,
+              poster: detail.belongs_to_collection.poster_path
+                ? `https://image.tmdb.org/t/p/w342${detail.belongs_to_collection.poster_path}`
+                : null
+            };
+          }
+        } catch(e) {}
+      }
+
+      const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection };
       await updM(idx, updated);
 
     } catch(e) {
@@ -2448,6 +2484,16 @@ function buildSmartCollections() {
     if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
   });
 
+// ── 3b. Sagas auto-détectées via l'enrichissement TMDB (_tmdb_collection) ──
+  movies.forEach((m) => {
+    if (m.media_type !== 'movie') return;
+    if (!m._tmdb_collection) return;
+    const col = m._tmdb_collection;
+    const key = 'tmdb_col_' + col.id;
+    if (!universeMap[key]) universeMap[key] = { name: '🎬 ' + col.name, films: [], poster: col.poster || null };
+    if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
+  });
+  
   // ── 4. Fusionner les univers auto-détectés dans universeMap ──
   Object.entries(autoUniverseMap).forEach(([key, g]) => {
     if (g.films.length < 2) return;
