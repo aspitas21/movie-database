@@ -2316,25 +2316,36 @@ async function startEnrich() {
 
       const credits = [...cast, ...directors];
 
-      // Saga TMDB automatique (belongs_to_collection)
+     // Saga TMDB automatique (belongs_to_collection) + keywords
       let _tmdb_collection = null;
-      if (m.media_type === 'movie') {
-        try {
-          const detailRes = await fetch(`https://api.themoviedb.org/3/movie/${m.tmdb_id}?api_key=${TK}&language=fr-FR`);
-          const detail    = await detailRes.json();
-          if (detail.belongs_to_collection) {
-            _tmdb_collection = {
-              id:     detail.belongs_to_collection.id,
-              name:   detail.belongs_to_collection.name,
-              poster: detail.belongs_to_collection.poster_path
-                ? `https://image.tmdb.org/t/p/w342${detail.belongs_to_collection.poster_path}`
-                : null
-            };
-          }
-        } catch(e) {}
-      }
+      let _tmdb_keywords = [];
+      try {
+        const endpoint = m.media_type === 'tv'
+          ? `https://api.themoviedb.org/3/tv/${m.tmdb_id}?api_key=${TK}&language=fr-FR`
+          : `https://api.themoviedb.org/3/movie/${m.tmdb_id}?api_key=${TK}&language=fr-FR`;
+        const detail = await (await fetch(endpoint)).json();
 
-      const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection };
+        // belongs_to_collection (films uniquement)
+        if (detail.belongs_to_collection) {
+          _tmdb_collection = {
+            id:     detail.belongs_to_collection.id,
+            name:   detail.belongs_to_collection.name,
+            poster: detail.belongs_to_collection.poster_path
+              ? `https://image.tmdb.org/t/p/w342${detail.belongs_to_collection.poster_path}`
+              : null
+          };
+        }
+
+        // Keywords
+        const kwEndpoint = m.media_type === 'tv'
+          ? `https://api.themoviedb.org/3/tv/${m.tmdb_id}/keywords?api_key=${TK}`
+          : `https://api.themoviedb.org/3/movie/${m.tmdb_id}/keywords?api_key=${TK}`;
+        const kwData = await (await fetch(kwEndpoint)).json();
+        _tmdb_keywords = (kwData.keywords || kwData.results || []).map(k => ({ id: k.id, name: k.name })).slice(0, 20);
+
+      } catch(e) {}
+
+      const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection, _tmdb_keywords };
       await updM(idx, updated);
 
     } catch(e) {
@@ -2442,14 +2453,21 @@ function buildSmartCollections() {
     if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
   });
 
-// ── 3c. Grouper séries + films par franchise (titre commun) ──
+// ── 3d. Grouper par keywords TMDB partagés (franchises mixtes films+séries) ──
+  const kwMap = {};
   movies.forEach((m) => {
-    if (!m._tmdb_collection) return;
-    const col = m._tmdb_collection;
-    const key = 'tmdb_col_' + col.id;
-    // déjà traité par 3b si movie, mais on s'assure que les tv aussi sont inclus
-    if (!universeMap[key]) universeMap[key] = { name: '🎬 ' + col.name, films: [], poster: col.poster || null };
-    if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
+    if (!m._tmdb_keywords || !m._tmdb_keywords.length) return;
+    m._tmdb_keywords.forEach(kw => {
+      const key = 'kw_' + kw.id;
+      if (!kwMap[key]) kwMap[key] = { name: '🎬 ' + kw.name, films: [], poster: null };
+      if (!kwMap[key].films.includes(m)) kwMap[key].films.push(m);
+    });
+  });
+  Object.entries(kwMap).forEach(([key, g]) => {
+    if (g.films.length < 2) return;
+    if (!universeMap[key]) {
+      universeMap[key] = { name: g.name, films: g.films, poster: g.films[0]?.poster || null };
+    }
   });
   
      // ── Filtrer et trier ──
