@@ -843,6 +843,7 @@ footer {
     <span class="count-badge" id="tc">0</span>
     <button class="btn-ghost" id="size-btn" onclick="toggleSize()" title="Changer la taille des cartes">⊞</button>
     <button class="btn-random" onclick="openRandom()">🎲 Surprise</button>
+    <button class="btn-ghost" onclick="openSmartCollections()" style="color:#a78bfa;border-color:rgba(167,139,250,0.2);white-space:nowrap;">🎞 Collections</button>
     <button class="btn-add" onclick="openModal()">+ Ajouter</button>
   </div>
 </header>
@@ -888,8 +889,6 @@ footer {
   <button class="btn-footer" onclick="document.getElementById('import-file').click()">⬆ Importer</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
   <button class="btn-footer" style="color:#00e0a6;border-color:rgba(0,224,166,0.2)" onclick="exportLetterboxd()">🎞 Letterboxd CSV</button>
-  <button class="btn-footer" style="color:#f59e0b;border-color:rgba(245,158,11,0.2)" onclick="openSmartCollections()">⚡ Smart Collections</button>
-  <button class="btn-footer" style="color:#a78bfa;border-color:rgba(167,139,250,0.2)" onclick="openFilmo()">🎭 Filmographie</button>
 </footer>
 
 <!-- ═══ FILMOGRAPHIE MODAL (actors standalone) ═══ -->
@@ -1896,7 +1895,7 @@ function refreshCollectionLinkPicker() {
   ].filter(l => l.url) : [];
 
   const manualLinks = getLinks();
-  const allLinks = [...autoLinks, ...manualLinks];
+  const allLinks = [...manualLinks, ...autoLinks];
 
   if (!allLinks.length) {
     picker.innerHTML = '<div class="link-picker-none">Recherche un acteur/réalisateur pour voir les liens disponibles.</div>';
@@ -2022,7 +2021,7 @@ function refreshSagaLinkPicker() {
   ].filter(l => l.url) : [];
 
   const manualLinks = getLinks();
-  const allLinks = [...autoLinks, ...manualLinks];
+  const allLinks = [...manualLinks, ...autoLinks];
 
   if (!allLinks.length) {
     picker.innerHTML = '<div class="link-picker-none">Recherche une saga pour voir les liens disponibles.</div>';
@@ -2196,93 +2195,72 @@ function openSmartCollections() {
 function closeSmartCollections() {
   document.getElementById('sc-page').style.display = 'none';
 }
-
 function buildSmartCollections() {
-  const linkGroupMap = {};
-  movies.forEach((m, idx) => {
+  // ── Acteurs : 3+ films avec le même person_id ou person_name ──
+  const actorMap = {};
+  const directorMap = {};
+  const universeMap = {};
+
+  // Grouper par acteur/réalisateur via les fiches Collection existantes
+  movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
-    const links = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
-    links.forEach(l => {
-      if (!l.url) return;
-      if (!linkGroupMap[l.url]) linkGroupMap[l.url] = [];
-      linkGroupMap[l.url].push(idx);
-    });
+    if (!m.person_id && !m.person_name) return;
+    const key = m.person_id ? String(m.person_id) : m.person_name.toLowerCase().trim();
+    const name = m.person_name || key;
+    const role = (m.person_role || '').toLowerCase();
+    const isDirector = role.includes('directing') || role.includes('réalisa');
+    const target = isDirector ? directorMap : actorMap;
+    if (!target[key]) target[key] = { name, films: [], poster: null };
+    target[key].films.push(m);
   });
 
-  const collectionEntries = movies.map((m, idx) => ({ m, idx })).filter(({ m }) => m.media_type === 'collection');
-  const sagaEntries       = movies.map((m, idx) => ({ m, idx })).filter(({ m }) => m.media_type === 'saga');
-  const actorGroups = [];
-  const directorGroups = [];
-
-  collectionEntries.forEach(({ m }) => {
-    const role       = (m.person_role || '').toLowerCase();
-    const isDirector = role.includes('directing') || role.includes('réalisa') || role === 'directing';
-
-    // Méthode 1 : films qui ont person_id = tmdb_id de cette collection
-    let linkedFilms = movies
-      .map((mv, i) => ({ mv, i }))
-      .filter(({ mv }) =>
-        (mv.media_type === 'movie' || mv.media_type === 'tv') &&
-        mv.person_id && m.tmdb_id &&
-        String(mv.person_id) === String(m.tmdb_id)
-      )
-      .map(({ i }) => i);
-
-    // Méthode 2 (fallback) : films partageant une URL avec cette collection
-    if (!linkedFilms.length) {
-      const allLinks = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
-      allLinks.forEach(l => {
-        if (l.url && linkGroupMap[l.url]) {
-          linkGroupMap[l.url].forEach(i => { if (!linkedFilms.includes(i)) linkedFilms.push(i); });
-        }
-      });
-    }
-
-    const group = { label: m.title, poster: m.poster, role: m.person_role || '', films: linkedFilms };
-    if (isDirector) directorGroups.push(group);
-    else actorGroups.push(group);
+  // Chercher le poster depuis la fiche Collection correspondante
+  movies.forEach((m) => {
+    if (m.media_type !== 'collection') return;
+    const key = m.tmdb_id ? String(m.tmdb_id) : m.title.toLowerCase().trim();
+    const role = (m.person_role || '').toLowerCase();
+    const isDirector = role.includes('directing') || role.includes('réalisa');
+    const target = isDirector ? directorMap : actorMap;
+    if (target[key]) target[key].poster = m.poster || null;
   });
 
-  const sagaGroups = sagaEntries.map(({ m }) => {
-    let linkedFilms = movies
-      .map((mv, i) => ({ mv, i }))
-      .filter(({ mv }) =>
-        (mv.media_type === 'movie' || mv.media_type === 'tv') &&
-        mv.person_id && m.tmdb_id &&
-        String(mv.person_id) === String(m.tmdb_id)
-      )
-      .map(({ i }) => i);
-
-    if (!linkedFilms.length) {
-      const allLinks = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
-      allLinks.forEach(l => {
-        if (l.url && linkGroupMap[l.url]) {
-          linkGroupMap[l.url].forEach(i => { if (!linkedFilms.includes(i)) linkedFilms.push(i); });
-        }
-      });
-    }
-    return { label: m.title, poster: m.poster, films: linkedFilms };
+  // Grouper par univers/saga via les fiches Saga existantes
+  movies.forEach((m) => {
+    if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
+    if (!m.person_id) return;
+    // Trouver la saga correspondante
+    const saga = movies.find(s => s.media_type === 'saga' && s.tmdb_id && String(s.tmdb_id) === String(m.person_id));
+    if (!saga) return;
+    const key = String(m.person_id);
+    if (!universeMap[key]) universeMap[key] = { name: saga.title, films: [], poster: saga.poster || null };
+    universeMap[key].films.push(m);
   });
 
-  // Build tabs
+  const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3);
+  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2);
+  const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2);
+
   const tabs = [
-    { id: 'actors',    label: `🎭 Acteurs (${actorGroups.length})`,     groups: actorGroups },
-    { id: 'directors', label: `🎬 Réalisateurs (${directorGroups.length})`, groups: directorGroups },
-    { id: 'sagas',     label: `⚡ Sagas (${sagaGroups.length})`,        groups: sagaGroups }
+    { id: 'actors',    label: `🎭 Acteurs (${actorGroups.length})`,          groups: actorGroups },
+    { id: 'directors', label: `🎬 Réalisateurs (${directorGroups.length})`,  groups: directorGroups },
+    { id: 'sagas',     label: `⚡ Univers & Sagas (${sagaGroups.length})`,   groups: sagaGroups }
   ];
 
-  // Render tabs buttons
   const tabBar = document.getElementById('sc-tabs');
   tabBar.innerHTML = tabs.map(t =>
     `<button class="sc-tab-btn ${scActiveTab === t.id ? 'active' : ''}" onclick="switchScTab('${t.id}')">${t.label}</button>`
   ).join('');
 
-  // Render each panel
   tabs.forEach(t => {
     const panel = document.getElementById('sc-tab-' + t.id);
     if (!panel) return;
     if (!t.groups.length) {
-      panel.innerHTML = `<div class="sc-empty"><div class="sc-empty-icon">🎬</div><p>Aucune ${t.id === 'sagas' ? 'saga' : t.id === 'directors' ? 'réalisateur' : 'acteur'} détecté(e) avec des films liés.<br><span style="font-size:12px;opacity:0.6">Importez des films depuis une fiche Collection pour les voir apparaître ici.</span></p></div>`;
+      const msg = t.id === 'actors'
+        ? 'Aucun acteur avec 3 films ou plus dans la bibliothèque.'
+        : t.id === 'directors'
+        ? 'Aucun réalisateur avec 2 films ou plus dans la bibliothèque.'
+        : 'Aucun univers ou saga avec 2 films ou plus dans la bibliothèque.';
+      panel.innerHTML = `<div class="sc-empty"><div class="sc-empty-icon">🎬</div><p>${msg}</p></div>`;
       return;
     }
     panel.innerHTML = t.groups.map(g => renderScGroup(g)).join('');
@@ -2315,26 +2293,30 @@ function renderScGroup(g) {
   </div>`;
 }
 
-function switchScTab(tabId) {
-  scActiveTab = tabId;
-  ['actors','directors','sagas'].forEach(id => {
-    const panel = document.getElementById('sc-tab-' + id);
-    if (panel) panel.style.display = id === tabId ? 'block' : 'none';
-  });
-  document.querySelectorAll('.sc-tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent.includes(tabId === 'actors' ? 'Acteurs' : tabId === 'directors' ? 'Réalisateurs' : 'Sagas'));
-  });
+function renderScGroup(g) {
+  const films = g.films;
+  const filmCards = films.length
+    ? films.map(m => {
+        const idx = movies.indexOf(m);
+        return `<div class="sc-film" onclick="openDetail(event,${idx})" style="cursor:pointer;">
+          ${m.poster ? `<img src="${m.poster}" alt="${m.title}">` : '<div style="width:28px;height:42px;background:var(--s3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;">🎬</div>'}
+          <div class="sc-film-info">
+            <div class="sc-film-title">${m.title}</div>
+            <div class="sc-film-year">${m.release_date ? m.release_date.slice(0,4) : ''}</div>
+          </div>
+        </div>`;
+      }).join('')
+    : '';
+
+  return `<div class="sc-group">
+    <div class="sc-group-header">
+      ${g.poster ? `<img class="sc-group-poster" src="${g.poster}" alt="${g.name}">` : '<div class="sc-group-poster-placeholder">🎭</div>'}
+      <div class="sc-group-name">${g.name}</div>
+      <span class="sc-group-count">${films.length} film${films.length !== 1 ? 's' : ''}</span>
+    </div>
+    <div class="sc-films">${filmCards}</div>
+  </div>`;
 }
-function openFilmo() {
-  filmoResults = []; filmoSel.clear();
-  document.getElementById('filmo-search').value = '';
-  document.getElementById('filmo-status').textContent = '';
-  document.getElementById('filmo-grid').innerHTML = '';
-  document.getElementById('filmo-bar').style.display = 'none';
-  document.getElementById('filmo-quality-field').style.display = 'none';
-  document.getElementById('filmo-import-btn').style.display = 'none';
-  document.getElementById('fmod').classList.add('open');
-  setTimeout(() => document.getElementById('filmo-search').focus(), 100);
 }
 function closeFilmo() { document.getElementById('fmod').classList.remove('open'); }
 document.getElementById('fmod').addEventListener('click', e => { if (e.target === document.getElementById('fmod')) closeFilmo(); });
