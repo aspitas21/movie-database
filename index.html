@@ -178,6 +178,33 @@ header {
   box-shadow: 0 4px 14px rgba(79,61,200,0.35);
 }
 .btn-add:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,61,200,0.5); }
+.btn-cinevault-col {
+  padding: 9px 18px;
+  background: linear-gradient(135deg, rgba(220,170,40,0.15), rgba(192,132,252,0.15));
+  border: 1px solid rgba(220,170,40,0.4);
+  border-radius: 10px;
+  color: #f5d87a;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: all 0.2s;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  box-shadow: 0 0 18px rgba(220,170,40,0.15), inset 0 1px 0 rgba(255,255,255,0.07);
+  position: relative; overflow: hidden;
+}
+.btn-cinevault-col::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(220,170,40,0.08), rgba(192,132,252,0.08));
+  opacity: 0; transition: opacity 0.2s;
+}
+.btn-cinevault-col:hover { 
+  border-color: rgba(220,170,40,0.65);
+  box-shadow: 0 0 28px rgba(220,170,40,0.28), 0 4px 16px rgba(0,0,0,0.3);
+  transform: translateY(-1px);
+  color: #fde68a;
+}
+.btn-cinevault-col:hover::before { opacity: 1; }
 
 /* ── FILTER BAR ───────────────────────────────── */
 .filter-bar {
@@ -843,8 +870,8 @@ footer {
     <span class="count-badge" id="tc">0</span>
     <button class="btn-ghost" id="size-btn" onclick="toggleSize()" title="Changer la taille des cartes">⊞</button>
     <button class="btn-random" onclick="openRandom()">🎲 Surprise</button>
-    <button class="btn-ghost" onclick="openSmartCollections()" style="color:#a78bfa;border-color:rgba(167,139,250,0.2);white-space:nowrap;">🎞 Collections</button>
     <button class="btn-add" onclick="openModal()">+ Ajouter</button>
+    <button class="btn-cinevault-col" onclick="openSmartCollections()">✦ CinéVault Collection</button>
   </div>
 </header>
 
@@ -2204,16 +2231,15 @@ function closeSmartCollections() {
   document.getElementById('sc-page').style.display = 'none';
 }
 function buildSmartCollections() {
-  // ── Acteurs : 3+ films avec le même person_id ou person_name ──
-  const actorMap = {};
+  const actorMap    = {};
   const directorMap = {};
   const universeMap = {};
 
- // Grouper par acteur/réalisateur via person_id/person_name (films importés via Collection)
+  // ── 1. Grouper par acteur/réalisateur via person_id ou person_name ──
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
     if (!m.person_id && !m.person_name) return;
-    const key = m.person_id ? String(m.person_id) : m.person_name.toLowerCase().trim();
+    const key  = m.person_id ? String(m.person_id) : m.person_name.toLowerCase().trim();
     const name = m.person_name || key;
     const role = (m.person_role || '').toLowerCase();
     const isDirector = role.includes('directing') || role.includes('réalisa');
@@ -2225,45 +2251,114 @@ function buildSmartCollections() {
   // Chercher le poster depuis la fiche Collection correspondante
   movies.forEach((m) => {
     if (m.media_type !== 'collection') return;
-    const key = m.tmdb_id ? String(m.tmdb_id) : m.title.toLowerCase().trim();
+    const key  = m.tmdb_id ? String(m.tmdb_id) : m.title.toLowerCase().trim();
     const role = (m.person_role || '').toLowerCase();
     const isDirector = role.includes('directing') || role.includes('réalisa');
     const target = isDirector ? directorMap : actorMap;
     if (target[key]) target[key].poster = m.poster || null;
   });
 
-  // Détection via tags : si plusieurs films partagent un même tag, regrouper
-  const tagMap = {};
+  // ── 2. Détection automatique par univers/saga à partir des tags et titres ──
+  // Définition d'univers connus (mots-clés dans le titre ou les tags)
+  const KNOWN_UNIVERSES = [
+    { key: 'mcu', label: '🦸 Marvel Cinematic Universe', keywords: ['marvel','mcu','avengers','iron man','captain america','thor','spider-man','spiderman','black panther','doctor strange','guardians of the galaxy','ant-man','captain marvel','black widow','eternals','shang-chi','hawkeye','wandavision','loki','falcon','she-hulk','ms. marvel','moon knight','hulk','scarlet witch'] },
+    { key: 'dceu', label: '🦇 DC Extended Universe', keywords: ['dc','dceu','batman','superman','wonder woman','aquaman','the flash','shazam','black adam','joker','green lantern','suicide squad','justice league','hawkgirl','cyborg','zatanna'] },
+    { key: 'alien_predator', label: '👾 Alien & Predator', keywords: ['alien','aliens','predator','predators','prometheus','covenant','alien vs predator','avp','xenomorph'] },
+    { key: 'godzilla', label: '🦕 Monsterverse / Godzilla', keywords: ['godzilla','kong','king kong','mothra','rodan','ghidorah','gamera','mechagodzilla','shin godzilla','monsterverse','kaiju'] },
+    { key: 'star_wars', label: '⚡ Star Wars', keywords: ['star wars','jedi','sith','skywalker','mandalorian','obi-wan','clone wars','rogue one','solo','andor','ahsoka'] },
+    { key: 'lord_of_the_rings', label: '💍 Terre du Milieu', keywords: ['lord of the rings','hobbit','tolkien','fellowship','two towers','return of the king','rings of power','seigneur des anneaux'] },
+    { key: 'evangelion', label: '🤖 Evangelion', keywords: ['evangelion','neon genesis','shinji','asuka','rei','nerv','rebuild of evangelion','end of evangelion'] },
+    { key: 'indiana_jones', label: '🎩 Indiana Jones', keywords: ['indiana jones','raiders of the lost ark','temple of doom','last crusade','crystal skull','dial of destiny'] },
+    { key: 'john_wick', label: '🔫 John Wick / Continental', keywords: ['john wick','continental','baba yaga'] },
+    { key: 'fast_furious', label: '🚗 Fast & Furious', keywords: ['fast','furious','fast & furious','fast and furious','hobbs','shaw','toretto'] },
+    { key: 'mission_impossible', label: '🕵️ Mission: Impossible', keywords: ['mission impossible','mission: impossible','ethan hunt'] },
+    { key: 'james_bond', label: '🍸 James Bond', keywords: ['james bond','007','goldfinger','skyfall','spectre','casino royale','no time to die','dr. no','thunderball','goldeneye','die another day'] },
+    { key: 'jurassic', label: '🦖 Jurassic', keywords: ['jurassic park','jurassic world','jurassic','lost world','dinosaurs'] },
+    { key: 'terminator', label: '🤖 Terminator', keywords: ['terminator','skynet','sarah connor','judgement day'] },
+    { key: 'x_men', label: '🧬 X-Men', keywords: ['x-men','x men','wolverine','magneto','xavier','mutants','deadpool','logan'] },
+    { key: 'transformers', label: '🤖 Transformers', keywords: ['transformers','optimus prime','bumblebee','autobots','decepticons'] },
+    { key: 'pirates_caribbean', label: '☠️ Pirates des Caraïbes', keywords: ['pirates of the caribbean','pirates des caraïbes','jack sparrow','davy jones'] },
+    { key: 'matrix', label: '💊 Matrix', keywords: ['matrix','neo','morpheus','trinity','zion','agent smith'] },
+    { key: 'planet_apes', label: '🐒 La Planète des Singes', keywords: ['planet of the apes','planète des singes','caesar','rise of the','dawn of the','war for the'] },
+    { key: 'conjuring', label: '👻 Conjuring Universe', keywords: ['conjuring','annabelle','nun','crooked man','warren','la nonne','la malédiction'] },
+    { key: 'halloween', label: '🔪 Halloween / Michael Myers', keywords: ['halloween','michael myers'] },
+    { key: 'saw', label: '🪚 Saw', keywords: ['saw','jigsaw','spiral'] },
+    { key: 'mad_max', label: '🌵 Mad Max', keywords: ['mad max','furiosa','fury road','thunderdome'] },
+    { key: 'monty_python', label: '🐓 Monty Python', keywords: ['monty python','holy grail','life of brian','meaning of life'] },
+    { key: 'star_trek', label: '🖖 Star Trek', keywords: ['star trek','enterprise','spock','kirk','picard','klingon','federation','vulcan','borg'] },
+    { key: 'avatar', label: '💙 Avatar', keywords: ['avatar','pandora','na\'vi','navi','james cameron avatar'] },
+    { key: 'back_to_future', label: '⏰ Retour vers le futur', keywords: ['back to the future','retour vers le futur','marty mcfly','doc brown','delorean'] },
+    { key: 'toy_story', label: '🧸 Toy Story / Pixar', keywords: ['toy story','buzz lightyear','woody','pixar','lightyear'] },
+  ];
+
+  // Créer les groupes d'univers détectés automatiquement dans la liste de films
+  const autoUniverseMap = {};
+  KNOWN_UNIVERSES.forEach(univ => {
+    autoUniverseMap[univ.key] = { name: univ.label, films: [], poster: null };
+  });
+
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
-    (m.tags || []).forEach(tag => {
-      const key = tag.toLowerCase().trim();
-      if (!tagMap[key]) tagMap[key] = { name: tag, films: [], poster: null };
-      tagMap[key].films.push(m);
+    const titleLow = (m.title || '').toLowerCase();
+    const tagsLow  = (m.tags || []).map(t => t.toLowerCase());
+    const combined = titleLow + ' ' + tagsLow.join(' ');
+
+    KNOWN_UNIVERSES.forEach(univ => {
+      const matches = univ.keywords.some(kw => combined.includes(kw));
+      if (matches && !autoUniverseMap[univ.key].films.includes(m)) {
+        autoUniverseMap[univ.key].films.push(m);
+      }
     });
   });
 
-  // Grouper par saga via les fiches Saga existantes (via person_id)
+  // ── 3. Grouper par saga via les fiches Saga existantes (via person_id) ──
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
     if (!m.person_id) return;
     const saga = movies.find(s => s.media_type === 'saga' && s.tmdb_id && String(s.tmdb_id) === String(m.person_id));
     if (!saga) return;
-    const key = String(m.person_id);
-    if (!universeMap[key]) universeMap[key] = { name: saga.title, films: [], poster: saga.poster || null };
-    universeMap[key].films.push(m);
+    const key = 'saga_' + String(m.person_id);
+    if (!universeMap[key]) universeMap[key] = { name: '⚡ ' + saga.title, films: [], poster: saga.poster || null };
+    if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
   });
 
-  // Ajouter aussi les groupes détectés par tags dans les sagas (si pas déjà dans actorMap/directorMap)
-  Object.entries(tagMap).forEach(([key, g]) => {
+  // ── 4. Fusionner les univers auto-détectés dans universeMap ──
+  Object.entries(autoUniverseMap).forEach(([key, g]) => {
+    if (g.films.length < 2) return;
+    const mapKey = 'auto_' + key;
+    if (!universeMap[mapKey]) universeMap[mapKey] = { name: g.name, films: [], poster: null };
+    g.films.forEach(f => {
+      if (!universeMap[mapKey].films.includes(f)) universeMap[mapKey].films.push(f);
+    });
+    if (!universeMap[mapKey].poster && g.films[0]) universeMap[mapKey].poster = g.films[0].poster || null;
+  });
+
+  // ── 5. Détection via tags partagés (3+ films avec le même tag) ──
+  const tagMap = {};
+  movies.forEach((m) => {
+    if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
+    (m.tags || []).forEach(tag => {
+      const k = tag.toLowerCase().trim();
+      if (!tagMap[k]) tagMap[k] = { name: '🏷 ' + tag, films: [] };
+      tagMap[k].films.push(m);
+    });
+  });
+  Object.entries(tagMap).forEach(([k, g]) => {
     if (g.films.length < 3) return;
-    if (actorMap[key] || directorMap[key]) return; // déjà traité
-    universeMap['tag_' + key] = { name: g.name, films: g.films, poster: null };
+    // skip si déjà couvert par un univers auto
+    const alreadyCovered = Object.values(autoUniverseMap).some(u =>
+      u.keywords && u.keywords.includes(k)
+    );
+    const mapKey = 'tag_' + k;
+    if (!universeMap[mapKey]) {
+      universeMap[mapKey] = { name: g.name, films: g.films, poster: g.films[0]?.poster || null };
+    }
   });
 
-  const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3);
-  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2);
-  const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2);
+  // ── Filtrer et trier ──
+  const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => b.films.length - a.films.length);
+  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
+  const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
 
   const tabs = [
     { id: 'actors',    label: `🎭 Acteurs (${actorGroups.length})`,          groups: actorGroups },
