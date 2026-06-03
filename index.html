@@ -2467,10 +2467,11 @@ function buildSmartCollections() {
       return true;
     });
   });
-  const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => b.films.length - a.films.length);
-  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
-  const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
-
+  const avgPop = g => g.films.reduce((s, m) => s + (m.popularity || 0), 0) / (g.films.length || 1);
+  const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => avgPop(b) - avgPop(a));
+  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a,b) => avgPop(b) - avgPop(a));
+  const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2).sort((a,b) => avgPop(b) - avgPop(a));
+  
   // --- Construction des onglets ---
   const tabs = [
     { id: 'actors',    label: `🎭 Acteurs (${actorGroups.length})`,          groups: actorGroups },
