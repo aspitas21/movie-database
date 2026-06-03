@@ -760,11 +760,11 @@ header {
 .sc-group { position:relative; border-radius: 13px; overflow: hidden; background: var(--s1); border: 1px solid var(--border); cursor: pointer; transition: transform 0.28s cubic-bezier(0.34,1.4,0.64,1), border-color 0.2s, box-shadow 0.28s; }
 .sc-group:hover { transform: translateY(-6px) scale(1.012); box-shadow: 0 28px 55px rgba(0,0,0,0.65); border-color: var(--border2); }
 .sc-group-poster-wrap { position:relative; width:100%; overflow:hidden; background:var(--s2); }
-.sc-group-poster-wrap.square { aspect-ratio:1/1; min-height:110px; }
-.sc-group-poster-wrap.portrait { aspect-ratio:2/3; min-height:150px; }
-.sc-group-poster { width:100%; height:100%; object-fit:cover; object-position:top; display:block; transition: transform 0.45s ease; }
+.sc-group-poster-wrap.square { aspect-ratio:1/1; height:110px; }
+.sc-group-poster-wrap.portrait { aspect-ratio:2/3; height:150px; }
+.sc-group-poster { width:100%; height:100%; object-fit:cover; object-position:top center; display:block; transition: transform 0.45s ease; }
 .sc-group:hover .sc-group-poster { transform: scale(1.06); }
-.sc-group-poster-placeholder { width:100%; height:100%; min-height:110px; display:flex; align-items:center; justify-content:center; font-size:36px; color:var(--muted); }
+.sc-group-poster-placeholder { width:100%; height:110px; display:flex; align-items:center; justify-content:center; font-size:36px; color:var(--muted); background:var(--s2); }
 .sc-group-overlay { padding:6px 8px 8px; background:var(--s1); border-top:1px solid var(--border); }
 .sc-group-name { font-size: 11px; font-weight: 800; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .sc-group-count { font-size: 10px; color: var(--muted2); margin-top:1px; }
@@ -1075,10 +1075,8 @@ footer {
   <div style="position:sticky;top:0;z-index:10;background:rgba(7,7,12,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;height:58px;display:flex;align-items:center;gap:14px;">
     <button onclick="closeSmartCollections()" style="padding:7px 13px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s;" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--muted2)';this.style.borderColor='var(--border)'">← Retour</button>
     <div style="font-family:'DM Serif Display',serif;font-size:19px;">CinéVault <em style="color:var(--accent);font-style:italic;">Collections</em></div>
-    <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-      <button onclick="startEnrich()" style="padding:6px 14px;background:rgba(124,106,245,0.12);border:1px solid rgba(124,106,245,0.3);border-radius:9px;color:#c4b5fd;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;" title="Enrichir les films avec acteurs/réalisateurs depuis TMDB">🔄 Enrichir</button>
-      <div id="sc-tabs" style="display:flex;gap:6px;"></div>
-    </div>
+    <button onclick="startEnrich()" id="enrich-btn" style="padding:6px 14px;background:rgba(124,106,245,0.12);border:1px solid rgba(124,106,245,0.3);border-radius:9px;color:#c4b5fd;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;" title="Enrichir les films avec acteurs/réalisateurs depuis TMDB">🔄 Enrichir</button>
+    <div id="sc-tabs" style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;"></div>
   </div>
   <div style="padding:1.5rem 2rem 4rem;">
     <div id="enrich-bar" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;">
@@ -2519,14 +2517,16 @@ function renderScGroup(g, isPeople = false) {
     : '';
   const indicesJson = JSON.stringify(films.map(m => movies.indexOf(m)));
   const labelEsc = escapeHtml(label).replace(/'/g, "\\'");
-  const posterEsc = escapeHtml(posterSrc);
+  const posterEsc = posterSrc.replace(/'/g, "\\'");
   const tmdbColId = g.tmdbCollectionId || null;
   const wrapClass = isPeople ? 'square' : 'portrait';
+  const placeholderIcon = isPeople ? '🎭' : '🎬';
+  const placeholderHtml = `<div class="sc-group-poster-placeholder">${placeholderIcon}</div>`;
   return `<div class="sc-group" onclick="openScDetail(${indicesJson},'${labelEsc}','${posterEsc}',${tmdbColId})">
     <div class="sc-group-poster-wrap ${wrapClass}">
       ${posterSrc
-        ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" data-person-id="${g.id||''}" onerror="this.parentElement.innerHTML='<div class=\\"sc-group-poster-placeholder\\">🎭</div>'">`
-        : `<div class="sc-group-poster-placeholder" data-person-id="${g.id||''}" style="min-height:110px;">${isPeople ? '🎭' : '🎬'}</div>`}
+        ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" onerror="this.onerror=null;this.parentElement.innerHTML='${placeholderHtml.replace(/'/g, "\\'")}'">`
+        : placeholderHtml}
     </div>
     <div class="sc-group-overlay">
       <div class="sc-group-name">${escapeHtml(label)}</div>
