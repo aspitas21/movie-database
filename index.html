@@ -1090,6 +1090,18 @@ footer {
   </div>
 </div>
 
+<!-- ═══ SC DETAIL PAGE ═══ -->
+<div id="sc-detail-page" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:150;overflow-y:auto;flex-direction:column;">
+  <div style="position:sticky;top:0;z-index:10;background:rgba(7,7,12,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;height:58px;display:flex;align-items:center;gap:14px;">
+    <button onclick="closeScDetail()" style="padding:7px 13px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted2)'">← Retour</button>
+    <img id="sc-detail-poster" src="" style="height:36px;border-radius:5px;display:none;">
+    <div id="sc-detail-title" style="font-family:'DM Serif Display',serif;font-size:19px;"></div>
+  </div>
+  <div style="padding:1.5rem 2rem 4rem;">
+    <div id="sc-detail-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;"></div>
+  </div>
+</div>
+  
 <!-- ═══ DETAIL MODAL ═══ -->
 <div class="mbg" id="dmod"><div class="modal dmod" id="dcont"></div></div>
 
@@ -2402,59 +2414,6 @@ function buildSmartCollections() {
     if (target[key]) target[key].poster = m.poster || null;
   });
 
-  // ── 2. Détection automatique par univers/saga à partir des tags et titres ──
-  // Définition d'univers connus (mots-clés dans le titre ou les tags)
-  const KNOWN_UNIVERSES = [
-    { key: 'mcu', label: '🦸 Marvel Cinematic Universe', keywords: ['marvel','mcu','avengers','iron man','captain america','thor','spider-man','spiderman','black panther','doctor strange','guardians of the galaxy','ant-man','captain marvel','black widow','eternals','shang-chi','hawkeye','wandavision','loki','falcon','she-hulk','ms. marvel','moon knight','hulk','scarlet witch'] },
-    { key: 'dceu', label: '🦇 DC Extended Universe', keywords: ['dc','dceu','batman','superman','wonder woman','aquaman','the flash','shazam','black adam','joker','green lantern','suicide squad','justice league','hawkgirl','cyborg','zatanna'] },
-    { key: 'alien_predator', label: '👾 Alien & Predator', keywords: ['alien','aliens','predator','predators','prometheus','covenant','alien vs predator','avp','xenomorph'] },
-    { key: 'godzilla', label: '🦕 Monsterverse / Godzilla', keywords: ['godzilla','kong','king kong','mothra','rodan','ghidorah','gamera','mechagodzilla','shin godzilla','monsterverse','kaiju'] },
-    { key: 'star_wars', label: '⚡ Star Wars', keywords: ['star wars','jedi','sith','skywalker','mandalorian','obi-wan','clone wars','rogue one','solo','andor','ahsoka'] },
-    { key: 'lord_of_the_rings', label: '💍 Terre du Milieu', keywords: ['lord of the rings','hobbit','tolkien','fellowship','two towers','return of the king','rings of power','seigneur des anneaux'] },
-    { key: 'evangelion', label: '🤖 Evangelion', keywords: ['evangelion','neon genesis','shinji','asuka','rei','nerv','rebuild of evangelion','end of evangelion'] },
-    { key: 'indiana_jones', label: '🎩 Indiana Jones', keywords: ['indiana jones','raiders of the lost ark','temple of doom','last crusade','crystal skull','dial of destiny'] },
-    { key: 'john_wick', label: '🔫 John Wick / Continental', keywords: ['john wick','continental','baba yaga'] },
-    { key: 'fast_furious', label: '🚗 Fast & Furious', keywords: ['fast','furious','fast & furious','fast and furious','hobbs','shaw','toretto'] },
-    { key: 'mission_impossible', label: '🕵️ Mission: Impossible', keywords: ['mission impossible','mission: impossible','ethan hunt'] },
-    { key: 'james_bond', label: '🍸 James Bond', keywords: ['james bond','007','goldfinger','skyfall','spectre','casino royale','no time to die','dr. no','thunderball','goldeneye','die another day'] },
-    { key: 'jurassic', label: '🦖 Jurassic', keywords: ['jurassic park','jurassic world','jurassic','lost world','dinosaurs'] },
-    { key: 'terminator', label: '🤖 Terminator', keywords: ['terminator','skynet','sarah connor','judgement day'] },
-    { key: 'x_men', label: '🧬 X-Men', keywords: ['x-men','x men','wolverine','magneto','xavier','mutants','deadpool','logan'] },
-    { key: 'transformers', label: '🤖 Transformers', keywords: ['transformers','optimus prime','bumblebee','autobots','decepticons'] },
-    { key: 'pirates_caribbean', label: '☠️ Pirates des Caraïbes', keywords: ['pirates of the caribbean','pirates des caraïbes','jack sparrow','davy jones'] },
-    { key: 'matrix', label: '💊 Matrix', keywords: ['matrix','neo','morpheus','trinity','zion','agent smith'] },
-    { key: 'planet_apes', label: '🐒 La Planète des Singes', keywords: ['planet of the apes','planète des singes','caesar','rise of the','dawn of the','war for the'] },
-    { key: 'conjuring', label: '👻 Conjuring Universe', keywords: ['conjuring','annabelle','nun','crooked man','warren','la nonne','la malédiction'] },
-    { key: 'halloween', label: '🔪 Halloween / Michael Myers', keywords: ['halloween','michael myers'] },
-    { key: 'saw', label: '🪚 Saw', keywords: ['saw','jigsaw','spiral'] },
-    { key: 'mad_max', label: '🌵 Mad Max', keywords: ['mad max','furiosa','fury road','thunderdome'] },
-    { key: 'monty_python', label: '🐓 Monty Python', keywords: ['monty python','holy grail','life of brian','meaning of life'] },
-    { key: 'star_trek', label: '🖖 Star Trek', keywords: ['star trek','enterprise','spock','kirk','picard','klingon','federation','vulcan','borg'] },
-    { key: 'avatar', label: '💙 Avatar', keywords: ['avatar','pandora','na\'vi','navi','james cameron avatar'] },
-    { key: 'back_to_future', label: '⏰ Retour vers le futur', keywords: ['back to the future','retour vers le futur','marty mcfly','doc brown','delorean'] },
-    { key: 'toy_story', label: '🧸 Toy Story / Pixar', keywords: ['toy story','buzz lightyear','woody','pixar','lightyear'] },
-  ];
-
-  // Créer les groupes d'univers détectés automatiquement dans la liste de films
-  const autoUniverseMap = {};
-  KNOWN_UNIVERSES.forEach(univ => {
-    autoUniverseMap[univ.key] = { name: univ.label, films: [], poster: null };
-  });
-
-  movies.forEach((m) => {
-    if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
-    const titleLow = (m.title || '').toLowerCase();
-    const tagsLow  = (m.tags || []).map(t => t.toLowerCase());
-    const combined = titleLow + ' ' + tagsLow.join(' ');
-
-    KNOWN_UNIVERSES.forEach(univ => {
-      const matches = univ.keywords.some(kw => combined.includes(kw));
-      if (matches && !autoUniverseMap[univ.key].films.includes(m)) {
-        autoUniverseMap[univ.key].films.push(m);
-      }
-    });
-  });
-
   // ── 3. Grouper par saga via les fiches Saga existantes (via person_id) ──
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
@@ -2476,40 +2435,7 @@ function buildSmartCollections() {
     if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
   });
   
-  // ── 4. Fusionner les univers auto-détectés dans universeMap ──
-  Object.entries(autoUniverseMap).forEach(([key, g]) => {
-    if (g.films.length < 2) return;
-    const mapKey = 'auto_' + key;
-    if (!universeMap[mapKey]) universeMap[mapKey] = { name: g.name, films: [], poster: null };
-    g.films.forEach(f => {
-      if (!universeMap[mapKey].films.includes(f)) universeMap[mapKey].films.push(f);
-    });
-    if (!universeMap[mapKey].poster && g.films[0]) universeMap[mapKey].poster = g.films[0].poster || null;
-  });
-
-  // ── 5. Détection via tags partagés (3+ films avec le même tag) ──
-  const tagMap = {};
-  movies.forEach((m) => {
-    if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
-    (m.tags || []).forEach(tag => {
-      const k = tag.toLowerCase().trim();
-      if (!tagMap[k]) tagMap[k] = { name: '🏷 ' + tag, films: [] };
-      tagMap[k].films.push(m);
-    });
-  });
-  Object.entries(tagMap).forEach(([k, g]) => {
-    if (g.films.length < 3) return;
-    // skip si déjà couvert par un univers auto
-    const alreadyCovered = Object.values(autoUniverseMap).some(u =>
-      u.keywords && u.keywords.includes(k)
-    );
-    const mapKey = 'tag_' + k;
-    if (!universeMap[mapKey]) {
-      universeMap[mapKey] = { name: g.name, films: g.films, poster: g.films[0]?.poster || null };
-    }
-  });
-
-  // ── Filtrer et trier ──
+     // ── Filtrer et trier ──
   const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => b.films.length - a.films.length);
   const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
   const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
@@ -2544,8 +2470,52 @@ function buildSmartCollections() {
 function renderScGroup(g) {
   const films = g.films.map(f => typeof f === 'number' ? movies[f] : f).filter(Boolean);
   const label = g.label || g.name || '?';
-  const posterSrc = g.poster || (films[0] && films[0].poster) || '';
+  const posterSrc = g.poster || '';
+  const isPersonGroup = !String(Object.keys(window._scGroupMap||{}).find(k => window._scGroupMap[k]===g)||'').startsWith('tmdb') && !String(Object.keys(window._scGroupMap||{}).find(k => window._scGroupMap[k]===g)||'').startsWith('saga');
 
+  return `<div class="sc-group" onclick="openScDetail(${JSON.stringify(films.map(m=>movies.indexOf(m)))},'${escapeHtml(label).replace(/'/g,"\\'")}','${escapeHtml(posterSrc)}')" style="cursor:pointer;">
+    <div class="sc-group-header">
+      ${posterSrc ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" onerror="this.style.display='none'">` : '<div class="sc-group-poster-placeholder">🎭</div>'}
+      <div style="flex:1;">
+        <div class="sc-group-name">${escapeHtml(label)}</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px;">${films.length} film${films.length !== 1 ? 's' : ''} dans ta bibliothèque</div>
+      </div>
+      <span class="sc-group-count">${films.length}</span>
+    </div>
+  </div>`;
+}
+
+  function openScDetail(indices, label, posterSrc) {
+  const page = document.getElementById('sc-detail-page');
+  const ownedSet = new Set(indices);
+
+  // Récupérer tous les films TMDB de la saga si possible
+  // Pour l'instant on affiche les films owned triés chronologiquement
+  const films = indices.map(i => movies[i]).filter(Boolean);
+  films.sort((a,b) => (a.release_date||'').localeCompare(b.release_date||''));
+
+  document.getElementById('sc-detail-title').textContent = label;
+  document.getElementById('sc-detail-poster').src = posterSrc;
+  document.getElementById('sc-detail-poster').style.display = posterSrc ? 'block' : 'none';
+
+  const grid = document.getElementById('sc-detail-grid');
+  grid.innerHTML = films.map(m => {
+    const idx = movies.indexOf(m);
+    const year = m.release_date ? m.release_date.slice(0,4) : '?';
+    return `<div class="sc-detail-card" onclick="closeScDetail();openDetail(event,${idx})">
+      ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}" onerror="this.outerHTML='<div class=\\"sc-detail-no-poster\\">🎬</div>'">` : '<div class="sc-detail-no-poster">🎬</div>'}
+      <div class="sc-detail-card-title">${escapeHtml(m.title)}</div>
+      <div class="sc-detail-card-year">${year}</div>
+    </div>`;
+  }).join('');
+
+  page.style.display = 'flex';
+}
+
+function closeScDetail() {
+  document.getElementById('sc-detail-page').style.display = 'none';
+}
+  
   // Grille de miniatures (max 6 affiches)
   const thumbs = films.slice(0, 6).map(m => {
     const idx = movies.indexOf(m);
@@ -2572,20 +2542,10 @@ function renderScGroup(g) {
   </div>`;
 }
 
-  function filterByGroup(indices) {
-  closeSmartCollections();
-  // Stocker les indices et re-render en ne montrant que ces films
-  window._groupFilter = new Set(indices);
+ function filterByGroup(indices) {
+  closeScDetail();
+  window._groupFilter = null;
   render();
-  // Afficher un bandeau pour sortir du filtre
-  let banner = document.getElementById('group-filter-banner');
-  if (!banner) {
-    banner = document.createElement('div');
-    banner.id = 'group-filter-banner';
-    banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border2);border-radius:12px;padding:10px 20px;display:flex;align-items:center;gap:12px;z-index:200;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
-    document.body.appendChild(banner);
-  }
-  banner.innerHTML = `<span>Filtre collection actif — <strong>${indices.length} films</strong></span><button onclick="clearGroupFilter()" style="padding:4px 12px;background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:8px;color:#c4b5fd;font-size:12px;cursor:pointer;">✕ Effacer le filtre</button>`;
 }
 
 function clearGroupFilter() {
