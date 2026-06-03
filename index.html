@@ -2389,8 +2389,8 @@ async function startEnrich() {
         : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '/credits?api_key=' + TK + '&language=fr-FR';
       const credData = await (await fetch(credEndpoint)).json();
 
-      const cast = (credData.cast || []).slice(0, 5).map(p => ({ id: p.id, name: p.name, role: 'Acting' }));
-      const directors = (credData.crew || []).filter(p => p.job === 'Director').slice(0, 2).map(p => ({ id: p.id, name: p.name, role: 'Directing' }));
+      const cast = (credData.cast || []).slice(0, 5).map(p => ({ id: p.id, name: p.name, role: 'Acting', popularity: p.popularity || 0 }));
+      const directors = (credData.crew || []).filter(p => p.job === 'Director').slice(0, 2).map(p => ({ id: p.id, name: p.name, role: 'Directing', popularity: p.popularity || 0 }));
       const credits = [...cast, ...directors];
 
       const _person_photos = {};
@@ -2642,8 +2642,17 @@ function buildSmartCollections() {
   });
  const avgPop = g => g.films.reduce((s, m) => s + (m.popularity || 0), 0) / (g.films.length || 1);
   const personPop = g => {
+    // 1. Fiche collection manuelle
     const fiche = movies.find(m => m.media_type === 'collection' && (String(m.tmdb_id) === String(g.id) || m.title.toLowerCase().trim() === String(g.name).toLowerCase().trim()));
-    return fiche ? (fiche.popularity || 0) : avgPop(g);
+    if (fiche && fiche.popularity) return fiche.popularity;
+    // 2. Popularité stockée dans _credits des films
+    for (const film of g.films) {
+      if (!film._credits) continue;
+      const credit = film._credits.find(c => String(c.id) === String(g.id));
+      if (credit && credit.popularity) return credit.popularity;
+    }
+    // 3. Fallback moyenne films
+    return avgPop(g);
   };
   const maxPop = g => Math.max(...g.films.map(m => m.popularity || 0));
   const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => personPop(b) - personPop(a));
