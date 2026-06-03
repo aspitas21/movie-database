@@ -2315,6 +2315,11 @@ async function startEnrich() {
         .map(p => ({ id: p.id, name: p.name, role: 'Directing' }));
 
       const credits = [...cast, ...directors];
+      // Stocker les photos des personnes
+      const _person_photos = {};
+      for (const p of [...(data.cast||[]).slice(0,5), ...(data.crew||[]).filter(p=>p.job==='Director').slice(0,2)]) {
+        if (p.profile_path) _person_photos[String(p.id)] = `https://image.tmdb.org/t/p/w185${p.profile_path}`;
+      }
 
      // Saga TMDB automatique (belongs_to_collection) + keywords
       let _tmdb_collection = null;
@@ -2345,7 +2350,7 @@ async function startEnrich() {
 
       } catch(e) {}
 
-      const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection, _tmdb_keywords };
+      const updated = { ...m, _enriched: true, _credits: credits, _tmdb_collection, _tmdb_keywords, _person_photos };
       await updM(idx, updated);
 
     } catch(e) {
@@ -2422,7 +2427,7 @@ function buildSmartCollections() {
     }
   }); // fermeture du premier forEach
 
-  // Chercher le poster depuis la fiche Collection correspondante
+ // Chercher le poster : d'abord fiche Collection manuelle, sinon photo TMDB
   movies.forEach((m) => {
     if (m.media_type !== 'collection') return;
     const key  = m.tmdb_id ? String(m.tmdb_id) : m.title.toLowerCase().trim();
@@ -2430,6 +2435,16 @@ function buildSmartCollections() {
     const isDirector = role.includes('directing') || role.includes('réalisa');
     const target = isDirector ? directorMap : actorMap;
     if (target[key]) target[key].poster = m.poster || null;
+  });
+
+  // Fallback : chercher la photo TMDB depuis _person_photos stocké lors de l'enrichissement
+  [actorMap, directorMap].forEach(map => {
+    Object.entries(map).forEach(([key, g]) => {
+      if (g.poster) return;
+      // Chercher dans les films si l'un d'eux a une photo pour cette personne
+      const film = g.films.find(m => m._person_photos && m._person_photos[key]);
+      if (film) g.poster = film._person_photos[key];
+    });
   });
 
   // ── 3. Grouper par saga via les fiches Saga existantes (via person_id) ──
@@ -2449,7 +2464,7 @@ function buildSmartCollections() {
     if (!m._tmdb_collection) return;
     const col = m._tmdb_collection;
     const key = 'tmdb_col_' + col.id;
-    if (!universeMap[key]) universeMap[key] = { name: '🎬 ' + col.name, films: [], poster: col.poster || null };
+    if (!universeMap[key]) universeMap[key] = { name: '🎬 ' + col.name, films: [], poster: col.poster || null, tmdbCollectionId: col.id };
     if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
   });
 
@@ -2509,43 +2524,67 @@ function renderScGroup(g) {
   const indicesJson = JSON.stringify(films.map(m => movies.indexOf(m)));
   const labelEsc = escapeHtml(label).replace(/'/g, "\\'");
   const posterEsc = escapeHtml(posterSrc);
-  return `<div class="sc-group" onclick="openScDetail(${indicesJson},'${labelEsc}','${posterEsc}')">
+  const tmdbColId = g.tmdbCollectionId || null;
+  return `<div class="sc-group" onclick="openScDetail(${indicesJson},'${labelEsc}','${posterEsc}',${tmdbColId})">
     <div class="sc-group-poster-wrap">
       ${posterSrc
         ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" onerror="this.parentElement.innerHTML='<div class=\\"sc-group-poster-placeholder\\">🎭</div>'">`
         : '<div class="sc-group-poster-placeholder">🎭</div>'}
-    </div>
-    <div class="sc-group-overlay">
-      <div class="sc-group-name">${escapeHtml(label)}</div>
-      <div class="sc-group-count">${films.length} film${films.length !== 1 ? 's' : ''}</div>
+      <div class="sc-group-overlay">
+        <div class="sc-group-name">${escapeHtml(label)}</div>
+        <div class="sc-group-count">${films.length} film${films.length !== 1 ? 's' : ''}</div>
+      </div>
     </div>
   </div>`;
 }
 
-  function openScDetail(indices, label, posterSrc) {
+ async function openScDetail(indices, label, posterSrc, tmdbCollectionId) {
   const page = document.getElementById('sc-detail-page');
   const ownedSet = new Set(indices);
-  const films = indices.map(i => movies[i]).filter(Boolean);
-  films.sort((a,b) => (a.release_date||'').localeCompare(b.release_date||''));
+  const ownedFilms = indices.map(i => movies[i]).filter(Boolean);
 
   document.getElementById('sc-detail-title').textContent = label;
   document.getElementById('sc-detail-poster').src = posterSrc;
   document.getElementById('sc-detail-poster').style.display = posterSrc ? 'block' : 'none';
+  page.style.display = 'flex';
 
   const grid = document.getElementById('sc-detail-grid');
-  grid.innerHTML = films.map(m => {
+  grid.innerHTML = '<div style="color:var(--muted2);font-size:12px;padding:1rem;">Chargement...</div>';
+
+  let allFilms = ownedFilms.map(m => ({ ...m, _owned: true }));
+
+  // Si on a un ID de collection TMDB, récupérer TOUS les films de la saga
+  if (tmdbCollectionId) {
+    try {
+      const res  = await fetch(`https://api.themoviedb.org/3/collection/${tmdbCollectionId}?api_key=${TK}&language=fr-FR`);
+      const data = await res.json();
+      const parts = data.parts || [];
+      // Fusionner avec les films owned
+      parts.forEach(p => {
+        const owned = ownedFilms.find(m => m.tmdb_id === p.id);
+        if (!owned) {
+          allFilms.push({
+            title: p.title, release_date: p.release_date || '',
+            poster: p.poster_path ? `https://image.tmdb.org/t/p/w342${p.poster_path}` : '',
+            _owned: false, tmdb_id: p.id
+          });
+        }
+      });
+    } catch(e) {}
+  }
+
+  allFilms.sort((a,b) => (a.release_date||'').localeCompare(b.release_date||''));
+
+  grid.innerHTML = allFilms.map(m => {
     const idx = movies.indexOf(m);
     const year = m.release_date ? m.release_date.slice(0,4) : '?';
-    const owned = ownedSet.has(idx);
-    return `<div class="sc-detail-card${owned ? '' : ' sc-detail-unavailable'}" onclick="${owned ? `closeScDetail();openDetail(event,${idx})` : ''}">
+    return `<div class="sc-detail-card${m._owned ? '' : ' sc-detail-unavailable'}" ${m._owned ? `onclick="closeScDetail();openDetail(event,${idx})"` : ''}>
       ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}">` : '<div class="sc-detail-no-poster">🎬</div>'}
-      ${!owned ? '<div class="sc-detail-lock">🔒</div>' : ''}
+      ${!m._owned ? '<div class="sc-detail-lock">🔒</div>' : ''}
       <div class="sc-detail-card-title">${escapeHtml(m.title)}</div>
       <div class="sc-detail-card-year">${year}</div>
     </div>`;
   }).join('');
-
-  page.style.display = 'flex';
 }
 
   function closeScDetail() {
