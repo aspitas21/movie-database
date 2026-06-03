@@ -757,14 +757,14 @@ header {
 /* ── SMART COLLECTIONS ───────────────────────────── */
 .sc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 13px; }
 .sc-grid.sc-grid-people { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
-.sc-group { position:relative; border-radius: 13px; overflow: hidden; background: var(--s1); border: 1px solid var(--border); cursor: pointer; transition: transform 0.28s cubic-bezier(0.34,1.4,0.64,1), border-color 0.2s, box-shadow 0.28s; }
+.sc-group { position:relative; border-radius: 13px; overflow: hidden; background: var(--s1); border: 1px solid var(--border); cursor: pointer; transition: transform 0.28s cubic-bezier(0.34,1.4,0.64,1), border-color 0.2s, box-shadow 0.28s; width:100%; min-width:0; }
 .sc-group:hover { transform: translateY(-6px) scale(1.012); box-shadow: 0 28px 55px rgba(0,0,0,0.65); border-color: var(--border2); }
 .sc-group-poster-wrap { position:relative; width:100%; overflow:hidden; background:var(--s2); }
-.sc-group-poster-wrap.square { aspect-ratio:1/1; height:110px; }
-.sc-group-poster-wrap.portrait { aspect-ratio:2/3; height:150px; }
+.sc-group-poster-wrap.square { height:110px; }
+.sc-group-poster-wrap.portrait { height:150px; }
 .sc-group-poster { width:100%; height:100%; object-fit:cover; object-position:top center; display:block; transition: transform 0.45s ease; }
 .sc-group:hover .sc-group-poster { transform: scale(1.06); }
-.sc-group-poster-placeholder { width:100%; height:110px; display:flex; align-items:center; justify-content:center; font-size:36px; color:var(--muted); background:var(--s2); }
+.sc-group-poster-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:36px; color:var(--muted); background:var(--s2); }
 .sc-group-overlay { padding:6px 8px 8px; background:var(--s1); border-top:1px solid var(--border); }
 .sc-group-name { font-size: 11px; font-weight: 800; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .sc-group-count { font-size: 10px; color: var(--muted2); margin-top:1px; }
@@ -2522,11 +2522,12 @@ function renderScGroup(g, isPeople = false) {
   const wrapClass = isPeople ? 'square' : 'portrait';
   const placeholderIcon = isPeople ? '🎭' : '🎬';
   const placeholderHtml = `<div class="sc-group-poster-placeholder">${placeholderIcon}</div>`;
+  const imgTag = posterSrc
+    ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\\"width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;color:#3a3a5c\\">${placeholderIcon}</div>'">`
+    : placeholderHtml;
   return `<div class="sc-group" onclick="openScDetail(${indicesJson},'${labelEsc}','${posterEsc}',${tmdbColId})">
     <div class="sc-group-poster-wrap ${wrapClass}">
-      ${posterSrc
-        ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" onerror="this.onerror=null;this.parentElement.innerHTML='${placeholderHtml.replace(/'/g, "\\'")}'">`
-        : placeholderHtml}
+      ${imgTag}
     </div>
     <div class="sc-group-overlay">
       <div class="sc-group-name">${escapeHtml(label)}</div>
