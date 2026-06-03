@@ -756,18 +756,18 @@ header {
 
 /* ── SMART COLLECTIONS ───────────────────────────── */
 .sc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 13px; }
+.sc-grid.sc-grid-people { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
 .sc-group { position:relative; border-radius: 13px; overflow: hidden; background: var(--s1); border: 1px solid var(--border); cursor: pointer; transition: transform 0.28s cubic-bezier(0.34,1.4,0.64,1), border-color 0.2s, box-shadow 0.28s; }
-.sc-group:hover { transform: translateY(-9px) scale(1.012); box-shadow: 0 28px 55px rgba(0,0,0,0.65); border-color: var(--border2); }
-.sc-group-poster-wrap { position:relative; width:100%; aspect-ratio:2/3; overflow:hidden; background:var(--s2); }
-.sc-group-poster { width:100%; height:100%; object-fit:cover; display:block; transition: transform 0.45s ease; }
+.sc-group:hover { transform: translateY(-6px) scale(1.012); box-shadow: 0 28px 55px rgba(0,0,0,0.65); border-color: var(--border2); }
+.sc-group-poster-wrap { position:relative; width:100%; overflow:hidden; background:var(--s2); }
+.sc-group-poster-wrap.square { aspect-ratio:1/1; }
+.sc-group-poster-wrap.portrait { aspect-ratio:2/3; }
+.sc-group-poster { width:100%; height:100%; object-fit:cover; object-position:top; display:block; transition: transform 0.45s ease; }
 .sc-group:hover .sc-group-poster { transform: scale(1.06); }
-.sc-group-poster-placeholder { width:100%; height:100%; background:var(--s2); display:flex; align-items:center; justify-content:center; font-size:36px; color:var(--muted); }
+.sc-group-poster-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:36px; color:var(--muted); }
 .sc-group-overlay { padding:6px 8px 8px; background:var(--s1); border-top:1px solid var(--border); }
-.sc-group-name { font-size: 11px; font-weight: 800; color: #fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.sc-group-count { font-size: 10px; color: rgba(255,255,255,0.55); margin-top:1px; }
-.sc-group-type { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; }
-.sc-group-type.col { background: rgba(0,224,166,0.1); color: #00e0a6; border: 1px solid rgba(0,224,166,0.2); }
-.sc-group-type.saga { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+.sc-group-name { font-size: 11px; font-weight: 800; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sc-group-count { font-size: 10px; color: var(--muted2); margin-top:1px; }
 
 /* ── COLLECTION LINK PICKER ──────────────────────── */
 .link-picker-wrap { background: var(--s2); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; margin-bottom: 8px; }
@@ -2416,12 +2416,19 @@ function buildSmartCollections() {
 
     // Nouvelle méthode (enrichissement TMDB via _credits)
     if (m._credits && m._credits.length) {
+    if (m._credits && m._credits.length) {
       m._credits.forEach(credit => {
         const key  = String(credit.id);
         const name = credit.name;
         const isDirector = (credit.role || '').toLowerCase().includes('directing');
         const target = isDirector ? directorMap : actorMap;
-        if (!target[key]) target[key] = { name, films: [], poster: null };
+        if (!target[key]) {
+          const photo = (m._person_photos && m._person_photos[key]) || null;
+          target[key] = { name, films: [], poster: photo };
+        }
+        if (!target[key].poster && m._person_photos && m._person_photos[key]) {
+          target[key].poster = m._person_photos[key];
+        }
         if (!target[key].films.includes(m)) target[key].films.push(m);
       });
     }
@@ -2501,23 +2508,23 @@ function buildSmartCollections() {
     `<button class="sc-tab-btn ${scActiveTab === t.id ? 'active' : ''}" onclick="switchScTab('${t.id}')">${t.label}</button>`
   ).join('');
 
-  tabs.forEach(t => {
-    const panel = document.getElementById('sc-tab-' + t.id);
-    if (!panel) return;
-    if (!t.groups.length) {
-      const msg = t.id === 'actors'
-        ? 'Aucun acteur avec 3 films ou plus dans la bibliothèque.'
-        : t.id === 'directors'
-        ? 'Aucun réalisateur avec 2 films ou plus dans la bibliothèque.'
-        : 'Aucun univers ou saga avec 2 films ou plus dans la bibliothèque.';
-      panel.innerHTML = `<div class="sc-empty"><div class="sc-empty-icon">🎬</div><p>${msg}</p></div>`;
-      return;
-    }
-    panel.innerHTML = `<div class="sc-grid">${t.groups.map(g => renderScGroup(g)).join('')}</div>`;
-  });
-}
+tabs.forEach(t => {
+  const panel = document.getElementById('sc-tab-' + t.id);
+  if (!panel) return;
+  if (!t.groups.length) {
+    const msg = t.id === 'actors'
+      ? 'Aucun acteur avec 3 films ou plus dans la bibliothèque.'
+      : t.id === 'directors'
+      ? 'Aucun réalisateur avec 2 films ou plus dans la bibliothèque.'
+      : 'Aucun univers ou saga avec 2 films ou plus dans la bibliothèque.';
+    panel.innerHTML = `<div class="sc-empty"><div class="sc-empty-icon">🎬</div><p>${msg}</p></div>`;
+    return;
+  }
+  const isPeople = t.id === 'actors' || t.id === 'directors';
+  panel.innerHTML = `<div class="sc-grid${isPeople ? ' sc-grid-people' : ''}">${t.groups.map(g => renderScGroup(g, isPeople)).join('')}</div>`;
+});
 
-function renderScGroup(g) {
+function renderScGroup(g, isPeople = false) {
   const films = g.films.map(f => typeof f === 'number' ? movies[f] : f).filter(Boolean);
   const label = g.label || g.name || '?';
   const posterSrc = g.poster || '';
@@ -2525,15 +2532,16 @@ function renderScGroup(g) {
   const labelEsc = escapeHtml(label).replace(/'/g, "\\'");
   const posterEsc = escapeHtml(posterSrc);
   const tmdbColId = g.tmdbCollectionId || null;
+  const wrapClass = isPeople ? 'square' : 'portrait';
   return `<div class="sc-group" onclick="openScDetail(${indicesJson},'${labelEsc}','${posterEsc}',${tmdbColId})">
-    <div class="sc-group-poster-wrap">
+    <div class="sc-group-poster-wrap ${wrapClass}">
       ${posterSrc
         ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" onerror="this.parentElement.innerHTML='<div class=\\"sc-group-poster-placeholder\\">🎭</div>'">`
-        : '<div class="sc-group-poster-placeholder">🎭</div>'}
-      <div class="sc-group-overlay">
-        <div class="sc-group-name">${escapeHtml(label)}</div>
-        <div class="sc-group-count">${films.length} film${films.length !== 1 ? 's' : ''}</div>
-      </div>
+        : `<div class="sc-group-poster-placeholder">${isPeople ? '🎭' : '🎬'}</div>`}
+    </div>
+    <div class="sc-group-overlay">
+      <div class="sc-group-name">${escapeHtml(label)}</div>
+      <div class="sc-group-count">${films.length} film${films.length !== 1 ? 's' : ''}</div>
     </div>
   </div>`;
 }
