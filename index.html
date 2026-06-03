@@ -2398,8 +2398,7 @@ function buildSmartCollections() {
   const directorMap = {};
   const universeMap = {};
 
-   // ── 1. Grouper par acteur/réalisateur via person_id ou person_name ──
-  // ── Grouper via les crédits enrichis (_credits) ──
+  // ── 1. Grouper par acteur/réalisateur via person_id ou person_name ──
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
 
@@ -2415,7 +2414,7 @@ function buildSmartCollections() {
     }
 
     // Nouvelle méthode (enrichissement TMDB via _credits)
-       if (m._credits && m._credits.length) {
+    if (m._credits && m._credits.length) {
       m._credits.forEach(credit => {
         const key  = String(credit.id);
         const name = credit.name;
@@ -2433,7 +2432,7 @@ function buildSmartCollections() {
     }
   }); // fermeture du premier forEach
 
- // Chercher le poster : d'abord fiche Collection manuelle, sinon photo TMDB
+  // Chercher le poster : d'abord fiche Collection manuelle, sinon photo TMDB
   movies.forEach((m) => {
     if (m.media_type !== 'collection') return;
     const key  = m.tmdb_id ? String(m.tmdb_id) : m.title.toLowerCase().trim();
@@ -2447,7 +2446,6 @@ function buildSmartCollections() {
   [actorMap, directorMap].forEach(map => {
     Object.entries(map).forEach(([key, g]) => {
       if (g.poster) return;
-      // Chercher dans les films si l'un d'eux a une photo pour cette personne
       const film = g.films.find(m => m._person_photos && m._person_photos[key]);
       if (film) g.poster = film._person_photos[key];
     });
@@ -2464,7 +2462,7 @@ function buildSmartCollections() {
     if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
   });
 
-// ── 3b. Sagas auto-détectées via l'enrichissement TMDB (_tmdb_collection) ──
+  // ── 3b. Sagas auto-détectées via l'enrichissement TMDB (_tmdb_collection) ──
   movies.forEach((m) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
     if (!m._tmdb_collection) return;
@@ -2474,7 +2472,7 @@ function buildSmartCollections() {
     if (!universeMap[key].films.includes(m)) universeMap[key].films.push(m);
   });
 
-// ── 3d. Grouper par keywords TMDB partagés (franchises mixtes films+séries) ──
+  // ── 3d. Grouper par keywords TMDB partagés (franchises mixtes films+séries) ──
   const kwMap = {};
   movies.forEach((m) => {
     if (!m._tmdb_keywords || !m._tmdb_keywords.length) return;
@@ -2490,6 +2488,39 @@ function buildSmartCollections() {
       universeMap[key] = { name: g.name, films: g.films, poster: g.films[0]?.poster || null };
     }
   });
+
+  // ── Filtrer et trier ──
+  const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => b.films.length - a.films.length);
+  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
+  const sagaGroups     = Object.values(universeMap).filter(g => g.films.length >= 2).sort((a,b) => b.films.length - a.films.length);
+
+  const tabs = [
+    { id: 'actors',    label: `🎭 Acteurs (${actorGroups.length})`,          groups: actorGroups },
+    { id: 'directors', label: `🎬 Réalisateurs (${directorGroups.length})`,  groups: directorGroups },
+    { id: 'sagas',     label: `⚡ Univers & Sagas (${sagaGroups.length})`,   groups: sagaGroups }
+  ];
+
+  const tabBar = document.getElementById('sc-tabs');
+  tabBar.innerHTML = tabs.map(t =>
+    `<button class="sc-tab-btn ${scActiveTab === t.id ? 'active' : ''}" onclick="switchScTab('${t.id}')">${t.label}</button>`
+  ).join('');
+
+  tabs.forEach(t => {
+    const panel = document.getElementById('sc-tab-' + t.id);
+    if (!panel) return;
+    if (!t.groups.length) {
+      const msg = t.id === 'actors'
+        ? 'Aucun acteur avec 3 films ou plus dans la bibliothèque.'
+        : t.id === 'directors'
+        ? 'Aucun réalisateur avec 2 films ou plus dans la bibliothèque.'
+        : 'Aucun univers ou saga avec 2 films ou plus dans la bibliothèque.';
+      panel.innerHTML = `<div class="sc-empty"><div class="sc-empty-icon">🎬</div><p>${msg}</p></div>`;
+      return;
+    }
+    const isPeople = t.id === 'actors' || t.id === 'directors';
+    panel.innerHTML = `<div class="sc-grid${isPeople ? ' sc-grid-people' : ''}">${t.groups.map(g => renderScGroup(g, isPeople)).join('')}</div>`;
+  });
+}
   
      // ── Filtrer et trier ──
   const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a,b) => b.films.length - a.films.length);
