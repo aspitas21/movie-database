@@ -2265,10 +2265,10 @@ async function startEnrich() {
   enrichRunning = true;
 
   const toEnrich = movies.filter(m =>
-    (m.media_type === 'movie' || m.media_type === 'tv') &&
-    m.tmdb_id &&
-    !m._enriched
-  );
+  (m.media_type === 'movie' || m.media_type === 'tv') &&
+  m.tmdb_id &&
+  (!m._enriched || !m._person_photos)
+);
 
   const bar      = document.getElementById('enrich-bar');
   const prog     = document.getElementById('enrich-progress');
