@@ -1789,8 +1789,8 @@ async function searchPosters() {
       } catch(e) {}
 
       const tmdbResults = [
-        ...(dataCol.results||[]).filter(r => r.poster_path).slice(0,4),
-        ...(dataMovie.results||[]).filter(r => r.poster_path).slice(0,2)
+        ...(dataCol.results||[]).filter(r => r.poster_path).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,4),
+        ...((dataCol.results||[]).length === 0 ? (dataMovie.results||[]).filter(r => r.poster_path).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,3) : [])
       ];
 
       const combined = [...tmdbResults, ...aniResults].slice(0, 12);
