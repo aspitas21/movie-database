@@ -1976,16 +1976,26 @@ async function loadSagaPosters() {
       };
       item.appendChild(img); item.appendChild(lbl);
       container.appendChild(item);
-    
-    // Also scan all movies for name match in title (fallback)
-    if (linkedFilms.length < 2) {
-      // no link-based match, skip auto-detection
-    }
-    const group = { label: m.title, poster: m.poster, role: m.person_role || '', films: linkedFilms };
-    if (isDirector) directorGroups.push(group);
-    else actorGroups.push(group);
-  });
-const linkGroupMap = {};
+    });
+  } catch(e) { alert('Erreur lors du chargement des films de la saga.'); }
+}
+
+// ══════════════════════════════════════════════════
+//  SMART COLLECTIONS TAB
+// ══════════════════════════════════════════════════
+let scActiveTab = 'actors';
+
+function openSmartCollections() {
+  document.getElementById('sc-page').style.display = 'flex';
+  buildSmartCollections();
+}
+
+function closeSmartCollections() {
+  document.getElementById('sc-page').style.display = 'none';
+}
+
+function buildSmartCollections() {
+  const linkGroupMap = {};
   movies.forEach((m, idx) => {
     if (m.media_type !== 'movie' && m.media_type !== 'tv') return;
     const links = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
@@ -2048,17 +2058,6 @@ const linkGroupMap = {};
         }
       });
     }
-    return { label: m.title, poster: m.poster, films: linkedFilms };
-  });
-  // Build saga groups
-  const sagaGroups = sagaEntries.map(({ m }) => {
-    const allLinks = m.links && m.links.length ? m.links : (m.link ? [{ url: m.link }] : []);
-    let linkedFilms = [];
-    allLinks.forEach(l => {
-      if (l.url && linkGroupMap[l.url]) {
-        linkGroupMap[l.url].forEach(i => { if (!linkedFilms.includes(i)) linkedFilms.push(i); });
-      }
-    });
     return { label: m.title, poster: m.poster, films: linkedFilms };
   });
 
