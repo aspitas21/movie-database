@@ -2265,7 +2265,7 @@ async function startEnrich() {
   const toEnrich = movies.filter(m =>
     (m.media_type === 'movie' || m.media_type === 'tv') &&
     m.tmdb_id &&
-    (!m._enriched || !m._person_photos || Object.keys(m._person_photos || {}).length === 0)
+    (!m._enriched || !m._person_photos)
   );
 
   const bar    = document.getElementById('enrich-bar');
@@ -2512,28 +2512,29 @@ function buildSmartCollections() {
 function renderScGroup(g, isPeople = false) {
   const films = g.films.map(f => typeof f === 'number' ? movies[f] : f).filter(Boolean);
   const label = g.label || g.name || '?';
-  const posterSrc = g.poster
-    ? (g.poster.startsWith('/') ? `https://image.tmdb.org/t/p/w185${g.poster}` : g.poster)
-    : '';
+  let posterSrc = g.poster || '';
+  if (posterSrc && posterSrc.startsWith('/')) posterSrc = 'https://image.tmdb.org/t/p/w185' + posterSrc;
   const indicesJson = JSON.stringify(films.map(m => movies.indexOf(m)));
   const labelEsc = escapeHtml(label).replace(/'/g, "\\'");
   const posterEsc = posterSrc.replace(/'/g, "\\'");
   const tmdbColId = g.tmdbCollectionId || null;
   const wrapClass = isPeople ? 'square' : 'portrait';
-  const placeholderIcon = isPeople ? '🎭' : '🎬';
-  const placeholderHtml = `<div class="sc-group-poster-placeholder">${placeholderIcon}</div>`;
-  const imgTag = posterSrc
-    ? `<img class="sc-group-poster" src="${posterSrc}" alt="${escapeHtml(label)}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\\"width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;color:#3a3a5c\\">${placeholderIcon}</div>'">`
-    : placeholderHtml;
-  return `<div class="sc-group" onclick="openScDetail(${indicesJson},'${labelEsc}','${posterEsc}',${tmdbColId})">
-    <div class="sc-group-poster-wrap ${wrapClass}">
-      ${imgTag}
-    </div>
-    <div class="sc-group-overlay">
-      <div class="sc-group-name">${escapeHtml(label)}</div>
-      <div class="sc-group-count">${films.length} film${films.length !== 1 ? 's' : ''}</div>
-    </div>
-  </div>`;
+  const icon = isPeople ? '🎭' : '🎬';
+
+  let imageHtml;
+  if (posterSrc) {
+    imageHtml = '<img src="' + posterSrc + '" alt="' + escapeHtml(label) + '" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block;" onerror="this.outerHTML=\'<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#3a3a5c;&quot;>' + icon + '</div>\'">';
+  } else {
+    imageHtml = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#3a3a5c;">' + icon + '</div>';
+  }
+
+  return '<div class="sc-group" onclick="openScDetail(' + indicesJson + ',\'' + labelEsc + '\',\'' + posterEsc + '\',' + tmdbColId + ')">'
+    + '<div class="sc-group-poster-wrap ' + wrapClass + '">' + imageHtml + '</div>'
+    + '<div class="sc-group-overlay">'
+    + '<div class="sc-group-name">' + escapeHtml(label) + '</div>'
+    + '<div class="sc-group-count">' + films.length + ' film' + (films.length !== 1 ? 's' : '') + '</div>'
+    + '</div>'
+    + '</div>';
 }
 
  async function openScDetail(indices, label, posterSrc, tmdbCollectionId) {
