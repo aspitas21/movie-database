@@ -695,6 +695,113 @@ footer {
   .logo-name { display: none; }
   .count-badge { display: none; }
 }
+
+/* ── SC PAGE LAYOUT ──────────────────────────────── */
+.sc-page {
+  display: none; position: fixed; inset: 0;
+  background: var(--bg); z-index: 100;
+  overflow-y: auto; flex-direction: column;
+}
+.sc-detail-page {
+  display: none; position: fixed; inset: 0;
+  background: var(--bg); z-index: 150;
+  overflow-y: auto; flex-direction: column;
+}
+.sc-header {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(6,6,8,0.95); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.75rem; height: 56px;
+  display: flex; align-items: center; gap: 12px;
+}
+.sc-back-btn {
+  padding: 6px 12px; background: var(--s2);
+  border: 1px solid var(--border); border-radius: 8px;
+  color: var(--muted2); font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+}
+.sc-back-btn:hover { color: var(--text); border-color: var(--border2); }
+.sc-title {
+  font-family: 'DM Serif Display', serif; font-size: 18px;
+}
+.sc-title em { color: var(--accent); font-style: italic; }
+.sc-enrich-btn {
+  padding: 5px 12px;
+  background: rgba(124,106,245,0.1); border: 1px solid rgba(124,106,245,0.25);
+  border-radius: 8px; color: #c4b5fd;
+  font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  transition: all 0.15s;
+}
+.sc-enrich-btn:hover { background: rgba(124,106,245,0.18); }
+.sc-tabs-bar { display: flex; gap: 5px; margin-left: auto; flex-wrap: wrap; }
+.sc-body { padding: 1.4rem 1.75rem 4rem; }
+.sc-detail-hdr-poster { height: 34px; border-radius: 5px; }
+.sc-detail-hdr-title { font-family: 'DM Serif Display', serif; font-size: 18px; }
+.sc-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-w), 1fr));
+  gap: 13px;
+}
+.enrich-bar {
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1.4rem;
+}
+.enrich-bar-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+.enrich-bar-label { font-size: 13px; font-weight: 700; color: var(--text); }
+.enrich-bar-status { font-size: 12px; color: var(--muted2); }
+.enrich-bar-track { height: 5px; background: var(--s3); border-radius: 3px; overflow: hidden; }
+.enrich-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4f3dc8, var(--accent)); border-radius: 3px; transition: width 0.3s; }
+.enrich-bar-detail { margin-top: 0.6rem; font-size: 11px; color: var(--muted2); }
+
+/* ── SC GROUP — portrait style like image 3 ──────── */
+.sc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 13px; }
+.sc-grid.sc-grid-people { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+.sc-group {
+  position: relative; border-radius: 10px; overflow: hidden;
+  background: var(--s1); border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.24s cubic-bezier(0.34,1.4,0.64,1), border-color 0.2s, box-shadow 0.24s;
+}
+.sc-group:hover { transform: translateY(-5px); box-shadow: 0 20px 45px rgba(0,0,0,0.7); border-color: var(--border2); }
+.sc-group-poster-wrap {
+  position: relative; width: 100%; overflow: hidden;
+  background: var(--s2); aspect-ratio: 2/3;
+}
+.sc-group-poster-wrap.square { aspect-ratio: 1/1; }
+.sc-group-poster {
+  width: 100%; height: 100%; object-fit: cover;
+  object-position: top center; display: block;
+  transition: transform 0.4s ease;
+}
+.sc-group:hover .sc-group-poster { transform: scale(1.05); }
+.sc-group-poster-placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center;
+  justify-content: center; font-size: 32px; color: var(--muted);
+}
+/* gradient overlay on poster */
+.sc-group-poster-wrap::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 55%;
+  background: linear-gradient(to top, rgba(0,0,0,0.88), transparent);
+  pointer-events: none;
+}
+/* name overlay on the poster itself */
+.sc-group-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 8px 9px; z-index: 2;
+}
+.sc-group-name {
+  font-size: 12px; font-weight: 800; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+.sc-group-count {
+  font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 1px;
+  font-weight: 500;
+}
+
+/* ── BTN-RANDOM icon only ───── */
+.btn-random { padding: 6px 9px; font-size: 14px; }
+
 </style>
 </head>
 <body>
@@ -713,7 +820,7 @@ footer {
   </div>
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
-    <input class="search-input" type="text" id="sb" placeholder="Rechercher dans la bibliothèque..." oninput="render()">
+    <input class="search-input" type="text" id="sb" placeholder="Rechercher..." oninput="render()">
   </div>
   <div class="hdr-right">
     <div class="sync-badge">
@@ -721,10 +828,10 @@ footer {
       <span id="slbl">...</span>
     </div>
     <span class="count-badge" id="tc">0</span>
-    <button class="btn-ghost" id="size-btn" onclick="toggleSize()" title="Changer la taille des cartes">⊞</button>
-    <button class="btn-random" onclick="openRandom()">🎲 Surprise</button>
+    <button class="btn-ghost" id="size-btn" onclick="toggleSize()" title="Taille des cartes">⊞</button>
+    <button class="btn-random" onclick="openRandom()">🎲</button>
+    <button class="btn-cinevault-col" onclick="openSmartCollections()">✦ Collections</button>
     <button class="btn-add" onclick="openModal()">+ Ajouter</button>
-    <button class="btn-cinevault-col" onclick="openSmartCollections()">✦ CinéVault Collection</button>
   </div>
 </header>
 
@@ -917,23 +1024,21 @@ footer {
 </div>
 
 <!-- ═══ SMART COLLECTIONS TAB ═══ -->
-<div id="sc-page" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto;flex-direction:column;">
-  <div style="position:sticky;top:0;z-index:10;background:rgba(7,7,12,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;height:58px;display:flex;align-items:center;gap:14px;">
-    <button onclick="closeSmartCollections()" style="padding:7px 13px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s;" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--muted2)';this.style.borderColor='var(--border)'">← Retour</button>
-    <div style="font-family:'DM Serif Display',serif;font-size:19px;">CinéVault <em style="color:var(--accent);font-style:italic;">Collections</em></div>
-    <button onclick="startEnrich()" id="enrich-btn" style="padding:6px 14px;background:rgba(124,106,245,0.12);border:1px solid rgba(124,106,245,0.3);border-radius:9px;color:#c4b5fd;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;" title="Enrichir les films avec acteurs/réalisateurs depuis TMDB">🔄 Enrichir</button>
-    <div id="sc-tabs" style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;"></div>
+<div id="sc-page" class="sc-page">
+  <div class="sc-header">
+    <button class="sc-back-btn" onclick="closeSmartCollections()">← Retour</button>
+    <div class="sc-title">CinéVault <em>Collections</em></div>
+    <button class="sc-enrich-btn" onclick="startEnrich()" id="enrich-btn" title="Enrichir les films avec acteurs/réalisateurs depuis TMDB">🔄 Enrichir</button>
+    <div id="sc-tabs" class="sc-tabs-bar"></div>
   </div>
-  <div style="padding:1.5rem 2rem 4rem;">
-    <div id="enrich-bar" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">
-        <span style="font-size:13px;font-weight:700;color:var(--text);">🔄 Enrichissement bibliothèque</span>
-        <span id="enrich-status" style="font-size:12px;color:var(--muted2);">—</span>
+  <div class="sc-body">
+    <div id="enrich-bar" class="enrich-bar" style="display:none;">
+      <div class="enrich-bar-top">
+        <span class="enrich-bar-label">🔄 Enrichissement bibliothèque</span>
+        <span id="enrich-status" class="enrich-bar-status">—</span>
       </div>
-      <div style="height:6px;background:var(--s3);border-radius:4px;overflow:hidden;">
-        <div id="enrich-progress" style="height:100%;width:0%;background:linear-gradient(90deg,#4f3dc8,#7c6af5);border-radius:4px;transition:width 0.3s;"></div>
-      </div>
-      <div style="margin-top:0.75rem;font-size:11px;color:var(--muted2);" id="enrich-detail">Prêt.</div>
+      <div class="enrich-bar-track"><div id="enrich-progress" class="enrich-bar-fill"></div></div>
+      <div id="enrich-detail" class="enrich-bar-detail">Prêt.</div>
     </div>
     <div id="sc-tab-actors" class="sc-tab-panel"></div>
     <div id="sc-tab-directors" class="sc-tab-panel" style="display:none;"></div>
@@ -942,14 +1047,14 @@ footer {
 </div>
 
 <!-- ═══ SC DETAIL PAGE ═══ -->
-<div id="sc-detail-page" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:150;overflow-y:auto;flex-direction:column;">
-  <div style="position:sticky;top:0;z-index:10;background:rgba(7,7,12,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;height:58px;display:flex;align-items:center;gap:14px;">
-    <button onclick="closeScDetail()" style="padding:7px 13px;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted2)'">← Retour</button>
-    <img id="sc-detail-poster" src="" style="height:36px;border-radius:5px;display:none;">
-    <div id="sc-detail-title" style="font-family:'DM Serif Display',serif;font-size:19px;"></div>
+<div id="sc-detail-page" class="sc-detail-page">
+  <div class="sc-header">
+    <button class="sc-back-btn" onclick="closeScDetail()">← Retour</button>
+    <img id="sc-detail-poster" src="" class="sc-detail-hdr-poster" style="display:none;">
+    <div id="sc-detail-title" class="sc-detail-hdr-title"></div>
   </div>
-  <div style="padding:1.5rem 2rem 4rem;">
-    <div id="sc-detail-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;"></div>
+  <div class="sc-body">
+    <div id="sc-detail-grid" class="sc-detail-grid"></div>
   </div>
 </div>
   
@@ -2464,51 +2569,9 @@ function buildSmartCollections() {
       return true;
     });
   });
-const personPop = g => {
-    // 1. Fiche collection manuelle
-    const fiche = movies.find(m => m.media_type === 'collection' &&
-      (String(m.tmdb_id) === String(g.id) || m.title.toLowerCase().trim() === g.name.toLowerCase().trim()));
-    if (fiche && fiche.popularity) return fiche.popularity;
-    // 2. Popularité dans _credits des films enrichis
-    for (const film of g.films) {
-      if (!film._credits) continue;
-      const credit = film._credits.find(c => String(c.id) === String(g.id));
-      if (credit && credit.popularity) return credit.popularity;
-    }
-    // 3. Fallback : nombre de films (simple et fiable)
-    return g.films.length * 10;
-  };
-  const maxPop = g => Math.max(...g.films.map(m => m.popularity || 0));
-  const actorGroups = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a, b) => {
-    const popA = (() => {
-      const fiche = movies.find(m => m.media_type === 'collection' && String(m.tmdb_id) === String(a.id));
-      if (fiche?.popularity) return fiche.popularity;
-      for (const f of a.films) { const c = (f._credits||[]).find(x => String(x.id)===String(a.id)); if (c?.popularity) return c.popularity; }
-      return a.films.length;
-    })();
-    const popB = (() => {
-      const fiche = movies.find(m => m.media_type === 'collection' && String(m.tmdb_id) === String(b.id));
-      if (fiche?.popularity) return fiche.popularity;
-      for (const f of b.films) { const c = (f._credits||[]).find(x => String(x.id)===String(b.id)); if (c?.popularity) return c.popularity; }
-      return b.films.length;
-    })();
-    return popB - popA;
-  });
-  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a, b) => {
-    const popA = (() => {
-      const fiche = movies.find(m => m.media_type === 'collection' && String(m.tmdb_id) === String(a.id));
-      if (fiche?.popularity) return fiche.popularity;
-      for (const f of a.films) { const c = (f._credits||[]).find(x => String(x.id)===String(a.id)); if (c?.popularity) return c.popularity; }
-      return a.films.length;
-    })();
-    const popB = (() => {
-      const fiche = movies.find(m => m.media_type === 'collection' && String(m.tmdb_id) === String(b.id));
-      if (fiche?.popularity) return fiche.popularity;
-      for (const f of b.films) { const c = (f._credits||[]).find(x => String(x.id)===String(b.id)); if (c?.popularity) return c.popularity; }
-      return b.films.length;
-    })();
-    return popB - popA;
-  });
+
+  const actorGroups    = Object.values(actorMap).filter(g => g.films.length >= 3).sort((a, b) => b.films.length - a.films.length);
+  const directorGroups = Object.values(directorMap).filter(g => g.films.length >= 2).sort((a, b) => b.films.length - a.films.length);
   // Ajouter les fiches Saga elles-mêmes même sans films rattachés
   movies.forEach(m => {
     if (m.media_type !== 'saga') return;
@@ -2558,9 +2621,9 @@ function renderScGroup(g, isPeople = false) {
 
   let imageHtml;
   if (posterSrc) {
-    imageHtml = '<img src="' + posterSrc + '" alt="' + escapeHtml(label) + '" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block;" onerror="this.outerHTML=\'<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#3a3a5c;&quot;>' + icon + '</div>\'">';
+    imageHtml = '<img class="sc-group-poster" src="' + posterSrc + '" alt="' + escapeHtml(label) + '" onerror="this.outerHTML=\'<div class=&quot;sc-group-poster-placeholder&quot;>' + icon + '</div>\'">';
   } else {
-    imageHtml = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#3a3a5c;">' + icon + '</div>';
+    imageHtml = '<div class="sc-group-poster-placeholder">' + icon + '</div>';
   }
 
   const countLabel = films.length > 0 ? films.length + ' film' + (films.length !== 1 ? 's' : '') : '⚡ Saga';
@@ -2568,10 +2631,12 @@ function renderScGroup(g, isPeople = false) {
     ? 'openDetail(event,' + movies.indexOf(g._sagaFiche) + ')'
     : 'openScDetail(' + indicesJson + ',\'' + labelEsc + '\',\'' + posterEsc + '\',' + tmdbColId + ')';
   return '<div class="sc-group" onclick="' + clickAction + '">'
-    + '<div class="sc-group-poster-wrap ' + wrapClass + '">' + imageHtml + '</div>'
+    + '<div class="sc-group-poster-wrap ' + wrapClass + '">'
+    + imageHtml
     + '<div class="sc-group-overlay">'
     + '<div class="sc-group-name">' + escapeHtml(label) + '</div>'
     + '<div class="sc-group-count">' + countLabel + '</div>'
+    + '</div>'
     + '</div>'
     + '</div>';
 }
