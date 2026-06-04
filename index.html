@@ -180,33 +180,67 @@ header {
 
 
 
-/* ── RECENT SECTION ───────────────────────────── */
-.recent-section { padding: 1.2rem 1.5rem 0; }
-.recent-header { display: flex; align-items: center; justify-content:space-between; margin-bottom: 0.85rem; }
-.recent-title { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.55); }
-.recent-line { display:none; }
-.recent-more { font-size:10px; color:rgba(255,255,255,0.25); font-weight:700; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer; transition:color 0.15s; }
-.recent-more:hover { color:rgba(255,255,255,0.6); }
-.recent-grid { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 6px; }
-.recent-grid::-webkit-scrollbar { display: none; }
-.recent-card {
-  flex-shrink: 0; width: 100px; cursor: pointer;
-  border-radius: 4px; overflow: hidden;
-  background: var(--s1);
-  transition: transform 0.18s;
-  position: relative;
+/* ── POPULAR SHOWCASE (style Letterboxd "Popular this week") ── */
+.popular-section { padding: 1.4rem 1.5rem 0.4rem; }
+.popular-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 0.6rem;
 }
-.recent-card:hover { transform: scale(1.04); }
-.recent-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
-.recent-card .rc-no-poster { width: 100%; aspect-ratio: 2/3; background: #1e242c; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--muted); }
-.recent-card .rc-title { display:none; }
-.recent-card-overlay {
-  position:absolute; inset:0; opacity:0; transition:opacity 0.18s;
-  background:linear-gradient(to top,rgba(0,0,0,0.88) 0%,transparent 60%);
-  display:flex; flex-direction:column; justify-content:flex-end; padding:7px 6px;
+.popular-title {
+  font-size: 11px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,0.6);
 }
-.recent-card:hover .recent-card-overlay { opacity:1; }
-.recent-card-name { font-size:10px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.popular-more {
+  font-size: 10px; color: rgba(255,255,255,0.25); font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  cursor: pointer; transition: color 0.15s; border:none; background:none;
+}
+.popular-more:hover { color: rgba(255,255,255,0.65); }
+.popular-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr 1fr 1fr 1fr;
+  gap: 6px;
+  align-items: end;
+}
+.popular-card {
+  position: relative; border-radius: 4px; overflow: hidden;
+  cursor: pointer; background: #1a1e24;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.popular-card:hover { transform: scale(1.03); box-shadow: 0 16px 40px rgba(0,0,0,0.8); z-index:2; }
+.popular-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+.popular-card-no-poster {
+  width: 100%; aspect-ratio: 2/3; background: #1e242c;
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+}
+.popular-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 55%; pointer-events: none;
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%);
+}
+.popular-card-info {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 10px 9px 8px; z-index: 2;
+}
+.popular-card-title {
+  font-size: 12px; font-weight: 800; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.popular-card:first-child .popular-card-title { font-size: 14px; }
+.popular-card-year { font-size: 10px; color: rgba(255,255,255,0.45); font-weight: 600; margin-top: 2px; }
+.popular-card-qbadge {
+  position: absolute; top: 7px; right: 7px; z-index: 3;
+  font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 3px;
+}
+.popular-card-qbadge.q4kr { background:rgba(192,132,252,0.25); color:#c084fc; }
+.popular-card-qbadge.q4kl { background:rgba(52,211,153,0.25); color:#34d399; }
+.popular-card-qbadge.q1r  { background:rgba(56,189,248,0.2);  color:#38bdf8; }
+.popular-card-qbadge.q1l  { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.3); }
+
+/* legacy recent-* hidden */
+.recent-section { display:none; }
 
 /* ── RESULTS BAR ─────────────────────────────── */
 .results-bar { padding: 0.6rem 1.5rem 0; display: flex; align-items: center; justify-content: space-between; }
@@ -814,8 +848,8 @@ footer {
 
 
 
-<!-- RECENT SECTION -->
-<div class="recent-section" id="recent-section"></div>
+<!-- POPULAR SECTION -->
+<div class="popular-section" id="popular-section"></div>
 
 <!-- GENRE BAR — masqué, genres accessibles via dropdown search -->
 <div class="genre-bar" id="genre-bar" style="display:none;"></div>
@@ -1189,29 +1223,42 @@ function updCounts() {
 }
 
 // ══════════════════════════════════════════════════
-//  RECENT SECTION
+//  POPULAR SHOWCASE
 // ══════════════════════════════════════════════════
 function renderRecent() {
-  const sec = document.getElementById('recent-section');
+  const sec = document.getElementById('popular-section');
+  if (!sec) return;
+  // Masquer quand filtres actifs
   if (filts.size > 0 || genreInc.size > 0 || genreExc.size > 0 || mediaFilt || document.getElementById('sb').value.trim()) {
-    sec.innerHTML = ''; return;
+    sec.style.display = 'none'; return;
   }
-  const last50 = [...movies].slice(-50);
-  const recent = [...last50].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 15);
-  if (!recent.length) { sec.innerHTML = ''; return; }
+  sec.style.display = '';
+  // Prendre les 100 derniers ajoutés, trier par popularité, garder les 5 premiers
+  const pool = [...movies].filter(m => m.media_type === 'movie' || m.media_type === 'tv');
+  const last100 = pool.slice(-100);
+  const top = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 5);
+  if (!top.length) { sec.style.display = 'none'; return; }
+
   sec.innerHTML = `
-    <div class="recent-header">
-      <div class="recent-title">Populaires — Récemment ajoutés</div>
-      <span class="recent-more" onclick="setSort('pop');document.getElementById('sort-sel').value='pop';render()">MORE</span>
+    <div class="popular-header">
+      <div class="popular-title">Populaires — Récemment ajoutés</div>
+      <button class="popular-more" onclick="setSort('pop');document.getElementById('sort-sel').value='pop';render()">MORE</button>
     </div>
-    <div class="recent-grid">
-      ${recent.map(m => {
+    <div class="popular-grid">
+      ${top.map(m => {
         const idx = movies.indexOf(m);
-        const icon = m.media_type === 'tv' ? '📺' : m.media_type === 'collection' ? '🎞' : m.media_type === 'saga' ? '⚡' : '🎬';
-        return `<div class="recent-card" onclick="openDetail(event,${idx})">
-          ${m.poster ? `<img src="${m.poster}" loading="lazy" alt="${m.title}">` : `<div class="rc-no-poster">${icon}</div>`}
-          <div class="rc-title">${m.title}</div>
-          <div class="recent-card-overlay"><div class="recent-card-name">${m.title}</div></div>
+        const year = m.release_date ? m.release_date.slice(0,4) : '';
+        const icon = m.media_type === 'tv' ? '📺' : '🎬';
+        const qi = QICON[m.quality] || '';
+        return `<div class="popular-card" onclick="openDetail(event,${idx})">
+          ${m.poster
+            ? `<img src="${m.poster}" loading="lazy" alt="${escapeHtml(m.title)}">`
+            : `<div class="popular-card-no-poster">${icon}</div>`}
+          ${m.quality ? `<div class="popular-card-qbadge ${m.quality}">${qi}</div>` : ''}
+          <div class="popular-card-info">
+            <div class="popular-card-title">${escapeHtml(m.title)}</div>
+            ${year ? `<div class="popular-card-year">${year}</div>` : ''}
+          </div>
         </div>`;
       }).join('')}
     </div>`;
