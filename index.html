@@ -667,7 +667,7 @@ footer {
 .sc-section-title { font-family:'DM Serif Display',serif; font-size:22px; color:#fff; letter-spacing:-0.3px; }
 .sc-section-count { font-size:13px; color:rgba(255,255,255,0.3); font-weight:500; }
 .sc-section-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; padding:0 2rem 1rem; }
-.sc-section-grid.sc-grid-people { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
+.sc-section-grid.sc-grid-people { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
 .sc-empty { padding:5rem 2rem; text-align:center; color:rgba(255,255,255,0.25); font-size:14px; }
 .sc-empty-icon { font-size:46px; margin-bottom:1rem; opacity:0.2; }
 
@@ -1152,7 +1152,13 @@ function sorted(list) {
 // ══════════════════════════════════════════════════
 function updGenres() { updateActiveGenreBar();
   const all = new Set();
-  movies.forEach(m => (m.tags || []).forEach(t => all.add(t)));
+  movies.forEach(m => {
+    if (m.media_type === 'collection' || m.media_type === 'saga') return;
+    (m.tags || []).forEach(t => {
+      if (t === 'Acting' || t === 'Directing') return;
+      all.add(t);
+    });
+  });
   const bar = document.getElementById('genre-bar');
   bar.innerHTML = '';
   if (!all.size) return;
@@ -2460,7 +2466,7 @@ function buildSmartCollections() {
       const role = (m.person_role || '').toLowerCase();
       const isDirector = role.includes('directing') || role.includes('réalisa');
       const target = isDirector ? directorMap : actorMap;
-      if (!target[key]) target[key] = { id: key, name, films: [], poster: null };
+      if (!target[key]) target[key] = { id: key, name, role: isDirector ? 'Directing' : 'Acting', films: [], poster: null };
       if (!target[key].films.includes(m)) target[key].films.push(m);
     }
 
@@ -2471,7 +2477,7 @@ function buildSmartCollections() {
         const name = credit.name;
         const isDirector = (credit.role || '').toLowerCase().includes('directing');
         const target = isDirector ? directorMap : actorMap;
-        if (!target[key]) target[key] = { id: key, name, films: [], poster: null };
+        if (!target[key]) target[key] = { id: key, name, role: isDirector ? 'Directing' : 'Acting', films: [], poster: null };
         if (!target[key].films.includes(m)) target[key].films.push(m);
       });
     }
@@ -2606,11 +2612,10 @@ function renderScGroup(g, isPeople = false) {
     + '<div class="sc-group-poster-wrap ' + wrapClass + '">'
     + imageHtml
     + '<div class="sc-group-overlay">'
-    + '<div class="sc-group-name">' + escapeHtml(label) + '</div>'
-    + '<div class="sc-group-count">' + countLabel + '</div>'
-    + '</div>'
-    + '</div>'
-    + '</div>';
+  + (isPeople && g.role ? '<div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:3px;">' + escapeHtml(g.role) + '</div>' : '')
+  + '<div class="sc-group-name">' + escapeHtml(label) + '</div>'
+  + '<div class="sc-group-count">' + countLabel + '</div>'
+  + '</div>'
 }
 
  async function openScDetail(indices, label, posterSrc, tmdbCollectionId) {
