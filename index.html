@@ -74,15 +74,8 @@ header {
   font-size: 22px; letter-spacing: -0.5px; color:#fff;
   display:flex; align-items:center; gap:4px;
 }
-.logo-name em { color: #00c030; font-style: normal; }
-/* Letterboxd-style colored dots after logo */
-.logo-name::after {
-  content: '';
-  display: inline-flex;
-  width: 34px; height: 10px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='10'%3E%3Ccircle cx='5' cy='5' r='4.5' fill='%23ff8000'/%3E%3Ccircle cx='17' cy='5' r='4.5' fill='%2300c030'/%3E%3Ccircle cx='29' cy='5' r='4.5' fill='%230080ff'/%3E%3C/svg%3E") no-repeat center;
-  margin-left: 6px;
-}
+.logo-name em { color: #f59e0b; font-style: italic; }
+.logo-name::after { display:none; }
 
 /* NAV links */
 .lbd-nav { display:flex; align-items:center; height:52px; }
@@ -188,25 +181,35 @@ header {
 
 
 /* ── RECENT SECTION ───────────────────────────── */
-.recent-section { padding: 0.9rem 1.5rem 0; }
-.recent-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem; }
-.recent-title { font-size: 9px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,0.25); }
-.recent-line { flex: 1; height: 1px; background: linear-gradient(to right, rgba(255,255,255,0.07), transparent); }
-.recent-grid { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+.recent-section { padding: 1.2rem 1.5rem 0; }
+.recent-header { display: flex; align-items: center; justify-content:space-between; margin-bottom: 0.85rem; }
+.recent-title { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+.recent-line { display:none; }
+.recent-more { font-size:10px; color:rgba(255,255,255,0.25); font-weight:700; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer; transition:color 0.15s; }
+.recent-more:hover { color:rgba(255,255,255,0.6); }
+.recent-grid { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 6px; }
 .recent-grid::-webkit-scrollbar { display: none; }
 .recent-card {
-  flex-shrink: 0; width: 58px; cursor: pointer;
-  border-radius: 3px; overflow: hidden;
+  flex-shrink: 0; width: 100px; cursor: pointer;
+  border-radius: 4px; overflow: hidden;
   background: var(--s1);
-  transition: transform 0.18s, opacity 0.18s;
+  transition: transform 0.18s;
+  position: relative;
 }
-.recent-card:hover { transform: scale(1.06); opacity:0.9; }
+.recent-card:hover { transform: scale(1.04); }
 .recent-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
-.recent-card .rc-no-poster { width: 100%; aspect-ratio: 2/3; background: #1e242c; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--muted); }
+.recent-card .rc-no-poster { width: 100%; aspect-ratio: 2/3; background: #1e242c; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--muted); }
 .recent-card .rc-title { display:none; }
+.recent-card-overlay {
+  position:absolute; inset:0; opacity:0; transition:opacity 0.18s;
+  background:linear-gradient(to top,rgba(0,0,0,0.88) 0%,transparent 60%);
+  display:flex; flex-direction:column; justify-content:flex-end; padding:7px 6px;
+}
+.recent-card:hover .recent-card-overlay { opacity:1; }
+.recent-card-name { font-size:10px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* ── RESULTS BAR ─────────────────────────────── */
-.results-bar { padding: 0.5rem 1.5rem 0; display: flex; align-items: center; justify-content: space-between; }
+.results-bar { padding: 0.6rem 1.5rem 0; display: flex; align-items: center; justify-content: space-between; }
 .results-label { font-size: 10px; color: rgba(255,255,255,0.25); font-weight: 600; letter-spacing:0.5px; text-transform:uppercase; }
 .results-label strong { color: rgba(255,255,255,0.5); font-weight: 800; }
 
@@ -814,8 +817,8 @@ footer {
 <!-- RECENT SECTION -->
 <div class="recent-section" id="recent-section"></div>
 
-<!-- GENRE BAR -->
-<div class="genre-bar" id="genre-bar"></div>
+<!-- GENRE BAR — masqué, genres accessibles via dropdown search -->
+<div class="genre-bar" id="genre-bar" style="display:none;"></div>
 
 <!-- ACTIVE GENRE BAR -->
 <div class="genre-active-bar" id="active-genre-bar"></div>
@@ -1198,8 +1201,8 @@ function renderRecent() {
   if (!recent.length) { sec.innerHTML = ''; return; }
   sec.innerHTML = `
     <div class="recent-header">
-      <div class="recent-title">🔥 Populaires — récemment ajoutés</div>
-      <div class="recent-line"></div>
+      <div class="recent-title">Populaires — Récemment ajoutés</div>
+      <span class="recent-more" onclick="setSort('pop');document.getElementById('sort-sel').value='pop';render()">MORE</span>
     </div>
     <div class="recent-grid">
       ${recent.map(m => {
@@ -1208,6 +1211,7 @@ function renderRecent() {
         return `<div class="recent-card" onclick="openDetail(event,${idx})">
           ${m.poster ? `<img src="${m.poster}" loading="lazy" alt="${m.title}">` : `<div class="rc-no-poster">${icon}</div>`}
           <div class="rc-title">${m.title}</div>
+          <div class="recent-card-overlay"><div class="recent-card-name">${m.title}</div></div>
         </div>`;
       }).join('')}
     </div>`;
