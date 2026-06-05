@@ -212,11 +212,8 @@ header {
 .popular-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 110px 110px;
   gap: 4px;
-  /* hauteur fixe — affiches compactes */
-  height: calc(100vh - 52px - 40px - 60px - 30px);
-  max-height: 280px;
 }
 .popular-card:first-child { grid-row: 1 / 3; }
 
@@ -227,7 +224,7 @@ header {
   height: 100%;
 }
 .popular-card:hover { transform: scale(1.025); box-shadow: 0 12px 30px rgba(0,0,0,0.8); z-index:2; }
-.popular-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.popular-card img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
 .popular-card-no-poster {
   width: 100%; height: 100%; background: #1e242c;
   display: flex; align-items: center; justify-content: center; font-size: 22px;
@@ -1022,8 +1019,13 @@ footer {
 <div class="genre-active-bar" id="active-genre-bar"></div>
 
 <!-- RESULTS + GRID -->
-<div class="results-bar"><span class="results-label" id="rlabel"></span></div>
-<div class="content" id="ct"></div>
+<div class="results-bar" id="results-bar" style="display:none;"><span class="results-label" id="rlabel"></span></div>
+<div id="show-all-wrap" style="text-align:center;padding:18px 0 6px;">
+  <button id="show-all-btn" onclick="showAllFilms()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:rgba(255,255,255,0.6);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:10px 28px;cursor:pointer;transition:all 0.2s;">
+    ▼ &nbsp;Montrer tous les films
+  </button>
+</div>
+<div class="content" id="ct" style="display:none;"></div>
 
 <!-- FOOTER -->
 <footer>
@@ -1427,7 +1429,7 @@ function renderRecent() {
     <div class="popular-right">
       <div class="popular-right-header">
         <div class="popular-right-title">Les + populaires</div>
-        <button class="btn-voir-tous" onclick="setSort('pop');document.getElementById('sort-sel').value='pop';render();document.getElementById('popular-section').style.display='none';">Voir tous →</button>
+        <button class="btn-voir-tous" onclick="setSort('pop');document.getElementById('sort-sel').value='pop';showAllFilms();render();">Voir tous →</button>
       </div>
       <div class="top-list">
         ${top8.map((m, i) => {
@@ -1481,6 +1483,14 @@ function render() {
 
   const filtLabel = filts.size > 0 ? [...filts].map(f => QLABEL[f]).join(', ') : '';
   const gLabel    = [[...genreInc].map(g => '✓'+g), [...genreExc].map(g => '✕'+g)].flat().join(' ');
+  const hasFilter = filts.size > 0 || genreInc.size > 0 || genreExc.size > 0 || mediaFilt || q || activeYearFilter || activeNoteFilter || activeGenreDD;
+
+  // Auto-show grid when any filter active, auto-hide when none
+  if (hasFilter && !gridVisible) showAllFilms();
+  if (!hasFilter && gridVisible && document.activeElement.id !== 'show-all-btn') {
+    hideAllFilms();
+  }
+
   document.getElementById('rlabel').innerHTML =
     `Affichage de <strong>${list.length}</strong> film${list.length > 1 ? 's' : ''}${filtLabel ? ' — <strong>'+filtLabel+'</strong>' : ''}${gLabel ? ' — '+gLabel : ''}${q ? ' — <strong>"'+q+'"</strong>' : ''}`;
 
@@ -3117,6 +3127,21 @@ function escapeHtml(str) {
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 load();
+
+// ── Show/hide films grid ──────────────────────────
+let gridVisible = false;
+function showAllFilms() {
+  gridVisible = true;
+  document.getElementById('show-all-wrap').style.display = 'none';
+  document.getElementById('ct').style.display = '';
+  document.getElementById('results-bar').style.display = '';
+}
+function hideAllFilms() {
+  gridVisible = false;
+  document.getElementById('show-all-wrap').style.display = '';
+  document.getElementById('ct').style.display = 'none';
+  document.getElementById('results-bar').style.display = 'none';
+}
 
 // ── Filter bar dropdowns ─────────────────────────
 let activeYearFilter = '';
