@@ -187,9 +187,6 @@ header {
   grid-template-columns: 1fr 220px;
   gap: 14px;
   align-items: start;
-  /* hauteur max pour que tout tienne sans scroller */
-  max-height: calc(100vh - 52px - 40px - 60px);
-  overflow: hidden;
 }
 
 .popular-left {}
@@ -208,23 +205,26 @@ header {
 }
 .popular-more:hover { color: rgba(255,255,255,0.65); }
 
-/* Grille : 1 grande à gauche + 2 col à droite sur 2 rangées */
+/* Grille : 1 grande à gauche + 2×2 à droite */
 .popular-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr;
-  grid-template-rows: 110px 110px;
-  gap: 4px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 5px;
+  height: 220px;
 }
-.popular-card:first-child { grid-row: 1 / 3; }
+.popular-card:first-child {
+  grid-column: 1 / 3;
+}
 
 .popular-card {
-  position: relative; border-radius: 4px; overflow: hidden;
+  position: relative; border-radius: 5px; overflow: hidden;
   cursor: pointer; background: #1a1e24;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   height: 100%;
 }
-.popular-card:hover { transform: scale(1.025); box-shadow: 0 12px 30px rgba(0,0,0,0.8); z-index:2; }
-.popular-card img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+.popular-card:hover { transform: scale(1.03); box-shadow: 0 12px 30px rgba(0,0,0,0.8); z-index:2; }
+.popular-card img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; }
 .popular-card-no-poster {
   width: 100%; height: 100%; background: #1e242c;
   display: flex; align-items: center; justify-content: center; font-size: 22px;
