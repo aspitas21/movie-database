@@ -205,16 +205,15 @@ header {
 }
 .popular-more:hover { color: rgba(255,255,255,0.65); }
 
-/* Grille : 6 affiches qui remplissent toute la largeur, ratio 2:3 */
+/* Grille : 7 films avec tailles variées, ratio 2:3 */
 .popular-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: 2fr 1.2fr 1.5fr 1.2fr 1.8fr 1.2fr 1.4fr;
   gap: 6px;
+  align-items: end;
 }
-/* Première affiche 2x plus large */
-.popular-card:first-child {
-  grid-column: span 2;
-}
+.popular-card:first-child { grid-column: span 1; }
+
 .popular-card {
   position: relative;
   border-radius: 6px;
@@ -222,9 +221,17 @@ header {
   cursor: pointer;
   background: #1a1e24;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  /* ratio portrait 2:3 */
   aspect-ratio: 2 / 3;
 }
+/* Hauteurs variées pour casser l'effet quadrillage */
+.popular-card:nth-child(1) { align-self: stretch; }
+.popular-card:nth-child(2) { margin-top: 30px; }
+.popular-card:nth-child(3) { margin-top: 10px; }
+.popular-card:nth-child(4) { margin-top: 50px; }
+.popular-card:nth-child(5) { margin-top: 0px; }
+.popular-card:nth-child(6) { margin-top: 40px; }
+.popular-card:nth-child(7) { margin-top: 20px; }
+
 .popular-card:hover { transform: scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.85); z-index: 2; }
 .popular-card img {
   position: absolute; inset: 0;
@@ -1410,7 +1417,7 @@ function renderRecent() {
   sec.style.display = '';
 
   const last100 = pool.slice(-100);
-  const recent5 = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 8);
+  const recent5 = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 7);
   const top8 = [...pool].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 8);
 
   sec.innerHTML = `
