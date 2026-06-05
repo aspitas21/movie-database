@@ -180,19 +180,19 @@ header {
 
 
 
-/* ── POPULAR SHOWCASE — compact, tout dans l'écran ── */
+/* ── POPULAR SHOWCASE ── */
 .popular-section {
-  padding: 8px 1.5rem 6px;
+  padding: 10px 1.5rem 8px;
   display: grid;
-  grid-template-columns: 1fr 220px;
-  gap: 14px;
+  grid-template-columns: 1fr 200px;
+  gap: 16px;
   align-items: start;
 }
 
-.popular-left { overflow: hidden; min-width: 0; }
+.popular-left { min-width: 0; }
 .popular-header {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 5px;
+  margin-bottom: 7px;
 }
 .popular-title {
   font-size: 9px; font-weight: 800; letter-spacing: 2px;
@@ -205,12 +205,15 @@ header {
 }
 .popular-more:hover { color: rgba(255,255,255,0.65); }
 
-/* ── POPULAR GRID — 5 affiches portrait fixes ── */
+/* Grille : 6 affiches qui remplissent toute la largeur, ratio 2:3 */
 .popular-grid {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
   gap: 6px;
-  height: 210px;
+}
+/* Première affiche 2x plus large */
+.popular-card:first-child {
+  grid-column: span 2;
 }
 .popular-card {
   position: relative;
@@ -219,45 +222,39 @@ header {
   cursor: pointer;
   background: #1a1e24;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  flex-shrink: 0;
-  /* ratio portrait 2:3 → hauteur 210px → largeur = 210 * 2/3 = 140px */
-  width: 140px;
-  height: 210px;
+  /* ratio portrait 2:3 */
+  aspect-ratio: 2 / 3;
 }
-/* première carte plus large */
-.popular-card:first-child {
-  width: 200px;
-}
-.popular-card:hover { transform: scale(1.03); box-shadow: 0 12px 30px rgba(0,0,0,0.8); z-index:2; }
+.popular-card:hover { transform: scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.85); z-index: 2; }
 .popular-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center top;
   display: block;
 }
 .popular-card-no-poster {
-  width: 100%; height: 100%; background: #1e242c;
-  display: flex; align-items: center; justify-content: center; font-size: 22px;
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; background: #1e242c;
 }
 .popular-card::after {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-  height: 55%; pointer-events: none;
+  height: 55%; pointer-events: none; z-index: 1;
   background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);
 }
 .popular-card-info {
   position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 7px 8px 6px; z-index: 2;
+  padding: 8px 9px 7px; z-index: 2;
 }
 .popular-card-title {
   font-size: 10px; font-weight: 800; color: #fff;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.popular-card:first-child .popular-card-title { font-size: 12px; }
-.popular-card-year { font-size: 9px; color: rgba(255,255,255,0.45); font-weight: 600; margin-top: 1px; }
+.popular-card:first-child .popular-card-title { font-size: 13px; }
+.popular-card-year { font-size: 9px; color: rgba(255,255,255,0.45); font-weight: 600; margin-top: 2px; }
 .popular-card-qbadge {
-  position: absolute; top: 5px; right: 5px; z-index: 3;
-  font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 3px;
+  position: absolute; top: 6px; right: 6px; z-index: 3;
+  font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 3px;
 }
 .popular-card-qbadge.q4kr { background:rgba(192,132,252,0.25); color:#c084fc; }
 .popular-card-qbadge.q4kl { background:rgba(52,211,153,0.25); color:#34d399; }
@@ -268,7 +265,7 @@ header {
 .popular-right { display: flex; flex-direction: column; }
 .popular-right-header {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 .popular-right-title {
   font-size: 9px; font-weight: 800; letter-spacing: 2px;
