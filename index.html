@@ -1057,11 +1057,7 @@ footer {
 
 <!-- RESULTS + GRID -->
 <div class="results-bar" id="results-bar" style="display:none;"><span class="results-label" id="rlabel"></span></div>
-<div id="show-all-wrap" style="text-align:center;padding:18px 0 6px;">
-  <button id="show-all-btn" onclick="showAllFilms()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:rgba(255,255,255,0.6);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:10px 28px;cursor:pointer;transition:all 0.2s;">
-    ▼ &nbsp;Montrer tous les films
-  </button>
-</div>
+
 <div class="content" id="ct" style="display:none;"></div>
 
 <!-- FOOTER -->
@@ -3198,14 +3194,10 @@ let gridVisible = false;
 
 function showAllFilms() {
   gridVisible = true;
-  // Masquer accueil
   document.getElementById('popular-section').style.display = 'none';
-  document.getElementById('show-all-wrap').style.display = 'none';
-  // Afficher vue bibliothèque
   document.getElementById('back-bar').classList.add('visible');
   document.getElementById('ct').style.display = '';
   document.getElementById('results-bar').style.display = '';
-  // Scroll haut
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -3214,7 +3206,6 @@ function hideAllFilms() {
   document.getElementById('ct').style.display = 'none';
   document.getElementById('results-bar').style.display = 'none';
   document.getElementById('back-bar').classList.remove('visible');
-  document.getElementById('show-all-wrap').style.display = '';
 }
 
 function goHome() {
