@@ -1462,7 +1462,7 @@ function renderRecent() {
     <div class="popular-right">
       <div class="popular-right-header">
         <div class="popular-right-title">Les + populaires</div>
-        <button class="btn-voir-tous" onclick="setSort('pop');document.getElementById('sort-sel').value='pop';showAllFilms();render();">Voir tous →</button>
+        <button class="btn-voir-tous" onclick="showAllFilms();setSort('pop');document.getElementById('sort-sel').value='pop';render();">Voir tous →</button>
       </div>
       <div class="top-list">
         ${top8.map((m, i) => {
@@ -1522,6 +1522,11 @@ function render() {
   if (hasFilter && !gridVisible) showAllFilms();
   if (!hasFilter && gridVisible && !document.getElementById('back-bar').classList.contains('visible')) {
     hideAllFilms();
+  }
+  // Si on est en vue bibliothèque, forcer ct visible
+  if (gridVisible) {
+    document.getElementById('ct').style.display = '';
+    document.getElementById('results-bar').style.display = '';
   }
 
   document.getElementById('rlabel').innerHTML =
