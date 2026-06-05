@@ -2079,12 +2079,40 @@ async function loadFilmographyForCollection() {
   try {
     const res  = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
-    let cast = (data.cast || []).filter(m => m.media_type === 'movie' && m.poster_path);
-    cast.sort((a,b) => (b.release_date||'').localeCompare(a.release_date||''));
+
+    // Cast : films où la personne joue (acteur)
+    const castMovies = (data.cast || []).filter(m =>
+      m.media_type === 'movie' &&
+      m.poster_path &&
+      !m.adult &&
+      (m.vote_count || 0) >= 10
+    );
+
+    // Crew : films où la personne est réalisateur, scénariste, producteur...
+    const crewMovies = (data.crew || []).filter(m =>
+      m.media_type === 'movie' &&
+      m.poster_path &&
+      !m.adult &&
+      (m.vote_count || 0) >= 10 &&
+      ['Director','Screenplay','Writer','Producer','Story'].includes(m.job)
+    );
+
+    // Fusionner et dédupliquer par tmdb id, en gardant le plus haut vote_count
+    const byId = new Map();
+    [...castMovies, ...crewMovies].forEach(m => {
+      const existing = byId.get(m.id);
+      if (!existing || (m.vote_count||0) > (existing.vote_count||0)) byId.set(m.id, m);
+    });
+
+    let cast = [...byId.values()];
+    // Trier par popularité décroissante
+    cast.sort((a,b) => (b.popularity||0) - (a.popularity||0));
     cast = cast.slice(0, 200);
+
     currentFilmography = cast.map(movie => ({ movie, selected: false, quality: '1l' }));
     renderFilmographyList();
-    st.textContent = `${cast.length} films trouvés — triés du plus récent au plus ancien. Doublons autorisés.`;
+    const roles = castMovies.length && crewMovies.length ? 'acteur + réalisateur/créateur' : crewMovies.length ? 'réalisateur/créateur' : 'acteur';
+    st.textContent = `${cast.length} films trouvés (${roles}) — triés par popularité.`;
   } catch(e) {
     st.textContent = 'Erreur lors du chargement.';
   }
