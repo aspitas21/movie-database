@@ -302,7 +302,32 @@ header {
 .top-title { font-size: 11px; font-weight: 700; color: #e0e0f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .top-meta { font-size: 9px; color: rgba(255,255,255,0.28); margin-top: 1px; }
 
-/* ── MENUS DÉROULANTS FILTRE ── */
+/* ── VUE BIBLIOTHÈQUE (page tous les films) ── */
+#back-bar {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 1.5rem;
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: var(--hdr-h);
+  z-index: 50;
+}
+#back-bar.visible { display: flex; }
+.back-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border2);
+  border-radius: 7px; color: rgba(255,255,255,0.7);
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+  padding: 6px 14px; cursor: pointer; transition: all 0.15s;
+  letter-spacing: 0.3px;
+}
+.back-btn:hover { background: rgba(255,255,255,0.09); color: #fff; }
+.back-bar-title {
+  font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.5);
+  letter-spacing: 1px; text-transform: uppercase;
+}
 .dd-wrap { position: relative; flex-shrink: 0; }
 .dd-btn {
   display: flex; align-items: center; gap: 4px;
@@ -1015,6 +1040,12 @@ footer {
 
 
 
+<!-- BACK BAR (vue bibliothèque) -->
+<div id="back-bar">
+  <button class="back-btn" onclick="goHome()">← Accueil</button>
+  <span class="back-bar-title">Bibliothèque</span>
+</div>
+
 <!-- POPULAR SECTION -->
 <div class="popular-section" id="popular-section"></div>
 
@@ -1493,7 +1524,7 @@ function render() {
 
   // Auto-show grid when any filter active, auto-hide when none
   if (hasFilter && !gridVisible) showAllFilms();
-  if (!hasFilter && gridVisible && document.activeElement.id !== 'show-all-btn') {
+  if (!hasFilter && gridVisible && !document.getElementById('back-bar').classList.contains('visible')) {
     hideAllFilms();
   }
 
@@ -3164,17 +3195,54 @@ load();
 
 // ── Show/hide films grid ──────────────────────────
 let gridVisible = false;
+
 function showAllFilms() {
   gridVisible = true;
+  // Masquer accueil
+  document.getElementById('popular-section').style.display = 'none';
   document.getElementById('show-all-wrap').style.display = 'none';
+  // Afficher vue bibliothèque
+  document.getElementById('back-bar').classList.add('visible');
   document.getElementById('ct').style.display = '';
   document.getElementById('results-bar').style.display = '';
+  // Scroll haut
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 function hideAllFilms() {
   gridVisible = false;
-  document.getElementById('show-all-wrap').style.display = '';
   document.getElementById('ct').style.display = 'none';
   document.getElementById('results-bar').style.display = 'none';
+  document.getElementById('back-bar').classList.remove('visible');
+  document.getElementById('show-all-wrap').style.display = '';
+}
+
+function goHome() {
+  // Réinitialiser tous les filtres
+  filts.clear();
+  genreInc.clear();
+  genreExc.clear();
+  mediaFilt = '';
+  activeYearFilter = '';
+  activeNoteFilter = '';
+  activeGenreDD = '';
+  document.getElementById('sb').value = '';
+  // Réinitialiser les boutons qualité
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  const allChip = document.querySelector('.chip[data-q=""]');
+  if (allChip) allChip.classList.add('active');
+  // Réinitialiser les dd-btn couleurs
+  ['annee','note','genre'].forEach(id => {
+    const btn = document.getElementById('dd-' + id + '-btn');
+    if (btn) btn.style.color = '';
+    const menu = document.getElementById('dd-' + id);
+    if (menu) menu.querySelectorAll('a').forEach((a,i) => a.classList.toggle('active', i===0));
+  });
+  // Revenir à l'accueil
+  hideAllFilms();
+  document.getElementById('popular-section').style.display = '';
+  renderRecent();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── Filter bar dropdowns ─────────────────────────
