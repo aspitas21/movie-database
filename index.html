@@ -180,111 +180,156 @@ header {
 
 
 
-/* ── POPULAR SHOWCASE — nouvelle mise en page ── */
+/* ── POPULAR SHOWCASE — compact, tout dans l'écran ── */
 .popular-section {
-  padding: 1.2rem 1.5rem 0;
+  padding: 8px 1.5rem 6px;
   display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 20px;
+  grid-template-columns: 1fr 220px;
+  gap: 14px;
   align-items: start;
+  /* hauteur max pour que tout tienne sans scroller */
+  max-height: calc(100vh - 52px - 40px - 60px);
+  overflow: hidden;
 }
 
-/* Colonne gauche : grande grille d'affiches */
 .popular-left {}
 .popular-header {
-  display: flex; align-items: baseline; justify-content: space-between;
-  margin-bottom: 0.8rem;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  padding-bottom: 0.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 5px;
 }
 .popular-title {
-  font-size: 10px; font-weight: 800; letter-spacing: 2px;
-  text-transform: uppercase; color: rgba(255,255,255,0.45);
+  font-size: 9px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,0.35);
 }
 .popular-more {
-  font-size: 10px; color: rgba(255,255,255,0.25); font-weight: 700;
+  font-size: 9px; color: rgba(255,255,255,0.22); font-weight: 700;
   letter-spacing: 0.5px; text-transform: uppercase;
   cursor: pointer; transition: color 0.15s; border:none; background:none;
 }
 .popular-more:hover { color: rgba(255,255,255,0.65); }
 
-/* Grille : 1 grande à gauche + 2 colonnes à droite */
+/* Grille : 1 grande à gauche + 2 col à droite sur 2 rangées */
 .popular-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 5px;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 4px;
+  /* hauteur fixe — affiches compactes */
+  height: calc(100vh - 52px - 40px - 60px - 30px);
+  max-height: 280px;
 }
-/* La 1ère carte s'étend sur 2 rangées */
-.popular-card:first-child {
-  grid-row: 1 / 3;
-}
+.popular-card:first-child { grid-row: 1 / 3; }
+
 .popular-card {
-  position: relative; border-radius: 5px; overflow: hidden;
+  position: relative; border-radius: 4px; overflow: hidden;
   cursor: pointer; background: #1a1e24;
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
 }
-.popular-card:hover { transform: scale(1.025); box-shadow: 0 16px 40px rgba(0,0,0,0.8); z-index:2; }
-.popular-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+.popular-card:hover { transform: scale(1.025); box-shadow: 0 12px 30px rgba(0,0,0,0.8); z-index:2; }
+.popular-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .popular-card-no-poster {
-  width: 100%; aspect-ratio: 2/3; background: #1e242c;
-  display: flex; align-items: center; justify-content: center; font-size: 28px;
+  width: 100%; height: 100%; background: #1e242c;
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
 }
 .popular-card::after {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-  height: 60%; pointer-events: none;
+  height: 55%; pointer-events: none;
   background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);
 }
 .popular-card-info {
   position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 10px 9px 8px; z-index: 2;
+  padding: 7px 8px 6px; z-index: 2;
 }
 .popular-card-title {
-  font-size: 11px; font-weight: 800; color: #fff;
+  font-size: 10px; font-weight: 800; color: #fff;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.popular-card:first-child .popular-card-title { font-size: 14px; }
-.popular-card-year { font-size: 10px; color: rgba(255,255,255,0.45); font-weight: 600; margin-top: 2px; }
+.popular-card:first-child .popular-card-title { font-size: 12px; }
+.popular-card-year { font-size: 9px; color: rgba(255,255,255,0.45); font-weight: 600; margin-top: 1px; }
 .popular-card-qbadge {
-  position: absolute; top: 7px; right: 7px; z-index: 3;
-  font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 3px;
+  position: absolute; top: 5px; right: 5px; z-index: 3;
+  font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 3px;
 }
 .popular-card-qbadge.q4kr { background:rgba(192,132,252,0.25); color:#c084fc; }
 .popular-card-qbadge.q4kl { background:rgba(52,211,153,0.25); color:#34d399; }
 .popular-card-qbadge.q1r  { background:rgba(56,189,248,0.2);  color:#38bdf8; }
 .popular-card-qbadge.q1l  { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.3); }
 
-/* Colonne droite : top populaires liste */
-.popular-right {}
-.popular-right-title {
-  font-size: 10px; font-weight: 800; letter-spacing: 2px;
-  text-transform: uppercase; color: rgba(255,255,255,0.45);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  padding-bottom: 0.5rem; margin-bottom: 0.7rem;
+/* Colonne droite : top populaires liste compacte */
+.popular-right { display: flex; flex-direction: column; }
+.popular-right-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 5px;
 }
-.top-list { display: flex; flex-direction: column; gap: 3px; }
+.popular-right-title {
+  font-size: 9px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,0.35);
+}
+.btn-voir-tous {
+  padding: 3px 9px; background: rgba(0,192,48,0.12);
+  border: 1px solid rgba(0,192,48,0.25); border-radius: 4px;
+  color: #00c030; font-size: 9px; font-weight: 800; cursor: pointer;
+  letter-spacing: 0.3px; text-transform: uppercase; transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-voir-tous:hover { background: rgba(0,192,48,0.22); border-color: rgba(0,192,48,0.5); }
+
+.top-list { display: flex; flex-direction: column; gap: 1px; }
 .top-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 5px 7px; border-radius: 5px; cursor: pointer;
+  display: flex; align-items: center; gap: 7px;
+  padding: 4px 5px; border-radius: 4px; cursor: pointer;
   transition: background 0.15s;
 }
 .top-item:hover { background: rgba(255,255,255,0.04); }
 .top-rank {
-  font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.1);
-  min-width: 20px; text-align: center; font-variant-numeric: tabular-nums; flex-shrink: 0;
+  font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.12);
+  min-width: 18px; text-align: center; flex-shrink: 0;
 }
 .top-thumb {
-  width: 36px; height: 52px; border-radius: 4px; object-fit: cover;
+  width: 30px; height: 44px; border-radius: 3px; object-fit: cover;
   background: #1e242c; flex-shrink: 0;
 }
 .top-thumb-placeholder {
-  width: 36px; height: 52px; border-radius: 4px;
+  width: 30px; height: 44px; border-radius: 3px;
   background: #1e242c; display: flex; align-items: center; justify-content: center;
-  font-size: 16px; flex-shrink: 0;
+  font-size: 14px; flex-shrink: 0;
 }
 .top-info { flex: 1; min-width: 0; }
-.top-title { font-size: 12px; font-weight: 700; color: #e8e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.top-meta { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+.top-title { font-size: 11px; font-weight: 700; color: #e0e0f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-meta { font-size: 9px; color: rgba(255,255,255,0.28); margin-top: 1px; }
+
+/* ── MENUS DÉROULANTS FILTRE ── */
+.dd-wrap { position: relative; flex-shrink: 0; }
+.dd-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 10px; height: 40px;
+  border: none; border-bottom: 2px solid transparent;
+  background: transparent; color: rgba(255,255,255,0.45);
+  font-size: 11px; font-weight: 700; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: color 0.15s; white-space: nowrap;
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.dd-btn:hover { color: rgba(255,255,255,0.8); }
+.dd-btn.open { color: #fff; border-bottom-color: #00c030; }
+.dd-btn svg { transition: transform 0.15s; }
+.dd-btn.open svg { transform: rotate(180deg); }
+.dd-menu {
+  display: none; position: absolute; top: calc(100% + 2px); left: 0;
+  background: #1c1c28; border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 5px; min-width: 150px; z-index: 300;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.7);
+}
+.dd-menu.open { display: block; }
+.dd-menu a {
+  display: block; padding: 7px 10px;
+  color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 600;
+  border-radius: 5px; cursor: pointer; transition: all 0.12s;
+  text-decoration: none;
+}
+.dd-menu a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.dd-menu a.active { color: #00c030; }
+.dd-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 4px 5px; }
 
 /* legacy recent-* hidden */
 .recent-section { display:none; }
@@ -888,6 +933,72 @@ footer {
   <button class="chip" data-q="1r"  onclick="setFilter('1r',this)">🍀 1080p Remux <span class="chip-count" id="cnt-1r"></span></button>
   <button class="chip" data-q="1l"  onclick="setFilter('1l',this)">🎬 1080p Light <span class="chip-count" id="cnt-1l"></span></button>
   <div class="bar-sep"></div>
+
+  <!-- Année -->
+  <div class="dd-wrap">
+    <button class="dd-btn" id="dd-annee-btn" onclick="toggleDD('annee')">
+      Année <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="dd-menu" id="dd-annee">
+      <a onclick="applyYearFilter('');toggleDD('annee')" class="active" id="dd-y-all">Toutes les années</a>
+      <div class="dd-divider"></div>
+      <a onclick="applyYearFilter('2026');toggleDD('annee')" id="dd-y-2026">2026</a>
+      <a onclick="applyYearFilter('2025');toggleDD('annee')" id="dd-y-2025">2025</a>
+      <a onclick="applyYearFilter('2024');toggleDD('annee')" id="dd-y-2024">2024</a>
+      <a onclick="applyYearFilter('2023');toggleDD('annee')" id="dd-y-2023">2023</a>
+      <a onclick="applyYearFilter('2022');toggleDD('annee')" id="dd-y-2022">2022</a>
+      <a onclick="applyYearFilter('2010-2019');toggleDD('annee')" id="dd-y-2010">2010 – 2019</a>
+      <a onclick="applyYearFilter('2000-2009');toggleDD('annee')" id="dd-y-2000">2000 – 2009</a>
+      <a onclick="applyYearFilter('avant-2000');toggleDD('annee')" id="dd-y-old">Avant 2000</a>
+    </div>
+  </div>
+
+  <!-- Note -->
+  <div class="dd-wrap">
+    <button class="dd-btn" id="dd-note-btn" onclick="toggleDD('note')">
+      Note <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="dd-menu" id="dd-note">
+      <a onclick="applyNoteFilter('');toggleDD('note')" class="active" id="dd-n-all">Toutes les notes</a>
+      <div class="dd-divider"></div>
+      <a onclick="applyNoteFilter('9');toggleDD('note')" id="dd-n-9">⭐ 9+ Exceptionnel</a>
+      <a onclick="applyNoteFilter('8');toggleDD('note')" id="dd-n-8">⭐ 8+ Excellent</a>
+      <a onclick="applyNoteFilter('7');toggleDD('note')" id="dd-n-7">⭐ 7+ Très bon</a>
+      <a onclick="applyNoteFilter('6');toggleDD('note')" id="dd-n-6">⭐ 6+ Bon</a>
+      <a onclick="applyNoteFilter('0-5');toggleDD('note')" id="dd-n-low">⭐ Moins de 5</a>
+    </div>
+  </div>
+
+  <!-- Genre -->
+  <div class="dd-wrap">
+    <button class="dd-btn" id="dd-genre-btn" onclick="toggleDD('genre')">
+      Genre <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="dd-menu" id="dd-genre" style="min-width:180px;max-height:320px;overflow-y:auto;" id="dd-genre-menu">
+      <a onclick="applyGenreDD('');toggleDD('genre')" class="active" id="dd-g-all">Tous les genres</a>
+      <div class="dd-divider"></div>
+      <a onclick="applyGenreDD('Action');toggleDD('genre')">Action</a>
+      <a onclick="applyGenreDD('Aventure');toggleDD('genre')">Aventure</a>
+      <a onclick="applyGenreDD('Animation');toggleDD('genre')">Animation</a>
+      <a onclick="applyGenreDD('Comédie');toggleDD('genre')">Comédie</a>
+      <a onclick="applyGenreDD('Crime');toggleDD('genre')">Crime</a>
+      <a onclick="applyGenreDD('Documentaire');toggleDD('genre')">Documentaire</a>
+      <a onclick="applyGenreDD('Drame');toggleDD('genre')">Drame</a>
+      <a onclick="applyGenreDD('Familial');toggleDD('genre')">Familial</a>
+      <a onclick="applyGenreDD('Fantastique');toggleDD('genre')">Fantastique</a>
+      <a onclick="applyGenreDD('Histoire');toggleDD('genre')">Histoire</a>
+      <a onclick="applyGenreDD('Horreur');toggleDD('genre')">Horreur</a>
+      <a onclick="applyGenreDD('Musique');toggleDD('genre')">Musique</a>
+      <a onclick="applyGenreDD('Mystère');toggleDD('genre')">Mystère</a>
+      <a onclick="applyGenreDD('Romance');toggleDD('genre')">Romance</a>
+      <a onclick="applyGenreDD('Science-Fiction');toggleDD('genre')">Science-Fiction</a>
+      <a onclick="applyGenreDD('Thriller');toggleDD('genre')">Thriller</a>
+      <a onclick="applyGenreDD('Guerre');toggleDD('genre')">Guerre</a>
+      <a onclick="applyGenreDD('Western');toggleDD('genre')">Western</a>
+    </div>
+  </div>
+
+  <div class="bar-sep"></div>
   <select class="bar-select" id="sort-sel" onchange="setSort(this.value)">
     <option value="added">📅 Date ajout</option>
     <option value="alpha">🔤 A → Z</option>
@@ -1281,7 +1392,7 @@ function updCounts() {
 function renderRecent() {
   const sec = document.getElementById('popular-section');
   if (!sec) return;
-  if (filts.size > 0 || genreInc.size > 0 || genreExc.size > 0 || mediaFilt || document.getElementById('sb').value.trim()) {
+  if (filts.size > 0 || genreInc.size > 0 || genreExc.size > 0 || mediaFilt || document.getElementById('sb').value.trim() || activeYearFilter || activeNoteFilter || activeGenreDD) {
     sec.style.display = 'none'; return;
   }
   const pool = [...movies].filter(m => m.media_type === 'movie' || m.media_type === 'tv');
@@ -1314,7 +1425,10 @@ function renderRecent() {
       </div>
     </div>
     <div class="popular-right">
-      <div class="popular-right-title">Les + populaires</div>
+      <div class="popular-right-header">
+        <div class="popular-right-title">Les + populaires</div>
+        <button class="btn-voir-tous" onclick="setSort('pop');document.getElementById('sort-sel').value='pop';render();document.getElementById('popular-section').style.display='none';">Voir tous →</button>
+      </div>
       <div class="top-list">
         ${top8.map((m, i) => {
           const idx = movies.indexOf(m);
@@ -1347,6 +1461,18 @@ function render() {
   if (genreInc.size > 0) list = list.filter(m => [...genreInc].every(g => (m.tags||[]).includes(g)));
   if (genreExc.size > 0) list = list.filter(m => [...genreExc].every(g => !(m.tags||[]).includes(g)));
   if (q) list = list.filter(m => m.title.toLowerCase().includes(q));
+  // ── filtres déroulants barre
+  if (activeYearFilter) {
+    if (activeYearFilter === '2010-2019') list = list.filter(m => { const y=parseInt((m.release_date||'').slice(0,4)); return y>=2010&&y<=2019; });
+    else if (activeYearFilter === '2000-2009') list = list.filter(m => { const y=parseInt((m.release_date||'').slice(0,4)); return y>=2000&&y<=2009; });
+    else if (activeYearFilter === 'avant-2000') list = list.filter(m => { const y=parseInt((m.release_date||'').slice(0,4)); return y<2000; });
+    else list = list.filter(m => (m.release_date||'').startsWith(activeYearFilter));
+  }
+  if (activeNoteFilter) {
+    if (activeNoteFilter === '0-5') list = list.filter(m => (m.vote_average||0) < 5);
+    else list = list.filter(m => (m.vote_average||0) >= parseFloat(activeNoteFilter));
+  }
+  if (activeGenreDD) list = list.filter(m => (m.tags||[]).includes(activeGenreDD));
     // Appliquer le filtre de la smart collection si actif
   if (window._groupFilter && window._groupFilter.size) {
     list = list.filter(m => window._groupFilter.has(movies.indexOf(m)));
@@ -2991,6 +3117,65 @@ function escapeHtml(str) {
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 load();
+
+// ── Filter bar dropdowns ─────────────────────────
+let activeYearFilter = '';
+let activeNoteFilter = '';
+let activeGenreDD    = '';
+
+function toggleDD(id) {
+  const menu = document.getElementById('dd-' + id);
+  const btn  = document.getElementById('dd-' + id + '-btn');
+  const isOpen = menu && menu.classList.contains('open');
+  // close all
+  document.querySelectorAll('.dd-menu').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.dd-btn').forEach(b => b.classList.remove('open'));
+  if (!isOpen && menu) { menu.classList.add('open'); btn && btn.classList.add('open'); }
+}
+// Close on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dd-wrap')) {
+    document.querySelectorAll('.dd-menu').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.dd-btn').forEach(b => b.classList.remove('open'));
+  }
+});
+
+function applyYearFilter(val) {
+  activeYearFilter = val;
+  // Update active state in menu
+  document.querySelectorAll('#dd-annee a').forEach(a => a.classList.remove('active'));
+  const map = {'':'dd-y-all','2026':'dd-y-2026','2025':'dd-y-2025','2024':'dd-y-2024','2023':'dd-y-2023','2022':'dd-y-2022','2010-2019':'dd-y-2010','2000-2009':'dd-y-2000','avant-2000':'dd-y-old'};
+  const el = document.getElementById(map[val]);
+  if (el) el.classList.add('active');
+  const btn = document.getElementById('dd-annee-btn');
+  if (btn) btn.style.color = val ? '#fff' : '';
+  render();
+}
+
+function applyNoteFilter(val) {
+  activeNoteFilter = val;
+  document.querySelectorAll('#dd-note a').forEach(a => a.classList.remove('active'));
+  const map = {'':'dd-n-all','9':'dd-n-9','8':'dd-n-8','7':'dd-n-7','6':'dd-n-6','0-5':'dd-n-low'};
+  const el = document.getElementById(map[val]);
+  if (el) el.classList.add('active');
+  const btn = document.getElementById('dd-note-btn');
+  if (btn) btn.style.color = val ? '#fff' : '';
+  render();
+}
+
+function applyGenreDD(val) {
+  activeGenreDD = val;
+  document.querySelectorAll('#dd-genre a').forEach(a => a.classList.remove('active'));
+  if (!val) { const el = document.getElementById('dd-g-all'); if(el) el.classList.add('active'); }
+  else {
+    document.querySelectorAll('#dd-genre a').forEach(a => {
+      if (a.textContent.trim() === val) a.classList.add('active');
+    });
+  }
+  const btn = document.getElementById('dd-genre-btn');
+  if (btn) btn.style.color = val ? '#fff' : '';
+  render();
+}
 
 // ── Genre dropdown ──────────────────────────────
 function showGenreDropdown() {
