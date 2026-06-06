@@ -3293,82 +3293,36 @@ document.addEventListener('click', e => {
 
 function applyYearFilter(val) {
   activeYearFilter = val;
-  // Update active state in menu
   document.querySelectorAll('#dd-annee a').forEach(a => a.classList.remove('active'));
-  const map = {'':'dd-y-all','2026':'dd-y-2026','2025':'dd-y-2025','2024':'dd-y-2024','2023':'dd-y-2023','2022':'dd-y-2022','2010-2019':'dd-y-2010','2000-2009':'dd-y-2000','avant-2000':'dd-y-old'};
-  const el = document.getElementById(map[val]);
-  if (el) el.classList.add('active');
+  if (!val) document.getElementById('dd-y-all').classList.add('active');
   const btn = document.getElementById('dd-annee-btn');
-  if (btn) btn.style.color = val ? '#fff' : '';
+  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val ? yearLabel(val)+' ' : 'Année '; }
+  closeAllDD();
+  if (val) { showAllFilms(); }
   render();
 }
 
 function applyNoteFilter(val) {
   activeNoteFilter = val;
   document.querySelectorAll('#dd-note a').forEach(a => a.classList.remove('active'));
-  const map = {'':'dd-n-all','9':'dd-n-9','8':'dd-n-8','7':'dd-n-7','6':'dd-n-6','0-5':'dd-n-low'};
-  const el = document.getElementById(map[val]);
-  if (el) el.classList.add('active');
+  if (!val) document.getElementById('dd-n-all').classList.add('active');
   const btn = document.getElementById('dd-note-btn');
-  if (btn) btn.style.color = val ? '#fff' : '';
+  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val ? 'Note '+val+'+ ' : 'Note '; }
+  closeAllDD();
+  if (val) { showAllFilms(); }
   render();
 }
 
 function applyGenreDD(val) {
   activeGenreDD = val;
   document.querySelectorAll('#dd-genre a').forEach(a => a.classList.remove('active'));
-  if (!val) { const el = document.getElementById('dd-g-all'); if(el) el.classList.add('active'); }
-  else {
-    document.querySelectorAll('#dd-genre a').forEach(a => {
-      if (a.textContent.trim() === val) a.classList.add('active');
-    });
-  }
-  const btn = document.getElementById('dd-genre-btn');
-  if (btn) btn.style.color = val ? '#fff' : '';
-  render();
-}
-
-// ── Scroll → retour en haut ──────────────────────
-window.addEventListener('scroll', () => {
-  const btn = document.getElementById('back-to-top');
-  if (btn) btn.classList.toggle('visible', window.scrollY > 300);
-});
-
-// ── Dropdown pick functions ──────────────────────
-function pickYear(val) {
-  activeYearFilter = val;
-  // Mettre à jour active dans le menu
-  document.querySelectorAll('#dd-annee a').forEach(a => a.classList.remove('active'));
-  if (!val) document.getElementById('dd-y-all').classList.add('active');
-  const btn = document.getElementById('dd-annee-btn');
-  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val ? yearLabel(val)+' ' : 'Année '; }
-  closeAllDD();
-  showAllFilms(); render();
-}
-function yearLabel(v) {
-  const map = {'era-classic':'Classic Era','era-golden':'Golden Age','era-modern':'Modern Era','2020s':'2020s','2010s':'2010s','2000s':'2000s','1990s':'1990s','1980s':'1980s','1970s':'1970s','1960s':'1960s','1950s':'1950s'};
-  return map[v] || v;
-}
-
-function pickNote(val) {
-  activeNoteFilter = val;
-  document.querySelectorAll('#dd-note a').forEach(a => a.classList.remove('active'));
-  if (!val) document.getElementById('dd-n-all').classList.add('active');
-  const btn = document.getElementById('dd-note-btn');
-  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val ? 'Note '+val+'+' : 'Note '; }
-  closeAllDD();
-  showAllFilms(); render();
-}
-
-function pickGenre(val) {
-  activeGenreDD = val;
-  document.querySelectorAll('#dd-genre a').forEach(a => a.classList.remove('active'));
   if (!val) { document.getElementById('dd-g-all').classList.add('active'); }
   else { document.querySelectorAll('#dd-genre a').forEach(a => { if(a.textContent.trim()===val) a.classList.add('active'); }); }
   const btn = document.getElementById('dd-genre-btn');
-  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val || 'Genre '; btn.childNodes[0].textContent += ' '; }
+  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = (val || 'Genre')+' '; }
   closeAllDD();
-  showAllFilms(); render();
+  if (val) { showAllFilms(); }
+  render();
 }
 
 function closeAllDD() {
@@ -3376,8 +3330,21 @@ function closeAllDD() {
   document.querySelectorAll('.dd-btn').forEach(b => b.classList.remove('open'));
 }
 
-// Compatibilité avec anciens appels
-function applyYearFilter(v) { pickYear(v); }
+function yearLabel(v) {
+  const map = {'era-classic':'Classic Era','era-golden':'Golden Age','era-modern':'Modern Era','2020s':'2020s','2010s':'2010s','2000s':'2000s','1990s':'1990s','1980s':'1980s','1970s':'1970s','1960s':'1960s','1950s':'1950s'};
+  return map[v] || v;
+}
+
+// pick* = alias directs
+function pickYear(v)  { applyYearFilter(v); }
+function pickNote(v)  { applyNoteFilter(v); }
+function pickGenre(v) { applyGenreDD(v); }
+
+// ── Scroll → retour en haut ──────────────────────
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('back-to-top');
+  if (btn) btn.classList.toggle('visible', window.scrollY > 300);
+});
 function applyNoteFilter(v) { pickNote(v); }
 function applyGenreDD(v)    { pickGenre(v); }
 
