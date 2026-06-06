@@ -1046,19 +1046,19 @@ footer {
   <span class="back-bar-title">Bibliothèque</span>
 </div>
 
-<!-- POPULAR SECTION -->
-<div class="popular-section" id="popular-section"></div>
+<!-- VUE ACCUEIL -->
+<div id="home-view">
+  <div class="popular-section" id="popular-section"></div>
+</div>
 
-<!-- GENRE BAR — masqué, genres accessibles via dropdown search -->
-<div class="genre-bar" id="genre-bar" style="display:none;"></div>
-
-<!-- ACTIVE GENRE BAR -->
-<div class="genre-active-bar" id="active-genre-bar"></div>
-
-<!-- RESULTS + GRID -->
-<div class="results-bar" id="results-bar" style="display:none;"><span class="results-label" id="rlabel"></span></div>
-
-<div class="content" id="ct" style="display:none;"></div>
+<!-- VUE BIBLIOTHÈQUE -->
+<div id="library-view" style="display:none;">
+  <!-- GENRE BAR -->
+  <div class="genre-bar" id="genre-bar" style="display:none;"></div>
+  <div class="genre-active-bar" id="active-genre-bar"></div>
+  <div class="results-bar" id="results-bar"><span class="results-label" id="rlabel"></span></div>
+  <div class="content" id="ct"></div>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -1522,11 +1522,6 @@ function render() {
   if (hasFilter && !gridVisible) showAllFilms();
   if (!hasFilter && gridVisible && !document.getElementById('back-bar').classList.contains('visible')) {
     hideAllFilms();
-  }
-  // Si on est en vue bibliothèque, forcer ct visible
-  if (gridVisible) {
-    document.getElementById('ct').style.display = '';
-    document.getElementById('results-bar').style.display = '';
   }
 
   document.getElementById('rlabel').innerHTML =
@@ -3199,46 +3194,35 @@ let gridVisible = false;
 
 function showAllFilms() {
   gridVisible = true;
-  document.getElementById('popular-section').style.display = 'none';
+  document.getElementById('home-view').style.display = 'none';
+  document.getElementById('library-view').style.display = '';
   document.getElementById('back-bar').classList.add('visible');
-  document.getElementById('ct').style.display = '';
-  document.getElementById('results-bar').style.display = '';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0 });
 }
 
 function hideAllFilms() {
   gridVisible = false;
-  document.getElementById('ct').style.display = 'none';
-  document.getElementById('results-bar').style.display = 'none';
+  document.getElementById('library-view').style.display = 'none';
   document.getElementById('back-bar').classList.remove('visible');
 }
 
 function goHome() {
-  // Réinitialiser tous les filtres
-  filts.clear();
-  genreInc.clear();
-  genreExc.clear();
-  mediaFilt = '';
-  activeYearFilter = '';
-  activeNoteFilter = '';
-  activeGenreDD = '';
+  filts.clear(); genreInc.clear(); genreExc.clear();
+  mediaFilt = ''; activeYearFilter = ''; activeNoteFilter = ''; activeGenreDD = '';
   document.getElementById('sb').value = '';
-  // Réinitialiser les boutons qualité
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   const allChip = document.querySelector('.chip[data-q=""]');
   if (allChip) allChip.classList.add('active');
-  // Réinitialiser les dd-btn couleurs
   ['annee','note','genre'].forEach(id => {
     const btn = document.getElementById('dd-' + id + '-btn');
     if (btn) btn.style.color = '';
     const menu = document.getElementById('dd-' + id);
     if (menu) menu.querySelectorAll('a').forEach((a,i) => a.classList.toggle('active', i===0));
   });
-  // Revenir à l'accueil
   hideAllFilms();
-  document.getElementById('popular-section').style.display = '';
+  document.getElementById('home-view').style.display = '';
   renderRecent();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0 });
 }
 
 // ── Filter bar dropdowns ─────────────────────────
