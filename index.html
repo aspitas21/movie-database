@@ -328,6 +328,27 @@ header {
   font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.5);
   letter-spacing: 1px; text-transform: uppercase;
 }
+.dd-section-label {
+  font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; color: rgba(255,255,255,0.2);
+  padding: 6px 10px 2px;
+}
+.dd-sub { font-size: 10px; color: rgba(255,255,255,0.25); font-weight: 400; }
+
+/* ── RETOUR EN HAUT ── */
+#back-to-top {
+  position: fixed; bottom: 28px; right: 28px; z-index: 999;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(30,30,42,0.95); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7); font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+  opacity: 0; pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+#back-to-top.visible { opacity: 1; pointer-events: all; }
+#back-to-top:hover { background: rgba(50,50,70,0.98); color: #fff; transform: translateY(-2px); }
+
 .dd-wrap { position: relative; flex-shrink: 0; }
 .dd-btn {
   display: flex; align-items: center; gap: 4px;
@@ -967,17 +988,23 @@ footer {
     <button class="dd-btn" id="dd-annee-btn" onclick="toggleDD('annee')">
       Année <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="dd-menu" id="dd-annee">
-      <a onclick="applyYearFilter('');toggleDD('annee')" class="active" id="dd-y-all">Toutes les années</a>
+    <div class="dd-menu" id="dd-annee" style="min-width:190px;">
+      <a onclick="pickYear('')" class="active" id="dd-y-all">Toutes les années</a>
       <div class="dd-divider"></div>
-      <a onclick="applyYearFilter('2026');toggleDD('annee')" id="dd-y-2026">2026</a>
-      <a onclick="applyYearFilter('2025');toggleDD('annee')" id="dd-y-2025">2025</a>
-      <a onclick="applyYearFilter('2024');toggleDD('annee')" id="dd-y-2024">2024</a>
-      <a onclick="applyYearFilter('2023');toggleDD('annee')" id="dd-y-2023">2023</a>
-      <a onclick="applyYearFilter('2022');toggleDD('annee')" id="dd-y-2022">2022</a>
-      <a onclick="applyYearFilter('2010-2019');toggleDD('annee')" id="dd-y-2010">2010 – 2019</a>
-      <a onclick="applyYearFilter('2000-2009');toggleDD('annee')" id="dd-y-2000">2000 – 2009</a>
-      <a onclick="applyYearFilter('avant-2000');toggleDD('annee')" id="dd-y-old">Avant 2000</a>
+      <div class="dd-section-label">Ères</div>
+      <a onclick="pickYear('era-classic')">🎞 Classic Era &nbsp;<span class="dd-sub">1900 – 1949</span></a>
+      <a onclick="pickYear('era-golden')">✨ Golden Age &nbsp;<span class="dd-sub">1950 – 1999</span></a>
+      <a onclick="pickYear('era-modern')">🔥 Modern Era &nbsp;<span class="dd-sub">2000 – aujourd'hui</span></a>
+      <div class="dd-divider"></div>
+      <div class="dd-section-label">Décennies</div>
+      <a onclick="pickYear('2020s')">2020s</a>
+      <a onclick="pickYear('2010s')">2010s</a>
+      <a onclick="pickYear('2000s')">2000s</a>
+      <a onclick="pickYear('1990s')">1990s</a>
+      <a onclick="pickYear('1980s')">1980s</a>
+      <a onclick="pickYear('1970s')">1970s</a>
+      <a onclick="pickYear('1960s')">1960s</a>
+      <a onclick="pickYear('1950s')">1950s</a>
     </div>
   </div>
 
@@ -987,13 +1014,13 @@ footer {
       Note <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="dd-menu" id="dd-note">
-      <a onclick="applyNoteFilter('');toggleDD('note')" class="active" id="dd-n-all">Toutes les notes</a>
+      <a onclick="pickNote('')" class="active" id="dd-n-all">Toutes les notes</a>
       <div class="dd-divider"></div>
-      <a onclick="applyNoteFilter('9');toggleDD('note')" id="dd-n-9">⭐ 9+ Exceptionnel</a>
-      <a onclick="applyNoteFilter('8');toggleDD('note')" id="dd-n-8">⭐ 8+ Excellent</a>
-      <a onclick="applyNoteFilter('7');toggleDD('note')" id="dd-n-7">⭐ 7+ Très bon</a>
-      <a onclick="applyNoteFilter('6');toggleDD('note')" id="dd-n-6">⭐ 6+ Bon</a>
-      <a onclick="applyNoteFilter('0-5');toggleDD('note')" id="dd-n-low">⭐ Moins de 5</a>
+      <a onclick="pickNote('9')">⭐ 9+&nbsp; Exceptionnel</a>
+      <a onclick="pickNote('8')">⭐ 8+&nbsp; Excellent</a>
+      <a onclick="pickNote('7')">⭐ 7+&nbsp; Très bon</a>
+      <a onclick="pickNote('6')">⭐ 6+&nbsp; Bon</a>
+      <a onclick="pickNote('0-5')">⭐ &lt;5&nbsp; Passable</a>
     </div>
   </div>
 
@@ -1002,27 +1029,27 @@ footer {
     <button class="dd-btn" id="dd-genre-btn" onclick="toggleDD('genre')">
       Genre <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="dd-menu" id="dd-genre" style="min-width:180px;max-height:320px;overflow-y:auto;" id="dd-genre-menu">
-      <a onclick="applyGenreDD('');toggleDD('genre')" class="active" id="dd-g-all">Tous les genres</a>
+    <div class="dd-menu" id="dd-genre" style="min-width:180px;max-height:320px;overflow-y:auto;">
+      <a onclick="pickGenre('')" class="active" id="dd-g-all">Tous les genres</a>
       <div class="dd-divider"></div>
-      <a onclick="applyGenreDD('Action');toggleDD('genre')">Action</a>
-      <a onclick="applyGenreDD('Aventure');toggleDD('genre')">Aventure</a>
-      <a onclick="applyGenreDD('Animation');toggleDD('genre')">Animation</a>
-      <a onclick="applyGenreDD('Comédie');toggleDD('genre')">Comédie</a>
-      <a onclick="applyGenreDD('Crime');toggleDD('genre')">Crime</a>
-      <a onclick="applyGenreDD('Documentaire');toggleDD('genre')">Documentaire</a>
-      <a onclick="applyGenreDD('Drame');toggleDD('genre')">Drame</a>
-      <a onclick="applyGenreDD('Familial');toggleDD('genre')">Familial</a>
-      <a onclick="applyGenreDD('Fantastique');toggleDD('genre')">Fantastique</a>
-      <a onclick="applyGenreDD('Histoire');toggleDD('genre')">Histoire</a>
-      <a onclick="applyGenreDD('Horreur');toggleDD('genre')">Horreur</a>
-      <a onclick="applyGenreDD('Musique');toggleDD('genre')">Musique</a>
-      <a onclick="applyGenreDD('Mystère');toggleDD('genre')">Mystère</a>
-      <a onclick="applyGenreDD('Romance');toggleDD('genre')">Romance</a>
-      <a onclick="applyGenreDD('Science-Fiction');toggleDD('genre')">Science-Fiction</a>
-      <a onclick="applyGenreDD('Thriller');toggleDD('genre')">Thriller</a>
-      <a onclick="applyGenreDD('Guerre');toggleDD('genre')">Guerre</a>
-      <a onclick="applyGenreDD('Western');toggleDD('genre')">Western</a>
+      <a onclick="pickGenre('Action')">Action</a>
+      <a onclick="pickGenre('Aventure')">Aventure</a>
+      <a onclick="pickGenre('Animation')">Animation</a>
+      <a onclick="pickGenre('Comédie')">Comédie</a>
+      <a onclick="pickGenre('Crime')">Crime</a>
+      <a onclick="pickGenre('Documentaire')">Documentaire</a>
+      <a onclick="pickGenre('Drame')">Drame</a>
+      <a onclick="pickGenre('Familial')">Familial</a>
+      <a onclick="pickGenre('Fantastique')">Fantastique</a>
+      <a onclick="pickGenre('Histoire')">Histoire</a>
+      <a onclick="pickGenre('Horreur')">Horreur</a>
+      <a onclick="pickGenre('Musique')">Musique</a>
+      <a onclick="pickGenre('Mystère')">Mystère</a>
+      <a onclick="pickGenre('Romance')">Romance</a>
+      <a onclick="pickGenre('Science-Fiction')">Science-Fiction</a>
+      <a onclick="pickGenre('Thriller')">Thriller</a>
+      <a onclick="pickGenre('Guerre')">Guerre</a>
+      <a onclick="pickGenre('Western')">Western</a>
     </div>
   </div>
 
@@ -1059,6 +1086,9 @@ footer {
   <div class="results-bar" id="results-bar"><span class="results-label" id="rlabel"></span></div>
   <div class="content" id="ct"></div>
 </div>
+
+<!-- RETOUR EN HAUT -->
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Retour en haut">↑</button>
 
 <!-- FOOTER -->
 <footer>
@@ -1498,10 +1528,24 @@ function render() {
   if (q) list = list.filter(m => m.title.toLowerCase().includes(q));
   // ── filtres déroulants barre
   if (activeYearFilter) {
-    if (activeYearFilter === '2010-2019') list = list.filter(m => { const y=parseInt((m.release_date||'').slice(0,4)); return y>=2010&&y<=2019; });
-    else if (activeYearFilter === '2000-2009') list = list.filter(m => { const y=parseInt((m.release_date||'').slice(0,4)); return y>=2000&&y<=2009; });
-    else if (activeYearFilter === 'avant-2000') list = list.filter(m => { const y=parseInt((m.release_date||'').slice(0,4)); return y<2000; });
-    else list = list.filter(m => (m.release_date||'').startsWith(activeYearFilter));
+    list = list.filter(m => {
+      const y = parseInt((m.release_date||'').slice(0,4));
+      if (!y) return false;
+      switch(activeYearFilter) {
+        case 'era-classic': return y >= 1900 && y <= 1949;
+        case 'era-golden':  return y >= 1950 && y <= 1999;
+        case 'era-modern':  return y >= 2000;
+        case '2020s': return y >= 2020;
+        case '2010s': return y >= 2010 && y <= 2019;
+        case '2000s': return y >= 2000 && y <= 2009;
+        case '1990s': return y >= 1990 && y <= 1999;
+        case '1980s': return y >= 1980 && y <= 1989;
+        case '1970s': return y >= 1970 && y <= 1979;
+        case '1960s': return y >= 1960 && y <= 1969;
+        case '1950s': return y >= 1950 && y <= 1959;
+        default: return (m.release_date||'').startsWith(activeYearFilter);
+      }
+    });
   }
   if (activeNoteFilter) {
     if (activeNoteFilter === '0-5') list = list.filter(m => (m.vote_average||0) < 5);
@@ -3283,6 +3327,59 @@ function applyGenreDD(val) {
   if (btn) btn.style.color = val ? '#fff' : '';
   render();
 }
+
+// ── Scroll → retour en haut ──────────────────────
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('back-to-top');
+  if (btn) btn.classList.toggle('visible', window.scrollY > 300);
+});
+
+// ── Dropdown pick functions ──────────────────────
+function pickYear(val) {
+  activeYearFilter = val;
+  // Mettre à jour active dans le menu
+  document.querySelectorAll('#dd-annee a').forEach(a => a.classList.remove('active'));
+  if (!val) document.getElementById('dd-y-all').classList.add('active');
+  const btn = document.getElementById('dd-annee-btn');
+  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val ? yearLabel(val)+' ' : 'Année '; }
+  closeAllDD();
+  showAllFilms(); render();
+}
+function yearLabel(v) {
+  const map = {'era-classic':'Classic Era','era-golden':'Golden Age','era-modern':'Modern Era','2020s':'2020s','2010s':'2010s','2000s':'2000s','1990s':'1990s','1980s':'1980s','1970s':'1970s','1960s':'1960s','1950s':'1950s'};
+  return map[v] || v;
+}
+
+function pickNote(val) {
+  activeNoteFilter = val;
+  document.querySelectorAll('#dd-note a').forEach(a => a.classList.remove('active'));
+  if (!val) document.getElementById('dd-n-all').classList.add('active');
+  const btn = document.getElementById('dd-note-btn');
+  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val ? 'Note '+val+'+' : 'Note '; }
+  closeAllDD();
+  showAllFilms(); render();
+}
+
+function pickGenre(val) {
+  activeGenreDD = val;
+  document.querySelectorAll('#dd-genre a').forEach(a => a.classList.remove('active'));
+  if (!val) { document.getElementById('dd-g-all').classList.add('active'); }
+  else { document.querySelectorAll('#dd-genre a').forEach(a => { if(a.textContent.trim()===val) a.classList.add('active'); }); }
+  const btn = document.getElementById('dd-genre-btn');
+  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val || 'Genre '; btn.childNodes[0].textContent += ' '; }
+  closeAllDD();
+  showAllFilms(); render();
+}
+
+function closeAllDD() {
+  document.querySelectorAll('.dd-menu').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.dd-btn').forEach(b => b.classList.remove('open'));
+}
+
+// Compatibilité avec anciens appels
+function applyYearFilter(v) { pickYear(v); }
+function applyNoteFilter(v) { pickNote(v); }
+function applyGenreDD(v)    { pickGenre(v); }
 
 // ── Genre dropdown ──────────────────────────────
 function showGenreDropdown() {
