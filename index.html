@@ -1097,6 +1097,7 @@ footer {
   <button class="btn-footer" onclick="document.getElementById('import-file').click()">⬆ Importer</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
   <button class="btn-footer" style="color:#00e0a6;border-color:rgba(0,224,166,0.2)" onclick="exportLetterboxd()">🎞 Letterboxd CSV</button>
+  <button class="btn-footer" style="color:#f59e0b;border-color:rgba(245,158,11,0.2)" onclick="startResyncTitles()">🔄 Re-sync titres EN</button>
 </footer>
 
 <!-- ═══ FILMOGRAPHIE MODAL (actors standalone) ═══ -->
@@ -3226,6 +3227,82 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, m =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
+// ══════════════════════════════════════════════════
+//  RE-SYNC TITRES EN ANGLAIS
+// ══════════════════════════════════════════════════
+let resyncRunning = false;
+
+async function startResyncTitles() {
+  if (resyncRunning) return;
+  const toSync = movies.filter(m =>
+    (m.media_type === 'movie' || m.media_type === 'tv') && m.tmdb_id
+  );
+  if (!toSync.length) { alert('Aucun film avec un TMDB ID à synchroniser.'); return; }
+  if (!confirm(`Re-synchroniser les titres en anglais pour ${toSync.length} films/séries ?\n\nCela va remplacer tous les titres actuels par les titres anglais TMDB.\nL'opération peut prendre plusieurs minutes.`)) return;
+
+  resyncRunning = true;
+
+  // Afficher une barre de progression dans le footer
+  let bar = document.getElementById('resync-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'resync-bar';
+    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#14181c;border-top:1px solid rgba(245,158,11,0.3);padding:10px 20px;display:flex;align-items:center;gap:14px;z-index:300;font-size:12px;';
+    bar.innerHTML = '<span style="color:#f59e0b;font-weight:700;">🔄 Re-sync titres EN</span>'
+      + '<div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">'
+      + '<div id="resync-prog" style="height:100%;width:0%;background:#f59e0b;border-radius:3px;transition:width 0.3s;"></div>'
+      + '</div>'
+      + '<span id="resync-status" style="color:rgba(255,255,255,0.4);min-width:80px;text-align:right;">0 / ' + toSync.length + '</span>'
+      + '<span id="resync-detail" style="color:rgba(255,255,255,0.25);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>'
+      + '<button onclick="cancelResync()" style="padding:3px 10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;">✕</button>';
+    document.body.appendChild(bar);
+  }
+  bar.style.display = 'flex';
+
+  const prog   = document.getElementById('resync-prog');
+  const status = document.getElementById('resync-status');
+  const detail = document.getElementById('resync-detail');
+
+  let done = 0, updated = 0, errors = 0;
+
+  for (const m of toSync) {
+    if (!resyncRunning) break; // annulé
+    const idx = movies.indexOf(m);
+    detail.textContent = m.title;
+
+    try {
+      const endpoint = m.media_type === 'tv'
+        ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US'
+        : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US';
+      const res  = await fetch(endpoint);
+      const data = await res.json();
+      const newTitle = data.title || data.name || m.title;
+
+      if (newTitle && newTitle !== m.title) {
+        await updM(idx, { ...m, title: newTitle });
+        updated++;
+      }
+    } catch(e) { errors++; }
+
+    done++;
+    prog.style.width   = Math.round(done / toSync.length * 100) + '%';
+    status.textContent = done + ' / ' + toSync.length;
+    await new Promise(r => setTimeout(r, 250));
+  }
+
+  resyncRunning = false;
+  detail.textContent  = '✅ ' + updated + ' titre(s) mis à jour' + (errors ? ' · ' + errors + ' erreur(s)' : '');
+  status.textContent  = 'Terminé';
+  render();
+  setTimeout(() => { if (bar) bar.style.display = 'none'; }, 5000);
+}
+
+function cancelResync() {
+  resyncRunning = false;
+  const bar = document.getElementById('resync-bar');
+  if (bar) bar.style.display = 'none';
+}
+
 load();
 
 // ── Show/hide films grid ──────────────────────────
