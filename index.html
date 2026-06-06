@@ -2127,27 +2127,39 @@ async function searchPosters() {
 async function fetchOmdbRatings(title, year, tmdb_id, media_type) {
   try {
     let imdbId = null;
-    // Récupérer l'IMDb ID depuis TMDB pour éviter les mauvais matchs
+    let enTitle = title;
+
     if (tmdb_id && media_type !== 'collection' && media_type !== 'saga') {
       const type = media_type === 'tv' ? 'tv' : 'movie';
-      const extRes = await fetch(`https://api.themoviedb.org/3/${type}/${tmdb_id}/external_ids?api_key=77b9e9b4e22e0658b189a83b0dbad526`);
-      const extData = await extRes.json();
-      imdbId = extData.imdb_id || null;
+      // /movie/{id} a imdb_id directement à la racine + titre EN
+      const tmdbRes = await fetch(`https://api.themoviedb.org/3/${type}/${tmdb_id}?api_key=77b9e9b4e22e0658b189a83b0dbad526&language=en-US`);
+      const tmdbData = await tmdbRes.json();
+      if (type === 'movie') {
+        imdbId = tmdbData.imdb_id || null;
+      } else {
+        const extRes = await fetch(`https://api.themoviedb.org/3/tv/${tmdb_id}/external_ids?api_key=77b9e9b4e22e0658b189a83b0dbad526`);
+        const extData = await extRes.json();
+        imdbId = extData.imdb_id || null;
+      }
+      enTitle = tmdbData.title || tmdbData.name || title;
     }
-    // Appel OMDB avec IMDb ID si dispo, sinon titre+année
+
     const url = imdbId
       ? `https://www.omdbapi.com/?i=${imdbId}&apikey=6f216ff1`
-      : `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&y=${year ? year.slice(0,4) : ''}&apikey=6f216ff1`;
+      : `https://www.omdbapi.com/?t=${encodeURIComponent(enTitle)}&y=${year ? year.slice(0,4) : ''}&apikey=6f216ff1`;
+
     const res = await fetch(url);
     const d = await res.json();
-    if (d.Response === 'False') return {};
+    if (!d || d.Response === 'False') return {};
+
     const imdb  = d.imdbRating && d.imdbRating !== 'N/A' ? parseFloat(d.imdbRating) : null;
-    const rt    = d.Ratings ? (d.Ratings.find(r => r.Source === 'Rotten Tomatoes') || null) : null;
-    const mc    = d.Ratings ? (d.Ratings.find(r => r.Source === 'Metacritic') || null) : null;
-    const rtScore = rt ? parseInt(rt.Value) : null;
-    const mcScore = mc ? parseInt(mc.Value) : null;
-    return { imdb_rating: imdb, rt_rating: rtScore, mc_rating: mcScore };
-  } catch(e) { return {}; }
+    const rtRaw = d.Ratings ? d.Ratings.find(r => r.Source === 'Rotten Tomatoes') : null;
+    const mcRaw = d.Ratings ? d.Ratings.find(r => r.Source === 'Metacritic') : null;
+    const rt    = rtRaw ? parseInt(rtRaw.Value) : null;
+    const mc    = mcRaw ? parseInt(mcRaw.Value) : null;
+
+    return { imdb_rating: imdb, rt_rating: rt, mc_rating: mc };
+  } catch(e) { console.error('fetchOmdb error:', e); return {}; }
 }
 
 async function saveMovie() {
