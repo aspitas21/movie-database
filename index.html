@@ -1098,6 +1098,7 @@ footer {
   <button class="btn-footer" onclick="document.getElementById('import-file').click()">⬆ Importer</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
   <button class="btn-footer" style="color:#00e0a6;border-color:rgba(0,224,166,0.2)" onclick="exportLetterboxd()">🎞 Letterboxd CSV</button>
+  <button class="btn-footer" style="color:#f5c518;border-color:rgba(245,197,24,0.2)" onclick="enrichAll()" id="enrich-btn">⭐ Enrichir les notes</button>
 </footer>
 
 <!-- ═══ FILMOGRAPHIE MODAL (actors standalone) ═══ -->
@@ -2122,17 +2123,29 @@ async function searchPosters() {
 // ══════════════════════════════════════════════════
 //  SAVE MOVIE
 // ══════════════════════════════════════════════════
-async function fetchOmdbRatings(title, year) {
+async function fetchOmdbRatings(title, year, tmdb_id, media_type) {
   try {
-    const y = year ? year.slice(0,4) : '';
-    const url = `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&y=${y}&apikey=6f216ff1`;
+    let imdbId = null;
+    // Récupérer l'IMDb ID depuis TMDB pour éviter les mauvais matchs
+    if (tmdb_id && media_type !== 'collection' && media_type !== 'saga') {
+      const type = media_type === 'tv' ? 'tv' : 'movie';
+      const extRes = await fetch(`https://api.themoviedb.org/3/${type}/${tmdb_id}/external_ids?api_key=77b9e9b4e22e0658b189a83b0dbad526`);
+      const extData = await extRes.json();
+      imdbId = extData.imdb_id || null;
+    }
+    // Appel OMDB avec IMDb ID si dispo, sinon titre+année
+    const url = imdbId
+      ? `https://www.omdbapi.com/?i=${imdbId}&apikey=6f216ff1`
+      : `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&y=${year ? year.slice(0,4) : ''}&apikey=6f216ff1`;
     const res = await fetch(url);
     const d = await res.json();
     if (d.Response === 'False') return {};
-    const imdb = d.imdbRating && d.imdbRating !== 'N/A' ? parseFloat(d.imdbRating) : null;
-    const rt = d.Ratings ? (d.Ratings.find(r => r.Source === 'Rotten Tomatoes') || null) : null;
+    const imdb  = d.imdbRating && d.imdbRating !== 'N/A' ? parseFloat(d.imdbRating) : null;
+    const rt    = d.Ratings ? (d.Ratings.find(r => r.Source === 'Rotten Tomatoes') || null) : null;
+    const mc    = d.Ratings ? (d.Ratings.find(r => r.Source === 'Metacritic') || null) : null;
     const rtScore = rt ? parseInt(rt.Value) : null;
-    return { imdb_rating: imdb, rt_rating: rtScore };
+    const mcScore = mc ? parseInt(mc.Value) : null;
+    return { imdb_rating: imdb, rt_rating: rtScore, mc_rating: mcScore };
   } catch(e) { return {}; }
 }
 
@@ -2147,10 +2160,11 @@ async function saveMovie() {
 
   // Récupérer notes OMDB si pas déjà stockées
   let omdb = {};
-  if (!orig.imdb_rating && !orig.rt_rating) {
-    omdb = await fetchOmdbRatings(title, year);
+  const hasOmdb = orig.imdb_rating != null || orig.rt_rating != null;
+  if (!hasOmdb) {
+    omdb = await fetchOmdbRatings(title, year, meta.tmdb_id || orig.tmdb_id, meta.media_type || orig.media_type);
   } else {
-    omdb = { imdb_rating: orig.imdb_rating, rt_rating: orig.rt_rating };
+    omdb = { imdb_rating: orig.imdb_rating, rt_rating: orig.rt_rating, mc_rating: orig.mc_rating };
   }
 
   const m = {
@@ -2168,6 +2182,7 @@ async function saveMovie() {
     person_name:  meta.media_type === 'collection' ? (document.getElementById('ititle').value.trim() || orig.person_name || '') : (orig.person_name || ''),
     imdb_rating:  omdb.imdb_rating   || orig.imdb_rating   || null,
     rt_rating:    omdb.rt_rating     || orig.rt_rating     || null,
+    mc_rating:    omdb.mc_rating     || orig.mc_rating     || null,
   };
   closeModal();
   if (editIdx >= 0) await updM(editIdx, m); else await addM(m);
@@ -3381,7 +3396,37 @@ function yearLabel(v) {
   return map[v] || v;
 }
 
-// pick* = alias directs
+async function enrichAll() {
+  const btn = document.getElementById('enrich-btn');
+  const toEnrich = movies.filter(m =>
+    m.imdb_rating == null && m.rt_rating == null &&
+    m.media_type !== 'collection' && m.media_type !== 'saga'
+  );
+  if (!toEnrich.length) { alert('Tous les films ont déjà leurs notes !'); return; }
+  if (!confirm(`Enrichir ${toEnrich.length} films avec les notes IMDb / RT / Metacritic ?\n\n⚠️ Ça peut prendre quelques minutes.`)) return;
+
+  btn.disabled = true;
+  btn.textContent = `⭐ 0 / ${toEnrich.length}`;
+  let done = 0; let errors = 0;
+
+  for (const m of toEnrich) {
+    const idx = movies.indexOf(m);
+    const omdb = await fetchOmdbRatings(m.title, m.release_date, m.tmdb_id, m.media_type);
+    if (omdb.imdb_rating != null || omdb.rt_rating != null) {
+      const updated = { ...m, imdb_rating: omdb.imdb_rating, rt_rating: omdb.rt_rating, mc_rating: omdb.mc_rating };
+      await updM(idx, updated);
+    } else { errors++; }
+    done++;
+    btn.textContent = `⭐ ${done} / ${toEnrich.length}`;
+    // Pause 200ms pour éviter de dépasser la limite OMDB
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  btn.disabled = false;
+  btn.textContent = '⭐ Enrichir les notes';
+  alert(`✅ Terminé !\n${done - errors} films enrichis\n${errors} films non trouvés sur OMDB`);
+  render();
+}
 function pickYear(v)  { applyYearFilter(v); }
 function pickNote(v)  { applyNoteFilter(v); }
 function pickGenre(v) { applyGenreDD(v); }
