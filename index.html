@@ -327,6 +327,7 @@ header {
   font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.5);
   letter-spacing: 1px; text-transform: uppercase;
 }
+.rt-badge { font-size: 9px; font-weight: 700; color: rgba(255,80,50,0.9); margin-left: 2px; }
 .dd-section-label {
   font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
   text-transform: uppercase; color: rgba(255,255,255,0.2);
@@ -1097,7 +1098,6 @@ footer {
   <button class="btn-footer" onclick="document.getElementById('import-file').click()">⬆ Importer</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
   <button class="btn-footer" style="color:#00e0a6;border-color:rgba(0,224,166,0.2)" onclick="exportLetterboxd()">🎞 Letterboxd CSV</button>
-  <button class="btn-footer" style="color:#f59e0b;border-color:rgba(245,158,11,0.2)" onclick="startResyncTitles()">🔄 Re-sync titres EN</button>
 </footer>
 
 <!-- ═══ FILMOGRAPHIE MODAL (actors standalone) ═══ -->
@@ -1551,8 +1551,9 @@ function render() {
     });
   }
   if (activeNoteFilter) {
-    if (activeNoteFilter === '0-5') list = list.filter(m => (m.vote_average||0) < 5);
-    else list = list.filter(m => (m.vote_average||0) >= parseFloat(activeNoteFilter));
+    const getScore = m => m.imdb_rating || m.vote_average || 0;
+    if (activeNoteFilter === '0-5') list = list.filter(m => getScore(m) < 5);
+    else list = list.filter(m => getScore(m) >= parseFloat(activeNoteFilter));
   }
   if (activeGenreDD) list = list.filter(m => (m.tags||[]).includes(activeGenreDD));
     // Appliquer le filtre de la smart collection si actif
@@ -1580,7 +1581,9 @@ function render() {
     const idx    = movies.indexOf(m);
     const year   = m.release_date ? m.release_date.slice(0,4) : '';
     const dur    = fmt(m.runtime);
-    const rating = m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : '';
+    const rating = m.imdb_rating ? '⭐ ' + m.imdb_rating.toFixed(1)
+                 : m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : '';
+    const rtBadge = m.rt_rating ? `<span class="rt-badge">${m.rt_rating >= 60 ? '🍅' : '🤢'} ${m.rt_rating}%</span>` : '';
     const sub    = [year, dur].filter(Boolean).join(' · ');
     const tagsHtml = m.tags && m.tags.length ? m.tags.slice(0,2).map(t => `<span class="ctag">${escapeHtml(t)}</span>`).join('') : '';
     const isCol  = m.media_type === 'collection';
@@ -1606,7 +1609,7 @@ function render() {
         + (m.poster
           ? `<img class="cposter" loading="lazy" src="${m.poster}" alt="${m.title}" onerror="this.outerHTML='<div class=&quot;no-poster&quot;>🎬</div>'">`
           : `<div class="no-poster">🎬</div>`)
-        + (rating ? `<div class="c-rating">${rating}</div>` : '')
+        + (rating ? `<div class="c-rating">${rating}${rtBadge ? ' '+rtBadge : ''}</div>` : (rtBadge ? `<div class="c-rating">${rtBadge}</div>` : ''))
         + `<div class="card-overlay"><div class="cov-title">${escapeHtml(m.title)}</div>${year ? `<div class="cov-year">${year}${dur ? ' · '+dur : ''}</div>` : ''}</div>`
         + (m.quality ? `<div class="card-qbadge-corner ${m.quality}">${QICON[m.quality]||''}</div>` : '')
         + `</div>`;
@@ -1630,7 +1633,9 @@ function openDetail(e, idx) {
   const m    = movies[idx];
   const year = m.release_date ? m.release_date.slice(0,4) : '';
   const dur  = fmt(m.runtime);
-  const rating = m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : '';
+  const imdbStr  = m.imdb_rating ? `⭐ ${m.imdb_rating.toFixed(1)} IMDb` : (m.vote_average ? `⭐ ${m.vote_average.toFixed(1)}` : '');
+  const rtStr    = m.rt_rating   ? `${m.rt_rating >= 60 ? '🍅' : '🤢'} ${m.rt_rating}% RT` : '';
+  const rating   = [imdbStr, rtStr].filter(Boolean).join('  ');
   const ql   = QLABEL[m.quality] || m.quality;
   const qi   = QICON[m.quality]  || '';
   const isTV = m.media_type === 'tv';
@@ -1694,7 +1699,9 @@ function openRandom() {
   const m     = pool[Math.floor(Math.random() * pool.length)];
   const year  = m.release_date ? m.release_date.slice(0,4) : '';
   const dur   = fmt(m.runtime);
-  const meta2 = [year, dur, m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : ''].filter(Boolean).join(' · ');
+  const imdbStr = m.imdb_rating ? `⭐ ${m.imdb_rating.toFixed(1)} IMDb` : (m.vote_average ? `⭐ ${m.vote_average.toFixed(1)}` : '');
+  const rtStr   = m.rt_rating   ? `${m.rt_rating >= 60 ? '🍅' : '🤢'} ${m.rt_rating}% RT` : '';
+  const meta2 = [year, dur, imdbStr, rtStr].filter(Boolean).join(' · ');
   const lbUrl    = m.tmdb_id ? `https://letterboxd.com/tmdb/${m.tmdb_id}/` : '';
   const allocUrl = `https://www.allocine.fr/rechercher/?q=${encodeURIComponent(m.title)}`;
   const rawLinks2 = [];
@@ -1955,7 +1962,7 @@ async function searchPosters() {
   try {
     let results = [], gmap = {};
     if (mediaType === 'collection') {
-      const res  = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`);
+      const res  = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`);
       const data = await res.json();
       results = (data.results || []).filter(r => r.profile_path).sort((a,b) => (b.popularity||0)-(a.popularity||0)).slice(0, 8);
       if (!results.length) { st.textContent = 'Aucune personne trouvée.'; return; }
@@ -1988,8 +1995,8 @@ async function searchPosters() {
     } else if (mediaType === 'saga') {
       // TMDB collections + movies
       const [resCol, resMovie] = await Promise.all([
-        fetch(`https://api.themoviedb.org/3/search/collection?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`),
-        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`)
+        fetch(`https://api.themoviedb.org/3/search/collection?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`),
+        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`)
       ]);
       const [dataCol, dataMovie] = await Promise.all([resCol.json(), resMovie.json()]);
 
@@ -2061,16 +2068,16 @@ async function searchPosters() {
       });
     } else {
       const endpoint = mediaType === 'tv'
-        ? `https://api.themoviedb.org/3/search/tv?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`
-        : `https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`;
+        ? `https://api.themoviedb.org/3/search/tv?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`
+        : `https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`;
       const res  = await fetch(endpoint);
       const data = await res.json();
       results = (data.results || []).filter(r => r.poster_path).slice(0, 10);
       if (!results.length) { st.textContent = 'Aucun résultat trouvé.'; return; }
       try {
         const gEndpoint = mediaType === 'tv'
-          ? `https://api.themoviedb.org/3/genre/tv/list?api_key=${TK}&language=en-US`
-          : `https://api.themoviedb.org/3/genre/movie/list?api_key=${TK}&language=en-US`;
+          ? `https://api.themoviedb.org/3/genre/tv/list?api_key=${TK}&language=fr-FR`
+          : `https://api.themoviedb.org/3/genre/movie/list?api_key=${TK}&language=fr-FR`;
         (await (await fetch(gEndpoint)).json()).genres.forEach(g => { gmap[g.id] = g.name; });
       } catch(e) {}
       st.textContent = 'Sélectionne une affiche :';
@@ -2115,6 +2122,20 @@ async function searchPosters() {
 // ══════════════════════════════════════════════════
 //  SAVE MOVIE
 // ══════════════════════════════════════════════════
+async function fetchOmdbRatings(title, year) {
+  try {
+    const y = year ? year.slice(0,4) : '';
+    const url = `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&y=${y}&apikey=6f216ff1`;
+    const res = await fetch(url);
+    const d = await res.json();
+    if (d.Response === 'False') return {};
+    const imdb = d.imdbRating && d.imdbRating !== 'N/A' ? parseFloat(d.imdbRating) : null;
+    const rt = d.Ratings ? (d.Ratings.find(r => r.Source === 'Rotten Tomatoes') || null) : null;
+    const rtScore = rt ? parseInt(rt.Value) : null;
+    return { imdb_rating: imdb, rt_rating: rtScore };
+  } catch(e) { return {}; }
+}
+
 async function saveMovie() {
   const title   = document.getElementById('ititle').value.trim();
   const quality = document.getElementById('iqual').value;
@@ -2122,6 +2143,16 @@ async function saveMovie() {
   const links = getLinks();
   const link  = links.length > 0 ? links[0].url : '';
   const orig  = editIdx >= 0 ? movies[editIdx] : {};
+  const year  = meta.release_date || orig.release_date || '';
+
+  // Récupérer notes OMDB si pas déjà stockées
+  let omdb = {};
+  if (!orig.imdb_rating && !orig.rt_rating) {
+    omdb = await fetchOmdbRatings(title, year);
+  } else {
+    omdb = { imdb_rating: orig.imdb_rating, rt_rating: orig.rt_rating };
+  }
+
   const m = {
     title, link, links, quality,
     poster:       selPoster,
@@ -2134,7 +2165,9 @@ async function saveMovie() {
     media_type:   meta.media_type    || orig.media_type    || mediaType || 'movie',
     person_role:  meta.person_role   || orig.person_role   || '',
     person_id:    meta.tmdb_id       || orig.person_id     || null,
-    person_name:  meta.media_type === 'collection' ? (document.getElementById('ititle').value.trim() || orig.person_name || '') : (orig.person_name || '')
+    person_name:  meta.media_type === 'collection' ? (document.getElementById('ititle').value.trim() || orig.person_name || '') : (orig.person_name || ''),
+    imdb_rating:  omdb.imdb_rating   || orig.imdb_rating   || null,
+    rt_rating:    omdb.rt_rating     || orig.rt_rating     || null,
   };
   closeModal();
   if (editIdx >= 0) await updM(editIdx, m); else await addM(m);
@@ -2150,7 +2183,7 @@ async function loadFilmographyForCollection() {
   const st = document.getElementById('status');
   st.textContent = 'Chargement de la filmographie...';
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=en-US`);
+    const res  = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
 
     // Cast : films où la personne joue (acteur)
@@ -2342,7 +2375,7 @@ async function loadSagaPosters() {
   const sagaId = meta.tmdb_id;
   if (!sagaId) { alert('Aucun TMDB ID pour cette saga. Cherchez d\'abord via le bouton Chercher.'); return; }
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=en-US`);
+    const res  = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
     const parts = (data.parts || []).filter(p => p.poster_path);
     if (!parts.length) { alert('Aucun film trouvé dans cette collection.'); return; }
@@ -2461,7 +2494,7 @@ async function loadFilmographyForSaga() {
   if (!sagaId) { alert('Aucun ID trouvé. Cherche d\'abord via le bouton Chercher.'); return; }
   st.textContent = 'Chargement depuis TMDB...';
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=en-US`);
+    const res  = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
     const parts = (data.parts || []).filter(p => p.poster_path);
     parts.sort((a,b) => (a.release_date||'').localeCompare(b.release_date||''));
@@ -2642,8 +2675,8 @@ async function startEnrich() {
     try {
       // ── 1. Crédits (acteurs + réalisateur) ──────────────────
       const credEndpoint = m.media_type === 'tv'
-        ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '/credits?api_key=' + TK + '&language=en-US'
-        : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '/credits?api_key=' + TK + '&language=en-US';
+        ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '/credits?api_key=' + TK + '&language=fr-FR'
+        : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '/credits?api_key=' + TK + '&language=fr-FR';
       const credData = await (await fetch(credEndpoint)).json();
 
       const cast = (credData.cast || []).slice(0, 5).map(p => ({ id: p.id, name: p.name, role: 'Acting', popularity: p.popularity || 0 }));
@@ -2658,8 +2691,8 @@ async function startEnrich() {
       let _tmdb_collection = m._tmdb_collection || null;
       try {
         const detailEndpoint = m.media_type === 'tv'
-          ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US'
-          : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US';
+          ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '?api_key=' + TK + '&language=fr-FR'
+          : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '?api_key=' + TK + '&language=fr-FR';
         const detailData = await (await fetch(detailEndpoint)).json();
         if (detailData.belongs_to_collection) {
           _tmdb_collection = {
@@ -2685,7 +2718,7 @@ async function startEnrich() {
           if (titleWords.length > 0) {
             // Chercher avec le mot le plus long/significatif
             const searchWord = titleWords.sort((a,b) => b.length - a.length)[0];
-            const colRes = await fetch('https://api.themoviedb.org/3/search/collection?api_key=' + TK + '&language=en-US&query=' + encodeURIComponent(searchWord));
+            const colRes = await fetch('https://api.themoviedb.org/3/search/collection?api_key=' + TK + '&language=fr-FR&query=' + encodeURIComponent(searchWord));
             const colData = await colRes.json();
             const results = colData.results || [];
 
@@ -2697,7 +2730,7 @@ async function startEnrich() {
 
             if (match) {
               // Vérifier que ce film fait bien partie de cette collection
-              const colDetail = await (await fetch('https://api.themoviedb.org/3/collection/' + match.id + '?api_key=' + TK + '&language=en-US')).json();
+              const colDetail = await (await fetch('https://api.themoviedb.org/3/collection/' + match.id + '?api_key=' + TK + '&language=fr-FR')).json();
               const partIds = (colDetail.parts || []).map(p => p.id);
               if (partIds.includes(m.tmdb_id)) {
                 _tmdb_collection = {
@@ -2977,7 +3010,7 @@ function renderScGroup(g, isPeople = false) {
   // Si on a un ID de collection TMDB, récupérer TOUS les films de la saga
   if (tmdbCollectionId) {
     try {
-      const res  = await fetch(`https://api.themoviedb.org/3/collection/${tmdbCollectionId}?api_key=${TK}&language=en-US`);
+      const res  = await fetch(`https://api.themoviedb.org/3/collection/${tmdbCollectionId}?api_key=${TK}&language=fr-FR`);
       const data = await res.json();
       const parts = data.parts || [];
       parts.forEach(p => {
@@ -3041,7 +3074,7 @@ async function searchFilmo() {
   document.getElementById('filmo-import-btn').style.display = 'none';
   filmoSel.clear();
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(q)}&language=en-US`);
+    const res  = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(q)}&language=fr-FR`);
     const data = await res.json();
     const people = (data.results || []).filter(p => p.known_for_department);
     if (!people.length) { st.textContent = 'Aucune personne trouvée.'; return; }
@@ -3057,7 +3090,7 @@ async function loadFilmo(personId, name, dept) {
   const st = document.getElementById('filmo-status');
   st.textContent = `Chargement de la filmographie de ${name}...`;
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=en-US`);
+    const res  = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=fr-FR`);
     const data = await res.json();
     let cast = (data.cast || []).filter(m => m.media_type === 'movie' && m.poster_path);
     cast.sort((a,b) => (b.release_date||'').localeCompare(a.release_date||''));
@@ -3227,82 +3260,6 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, m =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
-// ══════════════════════════════════════════════════
-//  RE-SYNC TITRES EN ANGLAIS
-// ══════════════════════════════════════════════════
-let resyncRunning = false;
-
-async function startResyncTitles() {
-  if (resyncRunning) return;
-  const toSync = movies.filter(m =>
-    (m.media_type === 'movie' || m.media_type === 'tv') && m.tmdb_id
-  );
-  if (!toSync.length) { alert('Aucun film avec un TMDB ID à synchroniser.'); return; }
-  if (!confirm(`Re-synchroniser les titres en anglais pour ${toSync.length} films/séries ?\n\nCela va remplacer tous les titres actuels par les titres anglais TMDB.\nL'opération peut prendre plusieurs minutes.`)) return;
-
-  resyncRunning = true;
-
-  // Afficher une barre de progression dans le footer
-  let bar = document.getElementById('resync-bar');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.id = 'resync-bar';
-    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#14181c;border-top:1px solid rgba(245,158,11,0.3);padding:10px 20px;display:flex;align-items:center;gap:14px;z-index:300;font-size:12px;';
-    bar.innerHTML = '<span style="color:#f59e0b;font-weight:700;">🔄 Re-sync titres EN</span>'
-      + '<div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">'
-      + '<div id="resync-prog" style="height:100%;width:0%;background:#f59e0b;border-radius:3px;transition:width 0.3s;"></div>'
-      + '</div>'
-      + '<span id="resync-status" style="color:rgba(255,255,255,0.4);min-width:80px;text-align:right;">0 / ' + toSync.length + '</span>'
-      + '<span id="resync-detail" style="color:rgba(255,255,255,0.25);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>'
-      + '<button onclick="cancelResync()" style="padding:3px 10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;">✕</button>';
-    document.body.appendChild(bar);
-  }
-  bar.style.display = 'flex';
-
-  const prog   = document.getElementById('resync-prog');
-  const status = document.getElementById('resync-status');
-  const detail = document.getElementById('resync-detail');
-
-  let done = 0, updated = 0, errors = 0;
-
-  for (const m of toSync) {
-    if (!resyncRunning) break; // annulé
-    const idx = movies.indexOf(m);
-    detail.textContent = m.title;
-
-    try {
-      const endpoint = m.media_type === 'tv'
-        ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US'
-        : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US';
-      const res  = await fetch(endpoint);
-      const data = await res.json();
-      const newTitle = data.title || data.name || m.title;
-
-      if (newTitle && newTitle !== m.title) {
-        await updM(idx, { ...m, title: newTitle });
-        updated++;
-      }
-    } catch(e) { errors++; }
-
-    done++;
-    prog.style.width   = Math.round(done / toSync.length * 100) + '%';
-    status.textContent = done + ' / ' + toSync.length;
-    await new Promise(r => setTimeout(r, 250));
-  }
-
-  resyncRunning = false;
-  detail.textContent  = '✅ ' + updated + ' titre(s) mis à jour' + (errors ? ' · ' + errors + ' erreur(s)' : '');
-  status.textContent  = 'Terminé';
-  render();
-  setTimeout(() => { if (bar) bar.style.display = 'none'; }, 5000);
-}
-
-function cancelResync() {
-  resyncRunning = false;
-  const bar = document.getElementById('resync-bar');
-  if (bar) bar.style.display = 'none';
-}
-
 load();
 
 // ── Show/hide films grid ──────────────────────────
