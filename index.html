@@ -957,7 +957,7 @@ footer {
   </nav>
   <div class="search-wrap" id="search-wrap">
     <span class="search-icon">🔍</span>
-    <input class="search-input" type="text" id="sb" placeholder="Rechercher un film, genre, acteur..." oninput="render()" onfocus="showGenreDropdown()" onblur="setTimeout(hideGenreDropdown,200)">
+    <input class="search-input" type="text" id="sb" placeholder="Rechercher un film, genre, acteur..." oninput="if(this.value.trim())showAllFilms();render();" onfocus="showGenreDropdown()" onblur="setTimeout(hideGenreDropdown,200)">
     <div class="genre-dropdown" id="genre-dropdown" style="display:none;"></div>
   </div>
   <div class="hdr-right">
@@ -1381,6 +1381,7 @@ function setFilter(f, btn) {
       document.documentElement.style.setProperty('--bg-glow', BG_GLOWS[last] || BG_GLOWS['']);
     }
   }
+  if (filts.size > 0) showAllFilms();
   render();
 }
 
@@ -1560,13 +1561,6 @@ function render() {
 
   const filtLabel = filts.size > 0 ? [...filts].map(f => QLABEL[f]).join(', ') : '';
   const gLabel    = [[...genreInc].map(g => '✓'+g), [...genreExc].map(g => '✕'+g)].flat().join(' ');
-  const hasFilter = filts.size > 0 || genreInc.size > 0 || genreExc.size > 0 || mediaFilt || q || activeYearFilter || activeNoteFilter || activeGenreDD;
-
-  // Auto-show grid when any filter active, auto-hide when none
-  if (hasFilter && !gridVisible) showAllFilms();
-  if (!hasFilter && gridVisible && !document.getElementById('back-bar').classList.contains('visible')) {
-    hideAllFilms();
-  }
 
   document.getElementById('rlabel').innerHTML =
     `Affichage de <strong>${list.length}</strong> film${list.length > 1 ? 's' : ''}${filtLabel ? ' — <strong>'+filtLabel+'</strong>' : ''}${gLabel ? ' — '+gLabel : ''}${q ? ' — <strong>"'+q+'"</strong>' : ''}`;
