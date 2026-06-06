@@ -3400,7 +3400,7 @@ function yearLabel(v) {
 async function enrichAll() {
   const btn = document.getElementById('enrich-btn');
   const toEnrich = movies.filter(m =>
-    m.imdb_rating == null && m.rt_rating == null &&
+    !m.imdb_rating && !m.rt_rating &&
     m.media_type !== 'collection' && m.media_type !== 'saga'
   );
   if (!toEnrich.length) { alert('Tous les films ont déjà leurs notes !'); return; }
@@ -3408,24 +3408,25 @@ async function enrichAll() {
 
   btn.disabled = true;
   btn.textContent = `⭐ 0 / ${toEnrich.length}`;
-  let done = 0; let errors = 0;
+  let done = 0; let changed = 0;
 
   for (const m of toEnrich) {
     const idx = movies.indexOf(m);
     const omdb = await fetchOmdbRatings(m.title, m.release_date, m.tmdb_id, m.media_type);
-    if (omdb.imdb_rating != null || omdb.rt_rating != null) {
-      const updated = { ...m, imdb_rating: omdb.imdb_rating, rt_rating: omdb.rt_rating, mc_rating: omdb.mc_rating };
+    if (omdb.imdb_rating || omdb.rt_rating || omdb.mc_rating) {
+      const updated = { ...m, imdb_rating: omdb.imdb_rating || null, rt_rating: omdb.rt_rating || null, mc_rating: omdb.mc_rating || null };
+      movies[idx] = updated; // update en mémoire aussi
       await updM(idx, updated);
-    } else { errors++; }
+      changed++;
+    }
     done++;
     btn.textContent = `⭐ ${done} / ${toEnrich.length}`;
-    // Pause 200ms pour éviter de dépasser la limite OMDB
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 250));
   }
 
   btn.disabled = false;
   btn.textContent = '⭐ Enrichir les notes';
-  alert(`✅ Terminé !\n${done - errors} films enrichis\n${errors} films non trouvés sur OMDB`);
+  alert(`✅ Terminé !\n${changed} films enrichis\n${done - changed} films non trouvés sur OMDB`);
   render();
 }
 async function translateTitles() {
