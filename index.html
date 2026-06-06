@@ -36,7 +36,6 @@ body {
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
-  overflow-x: hidden;
 }
 a { text-decoration: none; color: inherit; }
 button { font-family: 'DM Sans', sans-serif; }
@@ -361,6 +360,8 @@ header {
 }
 .dd-btn:hover { color: rgba(255,255,255,0.8); }
 .dd-btn.open { color: #fff; border-bottom-color: #00c030; }
+.dd-btn.active-filter { color: #00c030; border-bottom-color: #00c030; }
+.dd-btn.active-filter:hover { color: #33d655; }
 .dd-btn svg { transition: transform 0.15s; }
 .dd-btn.open svg { transform: rotate(180deg); }
 .dd-menu {
@@ -1953,7 +1954,7 @@ async function searchPosters() {
   try {
     let results = [], gmap = {};
     if (mediaType === 'collection') {
-      const res  = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`);
+      const res  = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`);
       const data = await res.json();
       results = (data.results || []).filter(r => r.profile_path).sort((a,b) => (b.popularity||0)-(a.popularity||0)).slice(0, 8);
       if (!results.length) { st.textContent = 'Aucune personne trouvée.'; return; }
@@ -1986,8 +1987,8 @@ async function searchPosters() {
     } else if (mediaType === 'saga') {
       // TMDB collections + movies
       const [resCol, resMovie] = await Promise.all([
-        fetch(`https://api.themoviedb.org/3/search/collection?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`),
-        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`)
+        fetch(`https://api.themoviedb.org/3/search/collection?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`),
+        fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`)
       ]);
       const [dataCol, dataMovie] = await Promise.all([resCol.json(), resMovie.json()]);
 
@@ -2059,16 +2060,16 @@ async function searchPosters() {
       });
     } else {
       const endpoint = mediaType === 'tv'
-        ? `https://api.themoviedb.org/3/search/tv?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`
-        : `https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=fr-FR`;
+        ? `https://api.themoviedb.org/3/search/tv?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`
+        : `https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`;
       const res  = await fetch(endpoint);
       const data = await res.json();
       results = (data.results || []).filter(r => r.poster_path).slice(0, 10);
       if (!results.length) { st.textContent = 'Aucun résultat trouvé.'; return; }
       try {
         const gEndpoint = mediaType === 'tv'
-          ? `https://api.themoviedb.org/3/genre/tv/list?api_key=${TK}&language=fr-FR`
-          : `https://api.themoviedb.org/3/genre/movie/list?api_key=${TK}&language=fr-FR`;
+          ? `https://api.themoviedb.org/3/genre/tv/list?api_key=${TK}&language=en-US`
+          : `https://api.themoviedb.org/3/genre/movie/list?api_key=${TK}&language=en-US`;
         (await (await fetch(gEndpoint)).json()).genres.forEach(g => { gmap[g.id] = g.name; });
       } catch(e) {}
       st.textContent = 'Sélectionne une affiche :';
@@ -2148,7 +2149,7 @@ async function loadFilmographyForCollection() {
   const st = document.getElementById('status');
   st.textContent = 'Chargement de la filmographie...';
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=fr-FR`);
+    const res  = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=en-US`);
     const data = await res.json();
 
     // Cast : films où la personne joue (acteur)
@@ -2340,7 +2341,7 @@ async function loadSagaPosters() {
   const sagaId = meta.tmdb_id;
   if (!sagaId) { alert('Aucun TMDB ID pour cette saga. Cherchez d\'abord via le bouton Chercher.'); return; }
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=fr-FR`);
+    const res  = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=en-US`);
     const data = await res.json();
     const parts = (data.parts || []).filter(p => p.poster_path);
     if (!parts.length) { alert('Aucun film trouvé dans cette collection.'); return; }
@@ -2459,7 +2460,7 @@ async function loadFilmographyForSaga() {
   if (!sagaId) { alert('Aucun ID trouvé. Cherche d\'abord via le bouton Chercher.'); return; }
   st.textContent = 'Chargement depuis TMDB...';
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=fr-FR`);
+    const res  = await fetch(`https://api.themoviedb.org/3/collection/${sagaId}?api_key=${TK}&language=en-US`);
     const data = await res.json();
     const parts = (data.parts || []).filter(p => p.poster_path);
     parts.sort((a,b) => (a.release_date||'').localeCompare(b.release_date||''));
@@ -2640,8 +2641,8 @@ async function startEnrich() {
     try {
       // ── 1. Crédits (acteurs + réalisateur) ──────────────────
       const credEndpoint = m.media_type === 'tv'
-        ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '/credits?api_key=' + TK + '&language=fr-FR'
-        : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '/credits?api_key=' + TK + '&language=fr-FR';
+        ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '/credits?api_key=' + TK + '&language=en-US'
+        : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '/credits?api_key=' + TK + '&language=en-US';
       const credData = await (await fetch(credEndpoint)).json();
 
       const cast = (credData.cast || []).slice(0, 5).map(p => ({ id: p.id, name: p.name, role: 'Acting', popularity: p.popularity || 0 }));
@@ -2656,8 +2657,8 @@ async function startEnrich() {
       let _tmdb_collection = m._tmdb_collection || null;
       try {
         const detailEndpoint = m.media_type === 'tv'
-          ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '?api_key=' + TK + '&language=fr-FR'
-          : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '?api_key=' + TK + '&language=fr-FR';
+          ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US'
+          : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US';
         const detailData = await (await fetch(detailEndpoint)).json();
         if (detailData.belongs_to_collection) {
           _tmdb_collection = {
@@ -2683,7 +2684,7 @@ async function startEnrich() {
           if (titleWords.length > 0) {
             // Chercher avec le mot le plus long/significatif
             const searchWord = titleWords.sort((a,b) => b.length - a.length)[0];
-            const colRes = await fetch('https://api.themoviedb.org/3/search/collection?api_key=' + TK + '&language=fr-FR&query=' + encodeURIComponent(searchWord));
+            const colRes = await fetch('https://api.themoviedb.org/3/search/collection?api_key=' + TK + '&language=en-US&query=' + encodeURIComponent(searchWord));
             const colData = await colRes.json();
             const results = colData.results || [];
 
@@ -2695,7 +2696,7 @@ async function startEnrich() {
 
             if (match) {
               // Vérifier que ce film fait bien partie de cette collection
-              const colDetail = await (await fetch('https://api.themoviedb.org/3/collection/' + match.id + '?api_key=' + TK + '&language=fr-FR')).json();
+              const colDetail = await (await fetch('https://api.themoviedb.org/3/collection/' + match.id + '?api_key=' + TK + '&language=en-US')).json();
               const partIds = (colDetail.parts || []).map(p => p.id);
               if (partIds.includes(m.tmdb_id)) {
                 _tmdb_collection = {
@@ -2975,7 +2976,7 @@ function renderScGroup(g, isPeople = false) {
   // Si on a un ID de collection TMDB, récupérer TOUS les films de la saga
   if (tmdbCollectionId) {
     try {
-      const res  = await fetch(`https://api.themoviedb.org/3/collection/${tmdbCollectionId}?api_key=${TK}&language=fr-FR`);
+      const res  = await fetch(`https://api.themoviedb.org/3/collection/${tmdbCollectionId}?api_key=${TK}&language=en-US`);
       const data = await res.json();
       const parts = data.parts || [];
       parts.forEach(p => {
@@ -3039,7 +3040,7 @@ async function searchFilmo() {
   document.getElementById('filmo-import-btn').style.display = 'none';
   filmoSel.clear();
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(q)}&language=fr-FR`);
+    const res  = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TK}&query=${encodeURIComponent(q)}&language=en-US`);
     const data = await res.json();
     const people = (data.results || []).filter(p => p.known_for_department);
     if (!people.length) { st.textContent = 'Aucune personne trouvée.'; return; }
@@ -3055,7 +3056,7 @@ async function loadFilmo(personId, name, dept) {
   const st = document.getElementById('filmo-status');
   st.textContent = `Chargement de la filmographie de ${name}...`;
   try {
-    const res  = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=fr-FR`);
+    const res  = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${TK}&language=en-US`);
     const data = await res.json();
     let cast = (data.cast || []).filter(m => m.media_type === 'movie' && m.poster_path);
     cast.sort((a,b) => (b.release_date||'').localeCompare(a.release_date||''));
@@ -3231,6 +3232,7 @@ load();
 let gridVisible = false;
 
 function showAllFilms() {
+  if (gridVisible) return; // déjà en vue bibliothèque
   gridVisible = true;
   document.getElementById('home-view').style.display = 'none';
   document.getElementById('library-view').style.display = '';
@@ -3278,7 +3280,7 @@ function toggleDD(id) {
   if (!isOpen && menu) { menu.classList.add('open'); btn && btn.classList.add('open'); }
 }
 // Close on outside click
-document.addEventListener('click', e => {
+document.addEventListener('mousedown', e => {
   if (!e.target.closest('.dd-wrap')) {
     document.querySelectorAll('.dd-menu').forEach(m => m.classList.remove('open'));
     document.querySelectorAll('.dd-btn').forEach(b => b.classList.remove('open'));
@@ -3286,36 +3288,52 @@ document.addEventListener('click', e => {
 });
 
 function applyYearFilter(val) {
-  activeYearFilter = val;
+  activeYearFilter = (activeYearFilter === val) ? '' : val; // toggle
+  val = activeYearFilter;
   document.querySelectorAll('#dd-annee a').forEach(a => a.classList.remove('active'));
   if (!val) document.getElementById('dd-y-all').classList.add('active');
   const btn = document.getElementById('dd-annee-btn');
-  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val ? yearLabel(val)+' ' : 'Année '; }
+  if (btn) {
+    btn.style.color = '';
+    btn.childNodes[0].textContent = val ? yearLabel(val)+' ' : 'Année ';
+    btn.classList.toggle('active-filter', !!val);
+  }
   closeAllDD();
-  if (val) { showAllFilms(); }
+  if (val) showAllFilms();
   render();
 }
 
 function applyNoteFilter(val) {
-  activeNoteFilter = val;
+  activeNoteFilter = (activeNoteFilter === val) ? '' : val; // toggle
+  val = activeNoteFilter;
   document.querySelectorAll('#dd-note a').forEach(a => a.classList.remove('active'));
   if (!val) document.getElementById('dd-n-all').classList.add('active');
   const btn = document.getElementById('dd-note-btn');
-  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = val ? 'Note '+val+'+ ' : 'Note '; }
+  if (btn) {
+    btn.style.color = '';
+    btn.childNodes[0].textContent = val ? 'Note '+val+'+ ' : 'Note ';
+    btn.classList.toggle('active-filter', !!val);
+  }
   closeAllDD();
-  if (val) { showAllFilms(); }
+  if (val) showAllFilms();
   render();
 }
 
 function applyGenreDD(val) {
-  activeGenreDD = val;
+  activeGenreDD = (activeGenreDD === val) ? '' : val; // toggle
+  val = activeGenreDD;
+  if (val) { genreInc.clear(); genreExc.clear(); }
   document.querySelectorAll('#dd-genre a').forEach(a => a.classList.remove('active'));
   if (!val) { document.getElementById('dd-g-all').classList.add('active'); }
   else { document.querySelectorAll('#dd-genre a').forEach(a => { if(a.textContent.trim()===val) a.classList.add('active'); }); }
   const btn = document.getElementById('dd-genre-btn');
-  if (btn) { btn.style.color = val ? '#fff' : ''; btn.childNodes[0].textContent = (val || 'Genre')+' '; }
+  if (btn) {
+    btn.style.color = '';
+    btn.childNodes[0].textContent = (val || 'Genre')+' ';
+    btn.classList.toggle('active-filter', !!val);
+  }
   closeAllDD();
-  if (val) { showAllFilms(); }
+  if (val) showAllFilms();
   render();
 }
 
@@ -3339,8 +3357,6 @@ window.addEventListener('scroll', () => {
   const btn = document.getElementById('back-to-top');
   if (btn) btn.classList.toggle('visible', window.scrollY > 300);
 });
-function applyNoteFilter(v) { pickNote(v); }
-function applyGenreDD(v)    { pickGenre(v); }
 
 // ── Genre dropdown ──────────────────────────────
 function showGenreDropdown() {
