@@ -1099,6 +1099,7 @@ footer {
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
   <button class="btn-footer" style="color:#00e0a6;border-color:rgba(0,224,166,0.2)" onclick="exportLetterboxd()">🎞 Letterboxd CSV</button>
   <button class="btn-footer" style="color:#f5c518;border-color:rgba(245,197,24,0.2)" onclick="enrichAll()" id="enrich-btn">⭐ Enrichir les notes</button>
+  <button class="btn-footer" style="color:#60a5fa;border-color:rgba(96,165,250,0.2)" onclick="translateTitles()" id="translate-btn">🔤 Titres EN</button>
 </footer>
 
 <!-- ═══ FILMOGRAPHIE MODAL (actors standalone) ═══ -->
@@ -3427,6 +3428,45 @@ async function enrichAll() {
   alert(`✅ Terminé !\n${done - errors} films enrichis\n${errors} films non trouvés sur OMDB`);
   render();
 }
+async function translateTitles() {
+  const btn = document.getElementById('translate-btn');
+  const toUpdate = movies.filter(m =>
+    m.tmdb_id && m.media_type !== 'collection' && m.media_type !== 'saga'
+  );
+  if (!toUpdate.length) { alert('Aucun film avec un TMDB ID trouvé.'); return; }
+  if (!confirm(`Mettre à jour les titres de ${toUpdate.length} films en anglais ?\n\n• Films français → titre original conservé\n• Autres → titre anglais\n\n⚠️ Fais un Export avant de continuer !`)) return;
+
+  btn.disabled = true;
+  let done = 0; let changed = 0; let kept = 0;
+
+  for (const m of toUpdate) {
+    const idx = movies.indexOf(m);
+    try {
+      const type = m.media_type === 'tv' ? 'tv' : 'movie';
+      const res = await fetch(`https://api.themoviedb.org/3/${type}/${m.tmdb_id}?api_key=77b9e9b4e22e0658b189a83b0dbad526&language=en-US`);
+      const d = await res.json();
+      let newTitle;
+      if (d.original_language === 'fr') {
+        newTitle = d.original_title || d.title || m.title;
+      } else {
+        newTitle = d.title || d.original_title || m.title;
+      }
+      if (newTitle && newTitle !== m.title) {
+        await updM(idx, { ...m, title: newTitle });
+        changed++;
+      } else { kept++; }
+    } catch(e) { kept++; }
+    done++;
+    btn.textContent = `🔤 ${done} / ${toUpdate.length}`;
+    await new Promise(r => setTimeout(r, 150));
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔤 Titres EN';
+  alert(`✅ Terminé !\n${changed} titres mis à jour\n${kept} titres inchangés`);
+  render();
+}
+
 function pickYear(v)  { applyYearFilter(v); }
 function pickNote(v)  { applyNoteFilter(v); }
 function pickGenre(v) { applyGenreDD(v); }
