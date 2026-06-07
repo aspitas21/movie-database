@@ -3002,8 +3002,9 @@ function renderScGroup(g, isPeople = false) {
   }
 
   const countLabel = films.length > 0 ? films.length + ' film' + (films.length !== 1 ? 's' : '') : '⚡ Saga';
-  const clickAction = g._sagaFiche && films.length === 0
-    ? 'openDetail(event,' + movies.indexOf(g._sagaFiche) + ')'
+  const sagaIdx = g._sagaFiche ? movies.indexOf(g._sagaFiche) : -1;
+  const clickAction = g._sagaFiche && films.length === 0 && sagaIdx >= 0
+    ? 'openDetail(event,' + sagaIdx + ')'
     : 'openScDetail(' + indicesJson + ',\'' + labelEsc + '\',\'' + posterEsc + '\',' + tmdbColId + ')';
   return '<div class="sc-group" onclick="' + clickAction + '">'
     + '<div class="sc-group-poster-wrap ' + wrapClass + '">'
@@ -3294,8 +3295,9 @@ load();
 let gridVisible = false;
 
 function showAllFilms() {
-  if (gridVisible) return; // déjà en vue bibliothèque
+  if (gridVisible) return;
   gridVisible = true;
+  window._groupFilter = null;
   document.getElementById('home-view').style.display = 'none';
   document.getElementById('library-view').style.display = '';
   document.getElementById('back-bar').classList.add('visible');
@@ -3311,6 +3313,7 @@ function hideAllFilms() {
 function goHome() {
   filts.clear(); genreInc.clear(); genreExc.clear();
   mediaFilt = ''; activeYearFilter = ''; activeNoteFilter = ''; activeGenreDD = '';
+  window._groupFilter = null;
   document.getElementById('sb').value = '';
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   const allChip = document.querySelector('.chip[data-q=""]');
@@ -3416,33 +3419,33 @@ async function enrichAll() {
     m.media_type !== 'collection' && m.media_type !== 'saga'
   );
   if (!toEnrich.length) { alert('Tous les films ont déjà leurs notes !'); return; }
-  if (!confirm(`Enrichir ${toEnrich.length} films avec les notes IMDb / RT / Metacritic ?\n\n⚠️ Ça peut prendre quelques minutes.`)) return;
+  if (!confirm('Enrichir ' + toEnrich.length + ' films avec les notes IMDb / RT / Metacritic ?\n\n⚠️ Ça peut prendre quelques minutes.')) return;
 
-  btn.disabled = true;
+  if (btn) btn.disabled = true;
   let done = 0; let changed = 0;
 
-  // Barre de progression
-  let bar = document.getElementById('enrich-bar');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.id = 'enrich-bar';
-    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#14181c;border-top:1px solid rgba(245,197,24,0.3);padding:10px 20px;display:flex;align-items:center;gap:14px;z-index:300;font-size:12px;';
-    bar.innerHTML = '<span style="color:#f5c518;font-weight:700;">⭐ Enrichissement notes</span>'
-      + '<div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">'
-      + '<div id="enrich-prog" style="height:100%;width:0%;background:#f5c518;border-radius:3px;transition:width 0.3s;"></div>'
-      + '</div>'
-      + '<span id="enrich-status" style="color:rgba(255,255,255,0.4);min-width:80px;text-align:right;">0 / ' + toEnrich.length + '</span>'
-      + '<span id="enrich-detail" style="color:rgba(255,255,255,0.25);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>';
-    document.body.appendChild(bar);
-  }
-  bar.style.display = 'flex';
-  const prog   = document.getElementById('enrich-prog');
-  const status = document.getElementById('enrich-status');
-  const detail = document.getElementById('enrich-detail');
+  // Toujours recréer la barre pour éviter les éléments null
+  const oldBar = document.getElementById('enrich-bar');
+  if (oldBar) oldBar.remove();
+  const bar = document.createElement('div');
+  bar.id = 'enrich-bar';
+  bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#14181c;border-top:1px solid rgba(245,197,24,0.3);padding:10px 20px;display:flex;align-items:center;gap:14px;z-index:9999;font-size:12px;';
+  bar.innerHTML = '<span style="color:#f5c518;font-weight:700;">⭐ Enrichissement notes</span>'
+    + '<div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">'
+    + '<div id="enrich-prog" style="height:100%;width:0%;background:#f5c518;border-radius:3px;transition:width 0.3s;"></div>'
+    + '</div>'
+    + '<span id="enrich-status" style="color:rgba(255,255,255,0.4);min-width:100px;text-align:right;">0 / ' + toEnrich.length + '</span>'
+    + '<span id="enrich-detail" style="color:rgba(255,255,255,0.25);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>';
+  document.body.appendChild(bar);
+
+  // querySelector après appendChild pour être sûr
+  const prog   = bar.querySelector('#enrich-prog');
+  const status = bar.querySelector('#enrich-status');
+  const detail = bar.querySelector('#enrich-detail');
 
   for (const m of toEnrich) {
     const idx = movies.indexOf(m);
-    detail.textContent = m.title;
+    if (detail) detail.textContent = m.title;
     const omdb = await fetchOmdbRatings(m.title, m.release_date, m.tmdb_id, m.media_type);
     if (omdb.imdb_rating || omdb.rt_rating || omdb.mc_rating) {
       const updated = { ...m, imdb_rating: omdb.imdb_rating || null, rt_rating: omdb.rt_rating || null, mc_rating: omdb.mc_rating || null };
@@ -3451,17 +3454,16 @@ async function enrichAll() {
       changed++;
     }
     done++;
-    prog.style.width   = Math.round(done / toEnrich.length * 100) + '%';
-    status.textContent = done + ' / ' + toEnrich.length;
+    if (prog)   prog.style.width   = Math.round(done / toEnrich.length * 100) + '%';
+    if (status) status.textContent = done + ' / ' + toEnrich.length;
     await new Promise(r => setTimeout(r, 250));
   }
 
-  btn.disabled = false;
-  btn.textContent = '⭐ Enrichir les notes';
-  detail.textContent = '✅ ' + changed + ' film(s) enrichis · ' + (done - changed) + ' non trouvés';
-  status.textContent = 'Terminé';
+  if (btn) { btn.disabled = false; btn.textContent = '⭐ Enrichir les notes'; }
+  if (detail) detail.textContent = '✅ ' + changed + ' enrichis · ' + (done - changed) + ' non trouvés';
+  if (status) status.textContent = 'Terminé';
   render();
-  setTimeout(() => { if (bar) bar.style.display = 'none'; }, 6000);
+  setTimeout(() => { const b = document.getElementById('enrich-bar'); if (b) b.remove(); }, 6000);
 }
 
 let resyncRunning = false;
