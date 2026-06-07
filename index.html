@@ -3262,6 +3262,15 @@ async function updM(idx, m) {
     render();
   } catch(e) { ss('error', 'Erreur de mise à jour'); }
 }
+
+async function updMSilent(idx, m) {
+  const id = movies[idx]._id;
+  try {
+    const r = await fetch(`${SU}/rest/v1/movies?id=eq.${id}`, { method:'PATCH', headers:{...H,'Prefer':'return=representation'}, body: JSON.stringify({ data: m }) });
+    if (!r.ok) throw new Error();
+    m._id = id; movies[idx] = m;
+  } catch(e) { console.error('updMSilent error:', e); }
+}
 async function delM(idx) {
   const id = movies[idx]._id;
   ss('loading', 'Suppression...');
@@ -3450,7 +3459,7 @@ async function enrichAll() {
     if (omdb.imdb_rating || omdb.rt_rating || omdb.mc_rating) {
       const updated = { ...m, imdb_rating: omdb.imdb_rating || null, rt_rating: omdb.rt_rating || null, mc_rating: omdb.mc_rating || null };
       movies[idx] = updated;
-      await updM(idx, updated);
+      await updMSilent(idx, updated);
       changed++;
     }
     done++;
