@@ -1099,7 +1099,7 @@ footer {
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
   <button class="btn-footer" style="color:#00e0a6;border-color:rgba(0,224,166,0.2)" onclick="exportLetterboxd()">🎞 Letterboxd CSV</button>
   <button class="btn-footer" style="color:#f59e0b;border-color:rgba(245,158,11,0.2)" onclick="startResyncTitles()">🔄 Re-sync titres EN</button>
-  <button class="btn-footer" style="color:#f5c518;border-color:rgba(245,197,24,0.2)" onclick="enrichAll()" id="enrich-btn">⭐ Enrichir les notes</button>
+  <button class="btn-footer" style="color:#f5c518;border-color:rgba(245,197,24,0.2)" onclick="enrichAll()" id="footer-enrich-btn">⭐ Enrichir les notes</button>
 </footer>
 
 <!-- ═══ FILMOGRAPHIE MODAL (actors standalone) ═══ -->
@@ -3410,7 +3410,7 @@ function yearLabel(v) {
 }
 
 async function enrichAll() {
-  const btn = document.getElementById('enrich-btn');
+  const btn = document.getElementById('footer-enrich-btn');
   const toEnrich = movies.filter(m =>
     !m.imdb_rating && !m.rt_rating &&
     m.media_type !== 'collection' && m.media_type !== 'saga'
