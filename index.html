@@ -816,8 +816,7 @@ footer {
 
 /* ── SC PAGE LAYOUT ──────────────────────────────── */
 .sc-page { display:none; position:fixed; inset:0; background:#0d0d0f; z-index:100; overflow-y:auto; flex-direction:column; }
-.sc-detail-page { display:none; position:fixed; inset:0; background:#0d0d0f; z-index:150; overflow-y:auto; flex-direction:column; }
-
+.sc-detail-page { display:none; position:fixed; inset:0; background:#0d0d0f; z-index:150; overflow-y:auto; flex-direction:column; width:100%; }
 /* ── SC NAV BAR ─────────────────────────────────── */
 .sc-header {
   position:sticky; top:0; z-index:10;
@@ -847,7 +846,7 @@ footer {
 .enrich-bar-detail { margin-top:0.6rem; font-size:11px; color:rgba(255,255,255,0.35); font-style:italic; }
 
 /* ── SC BODY & SECTION HEADERS ───────────────────── */
-.sc-body { padding:0 0 6rem; }
+.sc-body { padding:0 0 6rem; width:100%; }
 .sc-section-hdr { display:flex; align-items:baseline; gap:10px; padding:2rem 2rem 1rem; border-top:1px solid rgba(255,255,255,0.06); margin-top:1rem; }
 .sc-section-hdr:first-child { border-top:none; margin-top:0; padding-top:1.5rem; }
 .sc-section-title { font-family:'DM Serif Display',serif; font-size:22px; color:#fff; letter-spacing:-0.3px; }
@@ -888,7 +887,7 @@ footer {
 .sc-detail-unavailable { opacity:0.28; cursor:default; }
 .sc-detail-unavailable:hover { transform:none !important; }
 .sc-detail-lock { position:absolute; top:5px; right:5px; font-size:12px; }
-.sc-detail-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(var(--card-w),1fr)); gap:13px; padding:0 2rem; }
+.sc-detail-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:13px; padding:1.5rem 2rem; width:100%; }
 
 /* ── HEADER btn tweaks ───────────────────────────── */
 .btn-random { padding:5px 9px; font-size:13px; }
