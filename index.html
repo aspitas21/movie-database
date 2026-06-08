@@ -953,9 +953,9 @@ footer {
   </div>
   <nav class="lbd-nav">
     <button class="lbd-nav-link active" onclick="setMediaFilter('');this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Films</button>
-    <button class="lbd-nav-link" onclick="setMediaFilter('tv');this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Séries</button>
-    <button class="lbd-nav-link" onclick="setMediaFilter('collection');this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Collections</button>
-    <button class="lbd-nav-link" onclick="setMediaFilter('saga');this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Sagas</button>
+    <button class="lbd-nav-link" onclick="this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active');setMediaFilter('tv');showAllFilms();">Séries</button>
+    <button class="lbd-nav-link" onclick="this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active');openSmartCollections();switchScTab('actors');">Collections</button>
+    <button class="lbd-nav-link" onclick="this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active');openSmartCollections();switchScTab('sagas');">Sagas</button>
   </nav>
   <div class="search-wrap" id="search-wrap">
     <span class="search-icon">🔍</span>
@@ -1098,8 +1098,6 @@ footer {
   <button class="btn-footer" onclick="document.getElementById('import-file').click()">⬆ Importer</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
   <button class="btn-footer" style="color:#00e0a6;border-color:rgba(0,224,166,0.2)" onclick="exportLetterboxd()">🎞 Letterboxd CSV</button>
-  <button class="btn-footer" style="color:#f59e0b;border-color:rgba(245,158,11,0.2)" onclick="startResyncTitles()">🔄 Re-sync titres EN</button>
-  <button class="btn-footer" style="color:#f5c518;border-color:rgba(245,197,24,0.2)" onclick="enrichAll()" id="footer-enrich-btn">⭐ Enrichir les notes</button>
 </footer>
 
 <!-- ═══ FILMOGRAPHIE MODAL (actors standalone) ═══ -->
@@ -2124,43 +2122,6 @@ async function searchPosters() {
 // ══════════════════════════════════════════════════
 //  SAVE MOVIE
 // ══════════════════════════════════════════════════
-async function fetchOmdbRatings(title, year, tmdb_id, media_type) {
-  try {
-    let imdbId = null;
-    let enTitle = title;
-
-    if (tmdb_id && media_type !== 'collection' && media_type !== 'saga') {
-      const type = media_type === 'tv' ? 'tv' : 'movie';
-      // /movie/{id} a imdb_id directement à la racine + titre EN
-      const tmdbRes = await fetch(`https://api.themoviedb.org/3/${type}/${tmdb_id}?api_key=77b9e9b4e22e0658b189a83b0dbad526&language=en-US`);
-      const tmdbData = await tmdbRes.json();
-      if (type === 'movie') {
-        imdbId = tmdbData.imdb_id || null;
-      } else {
-        const extRes = await fetch(`https://api.themoviedb.org/3/tv/${tmdb_id}/external_ids?api_key=77b9e9b4e22e0658b189a83b0dbad526`);
-        const extData = await extRes.json();
-        imdbId = extData.imdb_id || null;
-      }
-      enTitle = tmdbData.title || tmdbData.name || title;
-    }
-
-    const url = imdbId
-      ? `https://www.omdbapi.com/?i=${imdbId}&apikey=6f216ff1`
-      : `https://www.omdbapi.com/?t=${encodeURIComponent(enTitle)}&y=${year ? year.slice(0,4) : ''}&apikey=6f216ff1`;
-
-    const res = await fetch(url);
-    const d = await res.json();
-    if (!d || d.Response === 'False') return {};
-
-    const imdb  = d.imdbRating && d.imdbRating !== 'N/A' ? parseFloat(d.imdbRating) : null;
-    const rtRaw = d.Ratings ? d.Ratings.find(r => r.Source === 'Rotten Tomatoes') : null;
-    const mcRaw = d.Ratings ? d.Ratings.find(r => r.Source === 'Metacritic') : null;
-    const rt    = rtRaw ? parseInt(rtRaw.Value) : null;
-    const mc    = mcRaw ? parseInt(mcRaw.Value) : null;
-
-    return { imdb_rating: imdb, rt_rating: rt, mc_rating: mc };
-  } catch(e) { console.error('fetchOmdb error:', e); return {}; }
-}
 
 async function saveMovie() {
   const title   = document.getElementById('ititle').value.trim();
@@ -2169,16 +2130,6 @@ async function saveMovie() {
   const links = getLinks();
   const link  = links.length > 0 ? links[0].url : '';
   const orig  = editIdx >= 0 ? movies[editIdx] : {};
-  const year  = meta.release_date || orig.release_date || '';
-
-  // Récupérer notes OMDB si pas déjà stockées
-  let omdb = {};
-  const hasOmdb = orig.imdb_rating != null || orig.rt_rating != null;
-  if (!hasOmdb) {
-    omdb = await fetchOmdbRatings(title, year, meta.tmdb_id || orig.tmdb_id, meta.media_type || orig.media_type);
-  } else {
-    omdb = { imdb_rating: orig.imdb_rating, rt_rating: orig.rt_rating, mc_rating: orig.mc_rating };
-  }
 
   const m = {
     title, link, links, quality,
@@ -2193,9 +2144,6 @@ async function saveMovie() {
     person_role:  meta.person_role   || orig.person_role   || '',
     person_id:    meta.tmdb_id       || orig.person_id     || null,
     person_name:  meta.media_type === 'collection' ? (document.getElementById('ititle').value.trim() || orig.person_name || '') : (orig.person_name || ''),
-    imdb_rating:  omdb.imdb_rating   || orig.imdb_rating   || null,
-    rt_rating:    omdb.rt_rating     || orig.rt_rating     || null,
-    mc_rating:    omdb.mc_rating     || orig.mc_rating     || null,
   };
   closeModal();
   if (editIdx >= 0) await updM(editIdx, m); else await addM(m);
@@ -3263,15 +3211,6 @@ async function updM(idx, m) {
   } catch(e) { ss('error', 'Erreur de mise à jour'); }
 }
 
-async function updMSilent(idx, m) {
-  const id = m._id || (movies[idx] && movies[idx]._id);
-  if (!id) { console.error('updMSilent: no _id found for idx', idx); return; }
-  try {
-    const r = await fetch(`${SU}/rest/v1/movies?id=eq.${id}`, { method:'PATCH', headers:{...H,'Prefer':'return=representation'}, body: JSON.stringify({ data: m }) });
-    if (!r.ok) { const txt = await r.text(); console.error('updMSilent failed:', r.status, txt); return; }
-    m._id = id; movies[idx] = m;
-  } catch(e) { console.error('updMSilent error:', e); }
-}
 async function delM(idx) {
   const id = movies[idx]._id;
   ss('loading', 'Suppression...');
@@ -3422,130 +3361,7 @@ function yearLabel(v) {
   return map[v] || v;
 }
 
-async function enrichAll() {
-  const btn = document.getElementById('footer-enrich-btn');
-  const toEnrich = movies.filter(m =>
-    !m.imdb_rating && !m.rt_rating &&
-    m.media_type !== 'collection' && m.media_type !== 'saga'
-  );
-  if (!toEnrich.length) { alert('Tous les films ont déjà leurs notes !'); return; }
-  if (!confirm('Enrichir ' + toEnrich.length + ' films avec les notes IMDb / RT / Metacritic ?\n\n⚠️ Ça peut prendre quelques minutes.')) return;
 
-  if (btn) btn.disabled = true;
-  let done = 0; let changed = 0;
-
-  // Toujours recréer la barre pour éviter les éléments null
-  const oldBar = document.getElementById('enrich-bar');
-  if (oldBar) oldBar.remove();
-  const bar = document.createElement('div');
-  bar.id = 'enrich-bar';
-  bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#14181c;border-top:1px solid rgba(245,197,24,0.3);padding:10px 20px;display:flex;align-items:center;gap:14px;z-index:9999;font-size:12px;';
-  bar.innerHTML = '<span style="color:#f5c518;font-weight:700;">⭐ Enrichissement notes</span>'
-    + '<div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">'
-    + '<div id="enrich-prog" style="height:100%;width:0%;background:#f5c518;border-radius:3px;transition:width 0.3s;"></div>'
-    + '</div>'
-    + '<span id="enrich-status" style="color:rgba(255,255,255,0.4);min-width:100px;text-align:right;">0 / ' + toEnrich.length + '</span>'
-    + '<span id="enrich-detail" style="color:rgba(255,255,255,0.25);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>';
-  document.body.appendChild(bar);
-
-  // querySelector après appendChild pour être sûr
-  const prog   = bar.querySelector('#enrich-prog');
-  const status = bar.querySelector('#enrich-status');
-  const detail = bar.querySelector('#enrich-detail');
-
-  for (const m of toEnrich) {
-    const idx = movies.indexOf(m);
-    if (detail) detail.textContent = m.title;
-    const omdb = await fetchOmdbRatings(m.title, m.release_date, m.tmdb_id, m.media_type);
-    if (omdb.imdb_rating || omdb.rt_rating || omdb.mc_rating) {
-      const updated = { ...m, imdb_rating: omdb.imdb_rating || null, rt_rating: omdb.rt_rating || null, mc_rating: omdb.mc_rating || null };
-      // S'assurer que _id est préservé pour updMSilent
-      if (m._id) updated._id = m._id;
-      movies[idx] = updated;
-      await updMSilent(idx, updated);
-      changed++;
-    }
-    done++;
-    if (prog)   prog.style.width   = Math.round(done / toEnrich.length * 100) + '%';
-    if (status) status.textContent = done + ' / ' + toEnrich.length;
-    await new Promise(r => setTimeout(r, 250));
-  }
-
-  if (btn) { btn.disabled = false; btn.textContent = '⭐ Enrichir les notes'; }
-  if (detail) detail.textContent = '✅ ' + changed + ' enrichis · ' + (done - changed) + ' non trouvés';
-  if (status) status.textContent = 'Terminé';
-  render();
-  setTimeout(() => { const b = document.getElementById('enrich-bar'); if (b) b.remove(); }, 6000);
-}
-
-let resyncRunning = false;
-
-async function startResyncTitles() {
-  if (resyncRunning) return;
-  const toSync = movies.filter(m =>
-    (m.media_type === 'movie' || m.media_type === 'tv') && m.tmdb_id
-  );
-  if (!toSync.length) { alert('Aucun film avec un TMDB ID à synchroniser.'); return; }
-  if (!confirm(`Re-synchroniser les titres en anglais pour ${toSync.length} films/séries ?\n\nCela va remplacer tous les titres actuels par les titres anglais TMDB.\nL'opération peut prendre plusieurs minutes.`)) return;
-
-  resyncRunning = true;
-
-  let bar = document.getElementById('resync-bar');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.id = 'resync-bar';
-    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#14181c;border-top:1px solid rgba(245,158,11,0.3);padding:10px 20px;display:flex;align-items:center;gap:14px;z-index:300;font-size:12px;';
-    bar.innerHTML = '<span style="color:#f59e0b;font-weight:700;">🔄 Re-sync titres EN</span>'
-      + '<div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">'
-      + '<div id="resync-prog" style="height:100%;width:0%;background:#f59e0b;border-radius:3px;transition:width 0.3s;"></div>'
-      + '</div>'
-      + '<span id="resync-status" style="color:rgba(255,255,255,0.4);min-width:80px;text-align:right;">0 / ' + toSync.length + '</span>'
-      + '<span id="resync-detail" style="color:rgba(255,255,255,0.25);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>'
-      + '<button onclick="cancelResync()" style="padding:3px 10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;">✕</button>';
-    document.body.appendChild(bar);
-  }
-  bar.style.display = 'flex';
-
-  const prog   = document.getElementById('resync-prog');
-  const status = document.getElementById('resync-status');
-  const detail = document.getElementById('resync-detail');
-
-  let done = 0, updated = 0, errors = 0;
-
-  for (const m of toSync) {
-    if (!resyncRunning) break;
-    const idx = movies.indexOf(m);
-    detail.textContent = m.title;
-    try {
-      const endpoint = m.media_type === 'tv'
-        ? 'https://api.themoviedb.org/3/tv/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US'
-        : 'https://api.themoviedb.org/3/movie/' + m.tmdb_id + '?api_key=' + TK + '&language=en-US';
-      const res  = await fetch(endpoint);
-      const data = await res.json();
-      const newTitle = data.title || data.name || m.title;
-      if (newTitle && newTitle !== m.title) {
-        await updM(idx, { ...m, title: newTitle });
-        updated++;
-      }
-    } catch(e) { errors++; }
-    done++;
-    prog.style.width   = Math.round(done / toSync.length * 100) + '%';
-    status.textContent = done + ' / ' + toSync.length;
-    await new Promise(r => setTimeout(r, 250));
-  }
-
-  resyncRunning = false;
-  detail.textContent = '✅ ' + updated + ' titre(s) mis à jour' + (errors ? ' · ' + errors + ' erreur(s)' : '');
-  status.textContent = 'Terminé';
-  render();
-  setTimeout(() => { if (bar) bar.style.display = 'none'; }, 5000);
-}
-
-function cancelResync() {
-  resyncRunning = false;
-  const bar = document.getElementById('resync-bar');
-  if (bar) bar.style.display = 'none';
-}
 
 function pickYear(v)  { applyYearFilter(v); }
 function pickNote(v)  { applyNoteFilter(v); }
