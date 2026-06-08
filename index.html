@@ -3264,10 +3264,11 @@ async function updM(idx, m) {
 }
 
 async function updMSilent(idx, m) {
-  const id = movies[idx]._id;
+  const id = m._id || (movies[idx] && movies[idx]._id);
+  if (!id) { console.error('updMSilent: no _id found for idx', idx); return; }
   try {
     const r = await fetch(`${SU}/rest/v1/movies?id=eq.${id}`, { method:'PATCH', headers:{...H,'Prefer':'return=representation'}, body: JSON.stringify({ data: m }) });
-    if (!r.ok) throw new Error();
+    if (!r.ok) { const txt = await r.text(); console.error('updMSilent failed:', r.status, txt); return; }
     m._id = id; movies[idx] = m;
   } catch(e) { console.error('updMSilent error:', e); }
 }
@@ -3458,6 +3459,8 @@ async function enrichAll() {
     const omdb = await fetchOmdbRatings(m.title, m.release_date, m.tmdb_id, m.media_type);
     if (omdb.imdb_rating || omdb.rt_rating || omdb.mc_rating) {
       const updated = { ...m, imdb_rating: omdb.imdb_rating || null, rt_rating: omdb.rt_rating || null, mc_rating: omdb.mc_rating || null };
+      // S'assurer que _id est préservé pour updMSilent
+      if (m._id) updated._id = m._id;
       movies[idx] = updated;
       await updMSilent(idx, updated);
       changed++;
