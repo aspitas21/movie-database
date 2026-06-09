@@ -855,7 +855,18 @@ footer {
 .sc-section-title { font-family:'DM Serif Display',serif; font-size:22px; color:#fff; letter-spacing:-0.3px; }
 .sc-section-count { font-size:13px; color:rgba(255,255,255,0.3); font-weight:500; }
 .sc-section-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; padding:0 2rem 1.5rem; }
-.sc-section-grid.sc-grid-people { grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
+.sc-section-grid.sc-grid-people { grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); }
+
+/* Sous-tabs réal/acteurs */
+.sc-people-tabs { display:flex; gap:8px; padding:1.2rem 2rem 0.8rem; }
+.sc-people-tab {
+  padding:7px 18px; border-radius:20px; border:1px solid rgba(255,255,255,0.12);
+  background:transparent; color:rgba(255,255,255,0.4); font-family:'DM Sans',sans-serif;
+  font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:6px;
+}
+.sc-people-tab:hover { color:rgba(255,255,255,0.75); border-color:rgba(255,255,255,0.25); }
+.sc-people-tab.active { background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.3); }
+.sc-people-count { font-size:10px; background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:10px; }
 .sc-empty { padding:5rem 2rem; text-align:center; color:rgba(255,255,255,0.25); font-size:14px; }
 .sc-empty-icon { font-size:46px; margin-bottom:1rem; opacity:0.2; }
 
@@ -2784,6 +2795,13 @@ function openSmartCollections() {
   buildSmartCollections();
 }
 
+function switchPeopleTab(tab, btn) {
+  document.getElementById('sc-people-directors').style.display = tab === 'directors' ? '' : 'none';
+  document.getElementById('sc-people-actors').style.display   = tab === 'actors'    ? '' : 'none';
+  document.querySelectorAll('.sc-people-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
 function switchScTab(tabId) {
   scActiveTab = tabId;
   document.querySelectorAll('.sc-tab-panel').forEach(panel => panel.style.display = 'none');
@@ -2816,8 +2834,9 @@ function buildSmartCollections() {
       const role = (m.person_role || '').toLowerCase();
       const isDirector = role.includes('directing') || role.includes('réalisa');
       const target = isDirector ? directorMap : actorMap;
-      if (!target[key]) target[key] = { id: key, name, films: [], poster: null };
-      if (!target[key].films.includes(m)) target[key].films.push(m);
+      if (!target[key]) target[key] = { id: key, name, films: [], _filmIds: new Set(), poster: null };
+      const fid = m.tmdb_id ? String(m.tmdb_id) : m.title;
+      if (!target[key]._filmIds.has(fid)) { target[key]._filmIds.add(fid); target[key].films.push(m); }
     }
 
     // Méthode TMDB (_credits)
@@ -2827,8 +2846,9 @@ function buildSmartCollections() {
         const name = credit.name;
         const isDirector = (credit.role || '').toLowerCase().includes('directing');
         const target = isDirector ? directorMap : actorMap;
-        if (!target[key]) target[key] = { id: key, name, films: [], poster: null };
-        if (!target[key].films.includes(m)) target[key].films.push(m);
+        if (!target[key]) target[key] = { id: key, name, films: [], _filmIds: new Set(), poster: null };
+        const fid = m.tmdb_id ? String(m.tmdb_id) : m.title;
+        if (!target[key]._filmIds.has(fid)) { target[key]._filmIds.add(fid); target[key].films.push(m); }
       });
     }
   });
@@ -2924,27 +2944,33 @@ function buildSmartCollections() {
     if (!panel) return;
 
     if (t.isCollections) {
-      // Afficher Réalisateurs puis Acteurs dans le même panel
-      let html = '';
+      let html = '<div class="sc-people-tabs">'
+        + '<button class="sc-people-tab active" onclick="switchPeopleTab(\'directors\',this)">🎬 Réalisateurs <span class="sc-people-count">' + t.directorGroups.length + '</span></button>'
+        + '<button class="sc-people-tab" onclick="switchPeopleTab(\'actors\',this)">🎭 Acteurs <span class="sc-people-count">' + t.actorGroups.length + '</span></button>'
+        + '</div>';
+
+      // Réalisateurs (visible par défaut)
+      html += '<div id="sc-people-directors">';
       if (t.directorGroups.length) {
-        html += '<div class="sc-section-hdr">'
-          + '<div class="sc-section-title">🎬 Réalisateurs</div>'
-          + '<div class="sc-section-count">' + t.directorGroups.length + ' collections</div>'
-          + '</div>'
-          + '<div class="sc-section-grid sc-grid-people">'
+        html += '<div class="sc-section-grid sc-grid-people">'
           + t.directorGroups.map(g => renderScGroup(g, true)).join('')
           + '</div>';
+      } else {
+        html += '<div class="sc-empty"><p>Aucun réalisateur trouvé.</p></div>';
       }
+      html += '</div>';
+
+      // Acteurs (caché par défaut)
+      html += '<div id="sc-people-actors" style="display:none;">';
       if (t.actorGroups.length) {
-        html += '<div class="sc-section-hdr">'
-          + '<div class="sc-section-title">🎭 Acteurs</div>'
-          + '<div class="sc-section-count">' + t.actorGroups.length + ' collections</div>'
-          + '</div>'
-          + '<div class="sc-section-grid sc-grid-people">'
+        html += '<div class="sc-section-grid sc-grid-people">'
           + t.actorGroups.map(g => renderScGroup(g, true)).join('')
           + '</div>';
+      } else {
+        html += '<div class="sc-empty"><p>Aucun acteur trouvé.</p></div>';
       }
-      if (!html) html = '<div class="sc-empty"><div class="sc-empty-icon">🎭</div><p>Aucune donnée.</p></div>';
+      html += '</div>';
+
       panel.innerHTML = html;
       return;
     }
@@ -3067,7 +3093,7 @@ function renderScGroup(g, isPeople = false) {
     const idx = m._origIdx;
     const year = m.release_date ? m.release_date.slice(0,4) : '?';
     const clickable = m._owned && idx >= 0;
-    return `<div class="sc-detail-card${m._owned ? '' : ' sc-detail-unavailable'}" ${clickable ? `onclick="closeScDetail();openDetail(event,${idx})"` : ''}>
+    return `<div class="sc-detail-card${m._owned ? '' : ' sc-detail-unavailable'}" ${clickable ? `onclick="openDetail(event,${idx})"` : ''}>
       ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}">` : '<div class="sc-detail-no-poster">🎬</div>'}
       ${!m._owned ? '<div class="sc-detail-lock">🔒</div>' : ''}
       <div class="sc-detail-card-title">${escapeHtml(m.title)}</div>
