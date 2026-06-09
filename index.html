@@ -855,7 +855,7 @@ footer {
 .sc-section-title { font-family:'DM Serif Display',serif; font-size:22px; color:#fff; letter-spacing:-0.3px; }
 .sc-section-count { font-size:13px; color:rgba(255,255,255,0.3); font-weight:500; }
 .sc-section-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; padding:0 2rem 1.5rem; }
-.sc-section-grid.sc-grid-people { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
+.sc-section-grid.sc-grid-people { grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
 .sc-empty { padding:5rem 2rem; text-align:center; color:rgba(255,255,255,0.25); font-size:14px; }
 .sc-empty-icon { font-size:46px; margin-bottom:1rem; opacity:0.2; }
 
@@ -1268,7 +1268,7 @@ footer {
       <div id="enrich-detail" class="enrich-bar-detail">Prêt.</div>
     </div>
     <div id="sc-tab-actors" class="sc-tab-panel"></div>
-    <div id="sc-tab-directors" class="sc-tab-panel" style="display:none;"></div>
+    <div id="sc-tab-sagas" class="sc-tab-panel" style="display:none;"></div>
     <div id="sc-tab-sagas" class="sc-tab-panel" style="display:none;"></div>
   </div>
 </div>
@@ -2902,12 +2902,15 @@ function buildSmartCollections() {
     if (alreadyExists) return;
     universeMap[key] = { name: m.title, films: [], poster: m.poster || null, _sagaFiche: m };
   });
-  const sagaGroups = Object.values(universeMap).filter(g => g._sagaFiche || g.films.length >= 2).sort((a,b) => maxPop(b) - maxPop(a));
+  const sagaGroups = Object.values(universeMap).filter(g => g._sagaFiche || g.films.length >= 2).sort((a,b) => (b.films.length||0) - (a.films.length||0));
   
+  // Trier acteurs et réalisateurs par nombre de films décroissant
+  actorGroups.sort((a,b) => (b.films.length||0) - (a.films.length||0));
+  directorGroups.sort((a,b) => (b.films.length||0) - (a.films.length||0));
+
   // --- Construction des onglets ---
   const tabs = [
-    { id: 'actors',    label: `🎭 Acteurs (${actorGroups.length})`,          groups: actorGroups },
-    { id: 'directors', label: `🎬 Réalisateurs (${directorGroups.length})`,  groups: directorGroups },
+    { id: 'actors',    label: `🎭 Collections (${actorGroups.length + directorGroups.length})`, groups: null, isCollections: true, actorGroups, directorGroups },
     { id: 'sagas',     label: `⚡ Univers & Sagas (${sagaGroups.length})`,   groups: sagaGroups }
   ];
 
@@ -2919,18 +2922,44 @@ function buildSmartCollections() {
   tabs.forEach(t => {
     const panel = document.getElementById('sc-tab-' + t.id);
     if (!panel) return;
-    if (!t.groups.length) {
-      panel.innerHTML = '<div class="sc-empty"><div class="sc-empty-icon">🎬</div><p>Aucune donnée.<br><span style="font-size:12px;opacity:0.5;">Clique sur 🔄 Enrichir pour analyser ta bibliothèque.</span></p></div>';
+
+    if (t.isCollections) {
+      // Afficher Réalisateurs puis Acteurs dans le même panel
+      let html = '';
+      if (t.directorGroups.length) {
+        html += '<div class="sc-section-hdr">'
+          + '<div class="sc-section-title">🎬 Réalisateurs</div>'
+          + '<div class="sc-section-count">' + t.directorGroups.length + ' collections</div>'
+          + '</div>'
+          + '<div class="sc-section-grid sc-grid-people">'
+          + t.directorGroups.map(g => renderScGroup(g, true)).join('')
+          + '</div>';
+      }
+      if (t.actorGroups.length) {
+        html += '<div class="sc-section-hdr">'
+          + '<div class="sc-section-title">🎭 Acteurs</div>'
+          + '<div class="sc-section-count">' + t.actorGroups.length + ' collections</div>'
+          + '</div>'
+          + '<div class="sc-section-grid sc-grid-people">'
+          + t.actorGroups.map(g => renderScGroup(g, true)).join('')
+          + '</div>';
+      }
+      if (!html) html = '<div class="sc-empty"><div class="sc-empty-icon">🎭</div><p>Aucune donnée.</p></div>';
+      panel.innerHTML = html;
       return;
     }
-    const isPeople = t.id === 'actors' || t.id === 'directors';
-    const sectionTitle = t.id === 'actors' ? 'Acteurs' : t.id === 'directors' ? 'Réalisateurs' : 'Univers & Sagas';
+
+    if (!t.groups.length) {
+      panel.innerHTML = '<div class="sc-empty"><div class="sc-empty-icon">🎬</div><p>Aucune donnée.</p></div>';
+      return;
+    }
+    const isPeople = false;
     panel.innerHTML = '<div class="sc-section-hdr">'
-      + '<div class="sc-section-title">' + sectionTitle + '</div>'
-      + '<div class="sc-section-count">' + t.groups.length + ' collection' + (t.groups.length > 1 ? 's' : '') + '</div>'
+      + '<div class="sc-section-title">Univers & Sagas</div>'
+      + '<div class="sc-section-count">' + t.groups.length + ' saga' + (t.groups.length > 1 ? 's' : '') + '</div>'
       + '</div>'
-      + '<div class="sc-section-grid' + (isPeople ? ' sc-grid-people' : '') + '">'
-      + t.groups.map(g => renderScGroup(g, isPeople)).join('')
+      + '<div class="sc-section-grid">'
+      + t.groups.map(g => renderScGroup(g, false)).join('')
       + '</div>';
   });
 }
