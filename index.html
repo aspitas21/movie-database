@@ -1610,7 +1610,7 @@ function render() {
   const mergedList = [...mergedMap.values(), ...noIdList];
 
   mergedList.forEach(({ primary: m, versions }, i) => {
-    const idx    = versions[0].idx; // index principal pour openDetail
+    const idx    = versions[0].idx;
     const year   = m.release_date ? m.release_date.slice(0,4) : '';
     const dur    = fmt(m.runtime);
     const rating = m.imdb_rating ? '⭐ ' + m.imdb_rating.toFixed(1)
@@ -1621,10 +1621,13 @@ function render() {
     const isCol  = m.media_type === 'collection';
     const isSaga = m.media_type === 'saga';
 
+    // Stocker les versions UNE SEULE FOIS par carte
+    const vKey = storeVersions(versions);
+
     const card = document.createElement('div');
     card.className = `card ${m.quality}${isCol ? ' collection' : ''}${isSaga ? ' collection' : ''}`;
     card.style.animationDelay = (Math.min(i, 30) * 0.022) + 's';
-    card.onclick = e => { if (!e.target.closest('.detail-btn')) openDetailMerged(e, storeVersions(versions)); };
+    card.onclick = e => { if (!e.target.closest('.detail-btn')) openDetailMerged(e, vKey); };
 
     // Badges qualité pour chaque version
     const badgesHtml = versions.length > 1
@@ -1652,7 +1655,7 @@ function render() {
     }
 
     card.innerHTML = posterHtml
-      + `<button class="detail-btn" onclick="openDetailMerged(event,'${storeVersions(versions)}')">⋯</button>`;
+      + `<button class="detail-btn" onclick="openDetailMerged(event,'${vKey}')">⋯</button>`;
 
     frag.appendChild(card);
   });
