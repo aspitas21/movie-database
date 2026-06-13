@@ -438,6 +438,9 @@ header {
 .card-qbadge-corner.q4kl { background:rgba(52,211,153,0.25); color:#34d399; }
 .card-qbadge-corner.q1r  { background:rgba(56,189,248,0.2); color:#38bdf8; }
 .card-qbadge-corner.q1l  { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.35); }
+/* Multi-version badges */
+.card-multi-badges { position:absolute; top:5px; right:5px; z-index:3; display:flex; flex-direction:column; gap:2px; align-items:flex-end; }
+.card-multi-badges .card-qbadge-corner { position:static; }
 
 .card-overlay {
   position: absolute; inset: 0; opacity: 0; transition: opacity 0.18s;
@@ -1593,8 +1596,21 @@ function render() {
   grid.className = 'grid';
   const frag = document.createDocumentFragment();
 
-  list.forEach((m, i) => {
-    const idx    = movies.indexOf(m);
+  // ── Fusionner les doublons par tmdb_id ──
+  const mergedMap = new Map(); // key → { primary, versions: [{idx, quality, links}] }
+  const noIdList  = []; // films sans tmdb_id → pas de fusion
+  list.forEach(m => {
+    const key = m.tmdb_id ? String(m.tmdb_id) + '_' + (m.media_type||'movie') : null;
+    if (!key) { noIdList.push({ primary: m, versions: [{ idx: movies.indexOf(m), quality: m.quality, links: m.links||[], link: m.link }] }); return; }
+    if (!mergedMap.has(key)) {
+      mergedMap.set(key, { primary: m, versions: [] });
+    }
+    mergedMap.get(key).versions.push({ idx: movies.indexOf(m), quality: m.quality, links: m.links||[], link: m.link });
+  });
+  const mergedList = [...mergedMap.values(), ...noIdList];
+
+  mergedList.forEach(({ primary: m, versions }, i) => {
+    const idx    = versions[0].idx; // index principal pour openDetail
     const year   = m.release_date ? m.release_date.slice(0,4) : '';
     const dur    = fmt(m.runtime);
     const rating = m.imdb_rating ? '⭐ ' + m.imdb_rating.toFixed(1)
@@ -1604,12 +1620,16 @@ function render() {
     const tagsHtml = m.tags && m.tags.length ? m.tags.slice(0,2).map(t => `<span class="ctag">${escapeHtml(t)}</span>`).join('') : '';
     const isCol  = m.media_type === 'collection';
     const isSaga = m.media_type === 'saga';
-    const typeIcon = isCol ? '🎞' : isSaga ? '⚡' : m.media_type === 'tv' ? '📺' : '';
 
     const card = document.createElement('div');
     card.className = `card ${m.quality}${isCol ? ' collection' : ''}${isSaga ? ' collection' : ''}`;
     card.style.animationDelay = (Math.min(i, 30) * 0.022) + 's';
-    card.onclick = e => { if (!e.target.closest('.detail-btn')) openDetail(e, idx); };
+    card.onclick = e => { if (!e.target.closest('.detail-btn')) openDetailMerged(e, storeVersions(versions)); };
+
+    // Badges qualité pour chaque version
+    const badgesHtml = versions.length > 1
+      ? `<div class="card-multi-badges">${versions.map(v => `<span class="card-qbadge-corner ${v.quality||''}">${QICON[v.quality]||'?'}</span>`).join('')}</div>`
+      : (m.quality ? `<div class="card-qbadge-corner ${m.quality}">${QICON[m.quality]||''}</div>` : '');
 
     let posterHtml;
     if (isCol || isSaga) {
@@ -1627,12 +1647,12 @@ function render() {
           : `<div class="no-poster">🎬</div>`)
         + (rating ? `<div class="c-rating">${rating}${rtBadge ? ' '+rtBadge : ''}</div>` : (rtBadge ? `<div class="c-rating">${rtBadge}</div>` : ''))
         + `<div class="card-overlay"><div class="cov-title">${escapeHtml(m.title)}</div>${year ? `<div class="cov-year">${year}${dur ? ' · '+dur : ''}</div>` : ''}</div>`
-        + (m.quality ? `<div class="card-qbadge-corner ${m.quality}">${QICON[m.quality]||''}</div>` : '')
+        + badgesHtml
         + `</div>`;
     }
 
-  card.innerHTML = posterHtml
-      + `<button class="detail-btn" onclick="openDetail(event,${idx})">⋯</button>`; 
+    card.innerHTML = posterHtml
+      + `<button class="detail-btn" onclick="openDetailMerged(event,'${storeVersions(versions)}')">⋯</button>`;
 
     frag.appendChild(card);
   });
@@ -1644,7 +1664,82 @@ function render() {
 // ══════════════════════════════════════════════════
 //  DETAIL MODAL
 // ══════════════════════════════════════════════════
-function openDetail(e, idx) {
+// Global store pour les versions fusionnées (évite JSON dans onclick)
+const _versionsStore = new Map();
+let _versionsCounter = 0;
+function storeVersions(versions) {
+  const key = 'v' + (++_versionsCounter);
+  _versionsStore.set(key, versions);
+  return key;
+}
+
+function openDetailMerged(e, keyOrVersions) {
+  const versions = typeof keyOrVersions === 'string'
+    ? (_versionsStore.get(keyOrVersions) || [])
+    : keyOrVersions;
+  if (versions.length === 1) { openDetail(e, versions[0].idx); return; }
+  e.stopPropagation();
+
+  const m   = movies[versions[0].idx];
+  const idx = versions[0].idx;
+  const year = m.release_date ? m.release_date.slice(0,4) : '';
+  const dur  = fmt(m.runtime);
+  const isTV = m.media_type === 'tv';
+  const rating = m.imdb_rating ? '⭐ ' + m.imdb_rating.toFixed(1) : m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : '';
+  const lbUrl    = m.tmdb_id ? `https://letterboxd.com/tmdb/${m.tmdb_id}/` : '';
+  const allocUrl = `https://www.allocine.fr/rechercher/?q=${encodeURIComponent(m.title)}`;
+  const subUrl   = `https://www.opensubtitles.org/fr/search/moviename-${encodeURIComponent(m.title)}`;
+
+  // Fusionner tous les liens de toutes les versions avec leur badge qualité
+  const allLinks = [];
+  versions.forEach(v => {
+    const vm = movies[v.idx];
+    const ql = QLABEL[v.quality] || v.quality || '';
+    const qi = QICON[v.quality] || '';
+    if (vm.links && vm.links.length) {
+      vm.links.forEach(l => { if (l && l.url) allLinks.push({ url: l.url, name: l.name || ql, quality: v.quality, qi, ql }); });
+    } else if (vm.link) {
+      allLinks.push({ url: vm.link, name: ql, quality: v.quality, qi, ql });
+    }
+  });
+
+  const linksHtml = allLinks.length
+    ? `<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">`
+      + allLinks.map(l => `<a class="dbtn watch" href="${l.url}" target="_blank" rel="noopener noreferrer"><span class="card-qbadge-corner ${l.quality}" style="position:static;font-size:9px;padding:1px 4px;border-radius:3px;margin-right:6px;">${l.qi} ${l.ql}</span>${escapeHtml(l.name !== l.ql ? l.name : 'Ouvrir')}</a>`).join('')
+      + `</div>`
+    : `<span class="no-link">Aucun lien ajouté</span>`;
+
+  // Badge qualités multiples
+  const badgesHtml = versions.map(v => `<span class="detail-qbadge ${v.quality}">${QICON[v.quality]||''} ${QLABEL[v.quality]||''}</span>`).join(' ');
+
+  document.getElementById('dcont').innerHTML = `
+    <div class="detail-body">
+      <div class="detail-poster-wrap">
+        ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}">` : `<div class="detail-no-poster">${isTV ? '📺' : '🎬'}</div>`}
+      </div>
+      <div class="detail-info">
+        <div class="detail-title">${isTV ? '📺 ' : ''}${escapeHtml(m.title)}</div>
+        ${year ? `<div class="detail-year">${year}</div>` : ''}
+        <div style="display:flex;gap:4px;flex-wrap:wrap">${badgesHtml}</div>
+        <div class="detail-badges">
+          ${rating ? `<span class="detail-badge r">${rating}</span>` : ''}
+          ${dur    ? `<span class="detail-badge d">⏱ ${dur}</span>` : ''}
+        </div>
+        ${m.tags && m.tags.length ? `<div class="detail-tags">${m.tags.map(t => `<span class="gpill">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+        <div class="detail-btns">
+          ${lbUrl ? `<a class="dbtn lb" href="${lbUrl}" target="_blank" rel="noopener noreferrer">🎞 Letterboxd</a>` : ''}
+          <a class="dbtn alloc" href="${allocUrl}" target="_blank" rel="noopener noreferrer">🎬 Allociné</a>
+          <a class="dbtn sub"   href="${subUrl}"   target="_blank" rel="noopener noreferrer">💬 Sous-titres</a>
+        </div>
+        ${linksHtml}
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top:1.5rem">
+      <button class="btn-delete" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
+      <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
+    </div>`;
+  document.getElementById('dmod').classList.add('open');
+}
   e.stopPropagation();
   const m    = movies[idx];
   const year = m.release_date ? m.release_date.slice(0,4) : '';
