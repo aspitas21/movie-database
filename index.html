@@ -1740,6 +1740,7 @@ function openDetailMerged(e, keyOrVersions) {
     </div>`;
   document.getElementById('dmod').classList.add('open');
 }
+function openDetail(e, idx) {
   e.stopPropagation();
   const m    = movies[idx];
   const year = m.release_date ? m.release_date.slice(0,4) : '';
