@@ -1596,43 +1596,20 @@ function render() {
   grid.className = 'grid';
   const frag = document.createDocumentFragment();
 
-  // ── Fusionner les doublons par tmdb_id ──
-  const mergedMap = new Map(); // key → { primary, versions: [{idx, quality, links}] }
-  const noIdList  = []; // films sans tmdb_id → pas de fusion
-  list.forEach(m => {
-    const key = m.tmdb_id ? String(m.tmdb_id) + '_' + (m.media_type||'movie') : null;
-    if (!key) { noIdList.push({ primary: m, versions: [{ idx: movies.indexOf(m), quality: m.quality, links: m.links||[], link: m.link }] }); return; }
-    if (!mergedMap.has(key)) {
-      mergedMap.set(key, { primary: m, versions: [] });
-    }
-    mergedMap.get(key).versions.push({ idx: movies.indexOf(m), quality: m.quality, links: m.links||[], link: m.link });
-  });
-  const mergedList = [...mergedMap.values(), ...noIdList];
-
-  mergedList.forEach(({ primary: m, versions }, i) => {
-    const idx    = versions[0].idx;
+  list.forEach((m, i) => {
+    const idx    = movies.indexOf(m);
     const year   = m.release_date ? m.release_date.slice(0,4) : '';
     const dur    = fmt(m.runtime);
     const rating = m.imdb_rating ? '⭐ ' + m.imdb_rating.toFixed(1)
                  : m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : '';
     const rtBadge = m.rt_rating ? `<span class="rt-badge">${m.rt_rating >= 60 ? '🍅' : '🤢'} ${m.rt_rating}%</span>` : '';
-    const sub    = [year, dur].filter(Boolean).join(' · ');
-    const tagsHtml = m.tags && m.tags.length ? m.tags.slice(0,2).map(t => `<span class="ctag">${escapeHtml(t)}</span>`).join('') : '';
     const isCol  = m.media_type === 'collection';
     const isSaga = m.media_type === 'saga';
-
-    // Stocker les versions UNE SEULE FOIS par carte
-    const vKey = storeVersions(versions);
 
     const card = document.createElement('div');
     card.className = `card ${m.quality}${isCol ? ' collection' : ''}${isSaga ? ' collection' : ''}`;
     card.style.animationDelay = (Math.min(i, 30) * 0.022) + 's';
-    card.onclick = e => { if (!e.target.closest('.detail-btn')) openDetailMerged(e, vKey); };
-
-    // Badges qualité pour chaque version
-    const badgesHtml = versions.length > 1
-      ? `<div class="card-multi-badges">${versions.map(v => `<span class="card-qbadge-corner ${v.quality||''}">${QICON[v.quality]||'?'}</span>`).join('')}</div>`
-      : (m.quality ? `<div class="card-qbadge-corner ${m.quality}">${QICON[m.quality]||''}</div>` : '');
+    card.onclick = e => { if (!e.target.closest('.detail-btn')) openDetail(e, idx); };
 
     let posterHtml;
     if (isCol || isSaga) {
@@ -1650,12 +1627,12 @@ function render() {
           : `<div class="no-poster">🎬</div>`)
         + (rating ? `<div class="c-rating">${rating}${rtBadge ? ' '+rtBadge : ''}</div>` : (rtBadge ? `<div class="c-rating">${rtBadge}</div>` : ''))
         + `<div class="card-overlay"><div class="cov-title">${escapeHtml(m.title)}</div>${year ? `<div class="cov-year">${year}${dur ? ' · '+dur : ''}</div>` : ''}</div>`
-        + badgesHtml
+        + (m.quality ? `<div class="card-qbadge-corner ${m.quality}">${QICON[m.quality]||''}</div>` : '')
         + `</div>`;
     }
 
     card.innerHTML = posterHtml
-      + `<button class="detail-btn" onclick="openDetailMerged(event,'${vKey}')">⋯</button>`;
+      + `<button class="detail-btn" onclick="openDetail(event,${idx})">⋯</button>`;
 
     frag.appendChild(card);
   });
