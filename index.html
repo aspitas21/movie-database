@@ -2164,7 +2164,8 @@ async function searchPosters() {
         : `https://api.themoviedb.org/3/search/movie?api_key=${TK}&query=${encodeURIComponent(title)}&language=en-US`;
       const res  = await fetch(endpoint);
       const data = await res.json();
-      results = (data.results || []).filter(r => r.poster_path).slice(0, 10);
+      const allResults = (data.results || []).filter(r => r.poster_path);
+      results = allResults.slice(0, 10);
       if (!results.length) { st.textContent = 'Aucun résultat trouvé.'; return; }
       try {
         const gEndpoint = mediaType === 'tv'
@@ -2173,40 +2174,58 @@ async function searchPosters() {
         (await (await fetch(gEndpoint)).json()).genres.forEach(g => { gmap[g.id] = g.name; });
       } catch(e) {}
       st.textContent = 'Sélectionne une affiche :';
-      results.forEach(r => {
-        const url         = `https://image.tmdb.org/t/p/w342${r.poster_path}`;
-        const rawDate     = mediaType === 'tv' ? r.first_air_date : r.release_date;
-        const year        = rawDate ? rawDate.slice(0,4) : '';
-        const displayTitle = mediaType === 'tv' ? r.name : r.title;
-        const wrap = document.createElement('div');
-        wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;';
-        const img  = document.createElement('img');
-        img.className = 'poster-opt'; img.src = url; img.alt = displayTitle;
-        img.title = `${displayTitle}${year?' ('+year+')':''}`;
-        const lbl = document.createElement('div');
-        lbl.style.cssText = 'font-size:9px;color:var(--muted2);font-weight:600;text-align:center;max-width:66px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
-        lbl.textContent = year || '?';
-        img.onclick = async () => {
-          document.querySelectorAll('.poster-opt').forEach(i => i.classList.remove('sel'));
-          img.classList.add('sel'); selPoster = url;
-          showCurrentPoster(url);
-          const tags = (r.genre_ids || []).map(id => gmap[id]).filter(Boolean);
-          const releaseDate = mediaType === 'tv' ? r.first_air_date||'' : r.release_date||'';
-          meta = { release_date: releaseDate, popularity: r.popularity||0, vote_average: r.vote_average||0, tags, runtime:0, tmdb_id: r.id||null, media_type: mediaType };
-          showGP(tags);
-          document.getElementById('ititle').value = displayTitle;
-          if (mediaType === 'movie') {
-            try {
-              st.textContent = 'Récupération de la durée...';
-              const dd = await (await fetch(`https://api.themoviedb.org/3/movie/${r.id}?api_key=${TK}`)).json();
-              meta.runtime = dd.runtime || 0;
-              st.textContent = dd.runtime ? `⏱ ${fmt(dd.runtime)}` : '';
-            } catch(e) { st.textContent = ''; }
-          } else { st.textContent = ''; }
+
+      const renderResults = (list) => {
+        list.forEach(r => {
+          const url          = `https://image.tmdb.org/t/p/w342${r.poster_path}`;
+          const rawDate      = mediaType === 'tv' ? r.first_air_date : r.release_date;
+          const year         = rawDate ? rawDate.slice(0,4) : '';
+          const displayTitle = mediaType === 'tv' ? r.name : r.title;
+          const wrap = document.createElement('div');
+          wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;';
+          const img  = document.createElement('img');
+          img.className = 'poster-opt'; img.src = url; img.alt = displayTitle;
+          img.title = `${displayTitle}${year?' ('+year+')':''}`;
+          const lbl = document.createElement('div');
+          lbl.style.cssText = 'font-size:9px;color:var(--muted2);font-weight:600;text-align:center;max-width:66px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+          lbl.textContent = year || '?';
+          img.onclick = async () => {
+            document.querySelectorAll('.poster-opt').forEach(i => i.classList.remove('sel'));
+            img.classList.add('sel'); selPoster = url;
+            showCurrentPoster(url);
+            const tags = (r.genre_ids || []).map(id => gmap[id]).filter(Boolean);
+            const releaseDate = mediaType === 'tv' ? r.first_air_date||'' : r.release_date||'';
+            meta = { release_date: releaseDate, popularity: r.popularity||0, vote_average: r.vote_average||0, tags, runtime:0, tmdb_id: r.id||null, media_type: mediaType };
+            showGP(tags);
+            document.getElementById('ititle').value = displayTitle;
+            if (mediaType === 'movie') {
+              try {
+                st.textContent = 'Récupération de la durée...';
+                const dd = await (await fetch(`https://api.themoviedb.org/3/movie/${r.id}?api_key=${TK}`)).json();
+                meta.runtime = dd.runtime || 0;
+                st.textContent = dd.runtime ? `⏱ ${fmt(dd.runtime)}` : '';
+              } catch(e) { st.textContent = ''; }
+            } else { st.textContent = ''; }
+          };
+          wrap.appendChild(img); wrap.appendChild(lbl);
+          row.appendChild(wrap);
+        });
+      };
+
+      renderResults(results);
+
+      // Bouton "Voir plus" si + de 10 résultats
+      if (allResults.length > 10) {
+        const moreBtn = document.createElement('div');
+        moreBtn.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:3px;min-width:60px;';
+        moreBtn.innerHTML = '<div style="width:48px;height:68px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px dashed rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;">＋</div>'
+          + '<div style="font-size:9px;color:var(--muted2);font-weight:600;">Voir plus</div>';
+        moreBtn.onclick = () => {
+          moreBtn.remove();
+          renderResults(allResults.slice(10, 25));
         };
-        wrap.appendChild(img); wrap.appendChild(lbl);
-        row.appendChild(wrap);
-      });
+        row.appendChild(moreBtn);
+      }
     }
   } catch(e) { document.getElementById('status').textContent = 'Erreur réseau.'; }
 }
