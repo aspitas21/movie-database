@@ -2910,9 +2910,8 @@ function buildSmartCollections() {
       const role = (m.person_role || '').toLowerCase();
       const isDirector = role.includes('directing') || role.includes('réalisa');
       const target = isDirector ? directorMap : actorMap;
-      if (!target[key]) target[key] = { id: key, name, films: [], _filmIds: new Set(), poster: null };
-      const fid = m.tmdb_id ? String(m.tmdb_id) : m.title;
-      if (!target[key]._filmIds.has(fid)) { target[key]._filmIds.add(fid); target[key].films.push(m); }
+      if (!target[key]) target[key] = { id: key, name, films: [], poster: null };
+      target[key].films.push(m);
     }
 
     // Méthode TMDB (_credits)
@@ -2922,9 +2921,8 @@ function buildSmartCollections() {
         const name = credit.name;
         const isDirector = (credit.role || '').toLowerCase().includes('directing');
         const target = isDirector ? directorMap : actorMap;
-        if (!target[key]) target[key] = { id: key, name, films: [], _filmIds: new Set(), poster: null };
-        const fid = m.tmdb_id ? String(m.tmdb_id) : m.title;
-        if (!target[key]._filmIds.has(fid)) { target[key]._filmIds.add(fid); target[key].films.push(m); }
+        if (!target[key]) target[key] = { id: key, name, films: [], poster: null };
+        target[key].films.push(m);
       });
     }
   });
@@ -3085,7 +3083,8 @@ function renderScGroup(g, isPeople = false) {
     imageHtml = '<div class="sc-group-poster-placeholder">' + icon + '</div>';
   }
 
-  const countLabel = films.length > 0 ? films.length + ' film' + (films.length !== 1 ? 's' : '') : '⚡ Saga';
+  const uniqueCount = new Set(films.map(m => m.tmdb_id || m.title)).size;
+  const countLabel = films.length > 0 ? uniqueCount + ' film' + (uniqueCount !== 1 ? 's' : '') + (films.length > uniqueCount ? ' (×'+films.length+')' : '') : '⚡ Saga';
 
   // Infos supplémentaires pour sagas/collections
   let metaHtml = '';
