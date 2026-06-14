@@ -3336,13 +3336,33 @@ async function importData(event) {
     try {
       const data = JSON.parse(e.target.result);
       if (!Array.isArray(data)) { alert('Fichier invalide.'); return; }
-      const dupes   = data.filter(m => movies.some(ex => (m.tmdb_id && ex.tmdb_id && m.tmdb_id === ex.tmdb_id) || (m.title && ex.title && m.title.toLowerCase() === ex.title.toLowerCase())));
+      const dupes    = data.filter(m => movies.some(ex => (m.tmdb_id && ex.tmdb_id && m.tmdb_id === ex.tmdb_id) || (m.title && ex.title && m.title.toLowerCase() === ex.title.toLowerCase())));
       const newItems = data.filter(m => !dupes.includes(m));
       let msg = `Importer ${newItems.length} film(s) ?`;
       if (dupes.length) msg += `\n(${dupes.length} doublon(s) ignoré(s) : ${dupes.slice(0,3).map(m => m.title).join(', ')}${dupes.length > 3 ? '...' : ''})`;
       if (!newItems.length) { alert('Aucun nouveau film — tout est déjà présent.'); event.target.value = ''; return; }
-      if (confirm(msg)) { for (const m of newItems) await addM(m); }
+      if (!confirm(msg)) { event.target.value = ''; return; }
+
+      ss('loading', `Import 0/${newItems.length}...`);
+      let ok = 0, errors = 0;
+      for (const m of newItems) {
+        try {
+          await addM(m);
+          ok++;
+        } catch(err) {
+          errors++;
+          console.warn('Import échoué pour:', m.title, err);
+        }
+        ss('loading', `Import ${ok}/${newItems.length}...`);
+      }
       event.target.value = '';
+      ss('ok', 'Synchronisé');
+      render();
+      if (errors > 0) {
+        alert(`✅ ${ok} film(s) importé(s).\n⚠️ ${errors} film(s) n'ont pas pu être sauvegardés en base (voir console).`);
+      } else {
+        ss('ok', `${ok} film(s) importé(s)`);
+      }
     } catch(err) { alert('Erreur de lecture du fichier.'); }
   };
   reader.readAsText(file);
@@ -3370,12 +3390,14 @@ async function addM(m) {
   ss('loading', 'Enregistrement...');
   try {
     const r = await fetch(`${SU}/rest/v1/movies`, { method:'POST', headers:{...H,'Prefer':'return=representation'}, body: JSON.stringify({ data: m }) });
-    if (!r.ok) throw new Error();
+    if (!r.ok) throw new Error('Supabase error ' + r.status);
     m._id = (await r.json())[0].id;
     movies.push(m);
     ss('ok', 'Synchronisé');
-    render();
-  } catch(e) { ss('error', 'Erreur d\'enregistrement'); }
+  } catch(e) {
+    ss('error', 'Erreur d\'enregistrement');
+    throw e; // relancer pour que l'appelant puisse gérer
+  }
 }
 async function updM(idx, m) {
   const id = movies[idx]._id;
