@@ -1717,7 +1717,7 @@ function openDetailMerged(e, keyOrVersions) {
       </div>
     </div>
     <div class="modal-actions" style="margin-top:1.5rem">
-      <button class="btn-delete admin-only" style="display:none" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
+      <button class="btn-delete admin-only" style="display:${isAdmin?"":"none"}" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
       <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
     </div>`;
   document.getElementById('dmod').classList.add('open');
@@ -1771,7 +1771,7 @@ function openDetail(e, idx) {
       </div>
     </div>
     <div class="modal-actions" style="margin-top:1.5rem">
-      <button class="btn-delete admin-only" style="display:none" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
+      <button class="btn-delete admin-only" style="display:${isAdmin?"":"none"}" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
       <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
     </div>`;
   document.getElementById('dmod').classList.add('open');
