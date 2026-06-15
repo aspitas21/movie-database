@@ -989,8 +989,9 @@ footer {
     <span class="count-badge" id="tc">0</span>
     <button class="btn-ghost" id="size-btn" onclick="toggleSize()" title="Taille des cartes">⊞</button>
     <button class="btn-random" onclick="openRandom()">🎲</button>
+    <button class="btn-ghost" id="admin-lock-btn" onclick="toggleAdmin()" title="Mode admin">🔒</button>
     <button class="btn-cinevault-col" onclick="openSmartCollections()">✦ CinéVault Collection</button>
-    <button class="btn-add" onclick="openModal()">+ Ajouter</button>
+    <button class="btn-add admin-only" onclick="openModal()" style="display:none">+ Ajouter</button>
   </div>
 </header>
 
@@ -1310,7 +1311,7 @@ footer {
 //  CONFIGURATION
 // ══════════════════════════════════════════════════
 const SU = 'https://dnzrpvyeiyxplrcomsuo.supabase.co';
-const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzYwNTAsImV4cCI6MjA5NTExMjA1MH0.BwuZBjZXQcJlNsaQ_DYSj_n-IbMZswsgL_VuGOVMVs4';
+const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTUzNjA1MCwiZXhwIjoyMDk1MTEyMDUwfQ.IZUKY4IsWIkk2LDMQTdUORtW3PhdlrlmTsu9Mng7oLA';
 const TK = '4dc76b66e8b41dd652e56c6cc3a425ab';
 const H  = { 'Content-Type': 'application/json', 'apikey': SK, 'Authorization': 'Bearer ' + SK };
 
@@ -1632,7 +1633,7 @@ function render() {
     }
 
     card.innerHTML = posterHtml
-      + `<button class="detail-btn" onclick="openDetail(event,${idx})">⋯</button>`;
+      + `<button class="detail-btn admin-only" style="display:${isAdmin?'':'none'}" onclick="openDetail(event,${idx})">⋯</button>`;
 
     frag.appendChild(card);
   });
@@ -1715,7 +1716,7 @@ function openDetailMerged(e, keyOrVersions) {
       </div>
     </div>
     <div class="modal-actions" style="margin-top:1.5rem">
-      <button class="btn-delete" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
+      <button class="btn-delete admin-only" style="display:none" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
       <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
     </div>`;
   document.getElementById('dmod').classList.add('open');
@@ -1769,7 +1770,7 @@ function openDetail(e, idx) {
       </div>
     </div>
     <div class="modal-actions" style="margin-top:1.5rem">
-      <button class="btn-delete" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
+      <button class="btn-delete admin-only" style="display:none" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
       <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
     </div>`;
   document.getElementById('dmod').classList.add('open');
@@ -3380,6 +3381,7 @@ async function load() {
     ss('ok', 'Synchronisé');
     document.getElementById('loading-screen').style.display = 'none';
     render();
+    applyAdminMode();
   } catch(e) {
     ss('error', 'Erreur');
     document.getElementById('loading-screen').style.display = 'none';
@@ -3438,6 +3440,52 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, m =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
+// ══════════════════════════════════════════════════
+//  ADMIN MODE
+// ══════════════════════════════════════════════════
+let isAdmin = sessionStorage.getItem('cv_admin') === '1';
+
+function hashStr(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  return Math.abs(h).toString(16);
+}
+const ADMIN_PWD_HASH = hashStr('Elpanda');
+
+function checkAdmin() {
+  if (isAdmin) return true;
+  const pwd = prompt('Mot de passe administrateur :');
+  if (!pwd) return false;
+  if (hashStr(pwd) === ADMIN_PWD_HASH) {
+    isAdmin = true;
+    sessionStorage.setItem('cv_admin', '1');
+    applyAdminMode();
+    return true;
+  }
+  alert('Mot de passe incorrect.');
+  return false;
+}
+
+function applyAdminMode() {
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
+  const btn = document.getElementById('admin-lock-btn');
+  if (btn) btn.innerHTML = isAdmin ? '🔓' : '🔒';
+}
+
+function toggleAdmin() {
+  if (isAdmin) {
+    if (confirm('Se déconnecter du mode admin ?')) {
+      isAdmin = false;
+      sessionStorage.removeItem('cv_admin');
+      applyAdminMode();
+    }
+  } else {
+    checkAdmin();
+  }
+}
+
 load();
 
 // ── Show/hide films grid ──────────────────────────
