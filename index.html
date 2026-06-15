@@ -3376,9 +3376,18 @@ async function importData(event) {
 async function load() {
   ss('loading', 'Chargement...');
   try {
-    const r = await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc&limit=10000`, { headers: H_GET });
-    if (!r.ok) throw new Error();
-    movies = (await r.json()).map(row => ({ ...row.data, _id: row.id }));
+    let allRows = [];
+    let offset = 0;
+    const pageSize = 1000;
+    while (true) {
+      const r = await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc&limit=${pageSize}&offset=${offset}`, { headers: H });
+      if (!r.ok) throw new Error();
+      const page = await r.json();
+      allRows = allRows.concat(page);
+      if (page.length < pageSize) break;
+      offset += pageSize;
+    }
+    movies = allRows.map(row => ({ ...row.data, _id: row.id }));
     ss('ok', 'Synchronisé');
     document.getElementById('loading-screen').style.display = 'none';
     render();
