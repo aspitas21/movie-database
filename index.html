@@ -1314,6 +1314,7 @@ const SU = 'https://dnzrpvyeiyxplrcomsuo.supabase.co';
 const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTUzNjA1MCwiZXhwIjoyMDk1MTEyMDUwfQ.IZUKY4IsWIkk2LDMQTdUORtW3PhdlrlmTsu9Mng7oLA';
 const TK = '4dc76b66e8b41dd652e56c6cc3a425ab';
 const H  = { 'Content-Type': 'application/json', 'apikey': SK, 'Authorization': 'Bearer ' + SK };
+const H_GET = { ...H, 'Range-Unit': 'items', 'Range': '0-9999', 'Prefer': 'count=none' };
 
 const QLABEL = { '4kr': '4K Remux', '4kl': '4K Light', '1r': '1080p Remux', '1l': '1080p Light' };
 const QICON  = { '4kr': '💎', '4kl': '✨', '1r': '🍀', '1l': '🎬' };
@@ -3375,7 +3376,7 @@ async function importData(event) {
 async function load() {
   ss('loading', 'Chargement...');
   try {
-    const r = await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc&limit=10000`, { headers: H });
+    const r = await fetch(`${SU}/rest/v1/movies?select=*&order=created_at.asc&limit=10000`, { headers: H_GET });
     if (!r.ok) throw new Error();
     movies = (await r.json()).map(row => ({ ...row.data, _id: row.id }));
     ss('ok', 'Synchronisé');
