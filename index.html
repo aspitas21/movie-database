@@ -783,43 +783,112 @@ footer {
   .popular-right { display: none; }
 }
 @media (max-width: 768px) {
-  header { padding: 0.65rem 1rem; height: auto; flex-wrap: wrap; gap: 7px; }
-  .logo-name { font-size: 14px; }
-  .search-wrap { order: 3; max-width: 100%; width: 100%; }
-  .hdr-right { gap: 5px; }
+  /* ── HEADER ── */
+  header { padding: 0 1rem; height: 52px; flex-wrap: nowrap; gap: 8px; }
+  .logo-name { font-size: 15px; }
+  .search-wrap { display: none; }
   .sync-badge { display: none; }
   .btn-ghost { display: none; }
-  .filter-bar { padding: 0.5rem 1rem; top: auto; position: relative; height: auto; flex-wrap: wrap; gap: 4px; }
+  .btn-random { display: none; }
+  .hdr-right { gap: 6px; }
+  .hdr-nav { display: none; }
+  .mobile-menu-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; background: transparent;
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+    color: rgba(255,255,255,0.7); font-size: 16px; cursor: pointer; flex-shrink: 0;
+  }
+  .mobile-nav-drawer {
+    display: none; position: fixed; top: 52px; left: 0; right: 0;
+    background: #14181c; border-bottom: 1px solid rgba(255,255,255,0.08);
+    z-index: 200; padding: 12px 16px; flex-direction: column; gap: 4px;
+  }
+  .mobile-nav-drawer.open { display: flex; }
+  .mobile-nav-drawer .lbd-nav-link {
+    display: block; padding: 10px 14px; border-radius: 8px;
+    font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.6); text-align: left; width: 100%;
+  }
+  .mobile-nav-drawer .lbd-nav-link.active { color: #00c030; background: rgba(0,192,48,0.08); }
+  .mobile-search-bar {
+    width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; color: #fff; padding: 9px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; margin-bottom: 4px;
+  }
+  /* ── FILTER BAR ── */
+  .filter-bar { padding: 0 0.8rem; top: 52px; height: 38px; gap: 2px; overflow-x: auto; }
+  .filter-bar::before { display: none; }
   .bar-sep { display: none; }
-  .bar-select { flex: 1; min-width: calc(50% - 5px); font-size: 11px; }
-  .recent-section { padding: 0.7rem 1rem 0; }
-  .results-bar { padding: 0.5rem 1rem 0; }
-  .content { padding: 0.7rem 1rem 3rem; }
-  .genre-bar { padding: 0.3rem 1rem; }
-  .grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  /* ── GRILLE ── */
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .card .ctags { display: none; }
-  .popular-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .content { padding: 0.7rem 0.8rem 5rem; }
+  .results-bar { padding: 0.5rem 0.8rem 0; }
+  .genre-bar { padding: 0.3rem 0.8rem; }
+  /* ── POPULAR ── */
+  .popular-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .popular-card:first-child { grid-row: auto; }
-  .modal { border-radius: 14px 14px 0 0; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; max-height: 88vh; padding: 1.4rem 1.1rem; animation: modal-up-mob 0.22s ease; }
+  .pop-section-title { font-size: 11px; padding: 0.5rem 0.8rem 0.3rem; }
+  #back-bar { padding: 0 0.8rem; }
+  /* ── MODALS ── */
+  .modal {
+    border-radius: 18px 18px 0 0; position: fixed;
+    bottom: 0; left: 0; right: 0; width: 100%;
+    max-width: 100%; max-height: 92vh;
+    padding: 1.6rem 1.2rem 2rem; overflow-y: auto;
+    animation: modal-up-mob 0.25s cubic-bezier(0.32,0.72,0,1);
+  }
+  .modal::before {
+    content: ''; display: block; width: 40px; height: 4px;
+    background: rgba(255,255,255,0.2); border-radius: 2px; margin: -0.8rem auto 1rem;
+  }
   @keyframes modal-up-mob { from{transform:translateY(100%)} to{transform:none} }
   .mbg.open { align-items: flex-end; }
   .dmod { width: 100%; }
-  .detail-body { flex-direction: column; align-items: center; text-align: center; }
-  .detail-poster-wrap img { width: 110px; }
-  .detail-no-poster { width: 110px; height: 165px; }
-  .detail-title { font-size: 17px; }
-  .detail-btns { justify-content: center; flex-wrap: wrap; }
+  .detail-body { flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
+  .detail-poster-wrap img { width: 120px; }
+  .detail-no-poster { width: 120px; height: 180px; }
+  .detail-title { font-size: 18px; }
+  .detail-btns { justify-content: center; flex-wrap: wrap; gap: 6px; }
   .detail-tags, .detail-badges { justify-content: center; }
-  footer { padding: 0.9rem 1rem; justify-content: center; }
+  .modal-actions { flex-wrap: wrap; gap: 8px; }
+  /* ── SC PAGE ── */
+  .sc-header { padding: 0 1rem; gap: 8px; flex-wrap: wrap; height: auto; min-height: 52px; padding-bottom: 8px; }
+  .sc-title { font-size: 14px; }
+  .sc-search-wrap { order: 3; flex: 1 1 100%; max-width: 100%; margin-bottom: 4px; }
+  .sc-tabs-bar { margin-left: 0; }
+  .sc-section-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; padding: 0 0.8rem 1rem; }
+  .sc-people-tabs { padding: 0.8rem 0.8rem 0.4rem; gap: 6px; }
+  .sc-group-name { font-size: 12px; }
+  .sc-detail-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px; padding: 1rem 0.8rem; }
+  /* ── FOOTER ── */
+  footer { padding: 0.8rem 1rem 1.5rem; justify-content: center; flex-wrap: wrap; gap: 6px; }
+  .btn-footer { font-size: 10px; padding: 5px 10px; }
 }
 @media (max-width: 480px) {
-  .logo-name { display: none; }
+  .logo-name { font-size: 14px; }
   .count-badge { display: none; }
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+  .btn-add { font-size: 12px; padding: 6px 12px; }
+  .sc-section-grid { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 /* ── SC PAGE LAYOUT ──────────────────────────────── */
 .sc-page { display:none; position:fixed; inset:0; background:#0d0d0f; z-index:100; overflow-y:auto; flex-direction:column; }
 .sc-detail-page { display:none; position:fixed; inset:0; background:#0d0d0f; z-index:150; overflow-y:auto; flex-direction:column; width:100%; }
+/* Mobile elements hidden on desktop */
+.mobile-menu-btn { display: none; }
+.mobile-nav-drawer { display: none; }
+
+/* SC Search */
+.sc-search-wrap { position:relative; flex:1; max-width:320px; }
+.sc-search-input {
+  width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px; color:#fff; padding:7px 12px 7px 32px;
+  font-family:'DM Sans',sans-serif; font-size:13px; outline:none; transition:border-color 0.15s;
+}
+.sc-search-input::placeholder { color:rgba(255,255,255,0.25); }
+.sc-search-input:focus { border-color:rgba(255,255,255,0.3); }
+
 /* ── SC NAV BAR ─────────────────────────────────── */
 .sc-header {
   position:sticky; top:0; z-index:10;
@@ -970,7 +1039,7 @@ footer {
   <div class="logo">
     <div class="logo-name">Ciné<em>Vault</em></div>
   </div>
-  <nav class="lbd-nav">
+  <nav class="lbd-nav hdr-nav">
     <button class="lbd-nav-link active" onclick="setMediaFilter('');this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active')">Films</button>
     <button class="lbd-nav-link" onclick="this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active');setMediaFilter('tv');showAllFilms();">Séries</button>
     <button class="lbd-nav-link" onclick="this.closest('nav').querySelectorAll('.lbd-nav-link').forEach(b=>b.classList.remove('active'));this.classList.add('active');openSmartCollections();switchScTab('actors');">Collections</button>
@@ -990,10 +1059,20 @@ footer {
     <button class="btn-ghost" id="size-btn" onclick="toggleSize()" title="Taille des cartes">⊞</button>
     <button class="btn-random" onclick="openRandom()">🎲</button>
     <button class="btn-ghost" id="admin-lock-btn" onclick="toggleAdmin()" title="Mode admin">🔒</button>
-    <button class="btn-cinevault-col" onclick="openSmartCollections()">✦ CinéVault Collection</button>
     <button class="btn-add admin-only" onclick="openModal()" style="display:none">+ Ajouter</button>
+    <!-- Bouton hamburger (mobile only) -->
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" id="mobile-menu-btn" style="display:none">☰</button>
   </div>
 </header>
+
+<!-- Menu mobile déroulant -->
+<div class="mobile-nav-drawer" id="mobile-nav-drawer">
+  <input class="mobile-search-bar" type="text" placeholder="🔍 Rechercher..." oninput="if(this.value.trim())showAllFilms();render();">
+  <button class="lbd-nav-link active" onclick="setMediaFilter('');closeMobileMenu()">🎬 Films</button>
+  <button class="lbd-nav-link" onclick="setMediaFilter('tv');showAllFilms();closeMobileMenu()">📺 Séries</button>
+  <button class="lbd-nav-link" onclick="openSmartCollections();switchScTab('actors');closeMobileMenu()">🎭 Collections</button>
+  <button class="lbd-nav-link" onclick="openSmartCollections();switchScTab('sagas');closeMobileMenu()">⚡ Sagas</button>
+</div>
 
 <!-- FILTER BAR -->
 <div class="filter-bar">
@@ -1270,6 +1349,10 @@ footer {
   <div class="sc-header">
     <button class="sc-back-btn" onclick="closeSmartCollections()">← Retour</button>
     <div class="sc-title">CinéVault <em>Collections</em></div>
+    <div class="sc-search-wrap">
+      <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;opacity:0.5;">🔍</span>
+      <input type="text" id="sc-search" class="sc-search-input" placeholder="Rechercher un acteur, réalisateur, saga…" oninput="filterScGroups(this.value)">
+    </div>
     <button class="sc-enrich-btn" onclick="startEnrich()" id="enrich-btn">🔄 Enrichir</button>
     <div id="sc-tabs" class="sc-tabs-bar"></div>
   </div>
@@ -1484,7 +1567,7 @@ function renderRecent() {
   if (filts.size > 0 || genreInc.size > 0 || genreExc.size > 0 || mediaFilt || document.getElementById('sb').value.trim() || activeYearFilter || activeNoteFilter || activeGenreDD) {
     sec.style.display = 'none'; return;
   }
-  const pool = [...movies].filter(m => m.media_type === 'movie' || m.media_type === 'tv');
+  const pool = [...movies].filter(m => m.media_type === 'movie');
   if (!pool.length) { sec.style.display = 'none'; return; }
   sec.style.display = '';
 
@@ -1717,7 +1800,7 @@ function openDetailMerged(e, keyOrVersions) {
       </div>
     </div>
     <div class="modal-actions" style="margin-top:1.5rem">
-      <button class="btn-delete admin-only" style="display:${isAdmin?"":"none"}" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
+      <button class="btn-delete admin-only" style="display:${isAdmin?'':'none'}" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
       <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
     </div>`;
   document.getElementById('dmod').classList.add('open');
@@ -1771,7 +1854,7 @@ function openDetail(e, idx) {
       </div>
     </div>
     <div class="modal-actions" style="margin-top:1.5rem">
-      <button class="btn-delete admin-only" style="display:${isAdmin?"":"none"}" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
+      <button class="btn-delete admin-only" style="display:${isAdmin?'':'none'}" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
       <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
     </div>`;
   document.getElementById('dmod').classList.add('open');
@@ -2892,11 +2975,21 @@ function openSmartCollections() {
   buildSmartCollections();
 }
 
+function filterScGroups(q) {
+  q = (q || '').toLowerCase().trim();
+  document.querySelectorAll('.sc-group').forEach(card => {
+    const name = (card.querySelector('.sc-group-name')?.textContent || '').toLowerCase();
+    card.style.display = (!q || name.includes(q)) ? '' : 'none';
+  });
+}
+
 function switchPeopleTab(tab, btn) {
   document.getElementById('sc-people-directors').style.display = tab === 'directors' ? '' : 'none';
   document.getElementById('sc-people-actors').style.display   = tab === 'actors'    ? '' : 'none';
   document.querySelectorAll('.sc-people-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  const s = document.getElementById('sc-search');
+  if (s) { s.value = ''; filterScGroups(''); }
 }
 
 function switchScTab(tabId) {
@@ -3495,6 +3588,28 @@ function toggleAdmin() {
     checkAdmin();
   }
 }
+
+function toggleMobileMenu() {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const btn    = document.getElementById('mobile-menu-btn');
+  drawer.classList.toggle('open');
+  btn.textContent = drawer.classList.contains('open') ? '✕' : '☰';
+}
+function closeMobileMenu() {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const btn    = document.getElementById('mobile-menu-btn');
+  drawer.classList.remove('open');
+  btn.textContent = '☰';
+}
+// Afficher le bouton hamburger sur mobile
+if (window.innerWidth <= 768) {
+  document.getElementById('mobile-menu-btn').style.display = 'flex';
+}
+window.addEventListener('resize', () => {
+  const btn = document.getElementById('mobile-menu-btn');
+  if (btn) btn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+  if (window.innerWidth > 768) closeMobileMenu();
+});
 
 load();
 
