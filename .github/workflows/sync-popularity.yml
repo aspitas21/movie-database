@@ -1,1 +1,89 @@
+name: Sync TMDB Popularity
 
+on:
+  schedule:
+    - cron: '0 3 * * 1'  # Chaque lundi à 3h du matin
+  workflow_dispatch:       # Permet de lancer manuellement depuis GitHub
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync popularity from TMDB to Supabase
+        run: |
+          node << 'EOF'
+          const SUPABASE_URL = '${{ secrets.SUPABASE_URL }}';
+          const SUPABASE_KEY = '${{ secrets.SUPABASE_SERVICE_KEY }}';
+          const TMDB_KEY     = '${{ secrets.TMDB_KEY }}';
+
+          async function fetchAll() {
+            let all = [], offset = 0, pageSize = 1000;
+            while (true) {
+              const r = await fetch(`${SUPABASE_URL}/rest/v1/movies?select=id,data&limit=${pageSize}&offset=${offset}`, {
+                headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+              });
+              const page = await r.json();
+              if (!page.length) break;
+              all = all.concat(page);
+              if (page.length < pageSize) break;
+              offset += pageSize;
+            }
+            return all;
+          }
+
+          async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+          async function main() {
+            console.log('Fetching films from Supabase...');
+            const rows = await fetchAll();
+            console.log(`Found ${rows.length} films`);
+
+            let updated = 0, skipped = 0, errors = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+              const row = rows[i];
+              const m = row.data;
+              if (!m.tmdb_id || (m.media_type !== 'movie' && m.media_type !== 'tv')) {
+                skipped++;
+                continue;
+              }
+
+              try {
+                const type = m.media_type === 'tv' ? 'tv' : 'movie';
+                const tmdbRes = await fetch(`https://api.themoviedb.org/3/${type}/${m.tmdb_id}?api_key=${TMDB_KEY}&language=en-US`);
+                const tmdbData = await tmdbRes.json();
+
+                if (tmdbData.popularity !== undefined) {
+                  const updatedData = { ...m, popularity: tmdbData.popularity, vote_average: tmdbData.vote_average || m.vote_average || 0 };
+                  const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/movies?id=eq.${row.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                      apikey: SUPABASE_KEY,
+                      Authorization: `Bearer ${SUPABASE_KEY}`,
+                      'Content-Type': 'application/json',
+                      Prefer: 'return=minimal'
+                    },
+                    body: JSON.stringify({ data: updatedData })
+                  });
+                  if (patchRes.ok) { updated++; }
+                  else { errors++; }
+                }
+              } catch(e) {
+                errors++;
+                console.error(`Error on film ${m.title}:`, e.message);
+              }
+
+              // Pause toutes les 40 requêtes pour respecter la limite TMDB
+              if (i % 40 === 0 && i > 0) {
+                console.log(`Progress: ${i}/${rows.length} — updated: ${updated}, errors: ${errors}`);
+                await sleep(1000);
+              }
+            }
+
+            console.log(`Done! Updated: ${updated}, Skipped: ${skipped}, Errors: ${errors}`);
+          }
+
+          main().catch(e => { console.error(e); process.exit(1); });
+          EOF
+        env:
+          NODE_OPTIONS: '--experimental-fetch'
