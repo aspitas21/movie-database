@@ -21,6 +21,7 @@ jobs:
             const SK = process.env.SUPABASE_KEY;
             const TK = process.env.TMDB_KEY;
 
+            // Récupérer tous les films
             async function fetchAll() {
               let all = [], offset = 0;
               while (true) {
@@ -39,33 +40,56 @@ jobs:
             const rows = await fetchAll();
             console.log(`Found ${rows.length} films`);
 
+            // Test sur 1 film pour vérifier le format
+            const testRow = rows.find(r => r.data && r.data.tmdb_id && r.data.media_type === 'movie');
+            if (testRow) {
+              console.log(`Test film: ${testRow.data.title}, id=${testRow.id}`);
+              console.log(`Data keys: ${Object.keys(testRow.data).join(', ')}`);
+              
+              // Test PATCH
+              const testData = { ...testRow.data };
+              delete testData._id;
+              testData.popularity = testRow.data.popularity || 0;
+              
+              const testPatch = await fetch(`${SU}/rest/v1/movies?id=eq.${testRow.id}`, {
+                method: 'PATCH',
+                headers: {
+                  apikey: SK,
+                  Authorization: `Bearer ${SK}`,
+                  'Content-Type': 'application/json',
+                  Prefer: 'return=minimal'
+                },
+                body: JSON.stringify({ data: testData })
+              });
+              console.log(`Test PATCH status: ${testPatch.status}`);
+              if (!testPatch.ok) {
+                const errText = await testPatch.text();
+                console.log(`Test PATCH error: ${errText}`);
+              }
+            }
+
             let updated = 0, errors = 0, skipped = 0;
 
             for (let i = 0; i < rows.length; i++) {
               const row = rows[i];
               const m = row.data;
-              if (!m || !m.tmdb_id) { skipped++; continue; }
-              const type = m.media_type === 'tv' ? 'tv' : 'movie';
-              if (type !== 'movie' && type !== 'tv') { skipped++; continue; }
+              if (!m || !m.tmdb_id || (m.media_type !== 'movie' && m.media_type !== 'tv')) {
+                skipped++;
+                continue;
+              }
 
               try {
-                const url = `https://api.themoviedb.org/3/${type}/${m.tmdb_id}?api_key=${TK}`;
-                const tr = await fetch(url);
+                const type = m.media_type === 'tv' ? 'tv' : 'movie';
+                const tr = await fetch(`https://api.themoviedb.org/3/${type}/${m.tmdb_id}?api_key=${TK}`);
                 if (!tr.ok) { errors++; continue; }
                 const td = await tr.json();
+                if (!td || td.success === false || td.popularity === undefined) { skipped++; continue; }
 
-                if (!td || td.success === false) { errors++; continue; }
-
-                const newPop = td.popularity;
-                const newVote = td.vote_average;
-
-                if (newPop === undefined) { skipped++; continue; }
-
-                const updated_data = {
-                  ...m,
-                  popularity: newPop,
-                  vote_average: newVote !== undefined ? newVote : (m.vote_average || 0)
-                };
+                // Construire le nouvel objet data SANS _id
+                const newData = { ...m };
+                delete newData._id;
+                newData.popularity = td.popularity;
+                newData.vote_average = td.vote_average !== undefined ? td.vote_average : (m.vote_average || 0);
 
                 const pr = await fetch(`${SU}/rest/v1/movies?id=eq.${row.id}`, {
                   method: 'PATCH',
@@ -75,25 +99,27 @@ jobs:
                     'Content-Type': 'application/json',
                     Prefer: 'return=minimal'
                   },
-                  body: JSON.stringify({ data: updated_data })
+                  body: JSON.stringify({ data: newData })
                 });
 
                 if (pr.ok) {
                   updated++;
-                  if (updated <= 5) console.log(`✓ ${m.title}: pop=${newPop}`);
+                  if (updated <= 3) console.log(`✓ ${m.title}: ${td.popularity}`);
                 } else {
-                  const err = await pr.text();
-                  console.log(`✗ ${m.title}: ${err}`);
+                  if (errors === 0) {
+                    const errText = await pr.text();
+                    console.log(`First error on ${m.title}: ${errText}`);
+                  }
                   errors++;
                 }
               } catch(e) {
+                if (errors === 0) console.log(`Exception: ${e.message}`);
                 errors++;
-                console.log(`Error: ${m.title}: ${e.message}`);
               }
 
               if (i % 50 === 0 && i > 0) {
                 console.log(`${i}/${rows.length} — updated: ${updated}, errors: ${errors}`);
-                await new Promise(r => setTimeout(r, 1200));
+                await new Promise(r => setTimeout(r, 1000));
               }
             }
 
