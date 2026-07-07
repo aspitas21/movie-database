@@ -28,7 +28,7 @@ jobs:
                   headers: { apikey: SK, Authorization: `Bearer ${SK}` }
                 });
                 const page = await r.json();
-                if (!page.length) break;
+                if (!Array.isArray(page) || !page.length) break;
                 all = all.concat(page);
                 if (page.length < 1000) break;
                 offset += 1000;
@@ -39,32 +39,62 @@ jobs:
             const rows = await fetchAll();
             console.log(`Found ${rows.length} films`);
 
-            let updated = 0, errors = 0;
+            let updated = 0, errors = 0, skipped = 0;
 
             for (let i = 0; i < rows.length; i++) {
               const row = rows[i];
               const m = row.data;
-              if (!m || !m.tmdb_id || (m.media_type !== 'movie' && m.media_type !== 'tv')) continue;
+              if (!m || !m.tmdb_id) { skipped++; continue; }
+              const type = m.media_type === 'tv' ? 'tv' : 'movie';
+              if (type !== 'movie' && type !== 'tv') { skipped++; continue; }
 
               try {
-                const type = m.media_type === 'tv' ? 'tv' : 'movie';
-                const tr = await fetch(`https://api.themoviedb.org/3/${type}/${m.tmdb_id}?api_key=${TK}`);
+                const url = `https://api.themoviedb.org/3/${type}/${m.tmdb_id}?api_key=${TK}`;
+                const tr = await fetch(url);
+                if (!tr.ok) { errors++; continue; }
                 const td = await tr.json();
-                if (td.popularity !== undefined) {
-                  const updated_data = { ...m, popularity: td.popularity, vote_average: td.vote_average || m.vote_average || 0 };
-                  const pr = await fetch(`${SU}/rest/v1/movies?id=eq.${row.id}`, {
-                    method: 'PATCH',
-                    headers: { apikey: SK, Authorization: `Bearer ${SK}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-                    body: JSON.stringify({ data: updated_data })
-                  });
-                  if (pr.ok) updated++; else errors++;
-                }
-              } catch(e) { errors++; }
 
-              if (i % 40 === 0 && i > 0) {
-                console.log(`${i}/${rows.length} — updated: ${updated}`);
-                await new Promise(r => setTimeout(r, 1000));
+                if (!td || td.success === false) { errors++; continue; }
+
+                const newPop = td.popularity;
+                const newVote = td.vote_average;
+
+                if (newPop === undefined) { skipped++; continue; }
+
+                const updated_data = {
+                  ...m,
+                  popularity: newPop,
+                  vote_average: newVote !== undefined ? newVote : (m.vote_average || 0)
+                };
+
+                const pr = await fetch(`${SU}/rest/v1/movies?id=eq.${row.id}`, {
+                  method: 'PATCH',
+                  headers: {
+                    apikey: SK,
+                    Authorization: `Bearer ${SK}`,
+                    'Content-Type': 'application/json',
+                    Prefer: 'return=minimal'
+                  },
+                  body: JSON.stringify({ data: updated_data })
+                });
+
+                if (pr.ok) {
+                  updated++;
+                  if (updated <= 5) console.log(`✓ ${m.title}: pop=${newPop}`);
+                } else {
+                  const err = await pr.text();
+                  console.log(`✗ ${m.title}: ${err}`);
+                  errors++;
+                }
+              } catch(e) {
+                errors++;
+                console.log(`Error: ${m.title}: ${e.message}`);
+              }
+
+              if (i % 50 === 0 && i > 0) {
+                console.log(`${i}/${rows.length} — updated: ${updated}, errors: ${errors}`);
+                await new Promise(r => setTimeout(r, 1200));
               }
             }
 
-            console.log(`Done! Updated: ${updated}, Errors: ${errors}`);
+            console.log(`Done! Updated: ${updated}, Skipped: ${skipped}, Errors: ${errors}`);
