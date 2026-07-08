@@ -22,18 +22,86 @@ jobs:
             const TK = process.env.TMDB_KEY;
             const H  = { apikey: SK, Authorization: `Bearer ${SK}` };
 
-            const r = await fetch(`${SU}/rest/v1/movies?select=id,data&limit=3`, { headers: H });
-            const rows = await r.json();
-            
-            for (const row of rows) {
-              const m = row.data;
-              console.log(`row.id=${row.id}`);
-              console.log(`typeof m = ${typeof m}`);
-              console.log(`m is null: ${m === null}`);
-              if (m) {
-                console.log(`m.tmdb_id = ${m.tmdb_id}`);
-                console.log(`typeof m.tmdb_id = ${typeof m.tmdb_id}`);
-                console.log(`keys: ${Object.keys(m).slice(0,8).join(', ')}`);
+            async function fetchAll() {
+              let all = [], offset = 0;
+              while (true) {
+                const r = await fetch(`${SU}/rest/v1/movies?select=id,data&limit=1000&offset=${offset}`, { headers: H });
+                const page = await r.json();
+                if (!Array.isArray(page) || !page.length) break;
+                all = all.concat(page);
+                if (page.length < 1000) break;
+                offset += 1000;
               }
-              console.log('---');
+              return all;
             }
+
+            async function tmdbFetch(tmdbId, mediaType) {
+              const types = mediaType === 'tv' ? ['tv', 'movie'] : ['movie', 'tv'];
+              for (const type of types) {
+                try {
+                  const r = await fetch(`https://api.themoviedb.org/3/${type}/${tmdbId}?api_key=${TK}`);
+                  if (!r.ok) continue;
+                  const d = await r.json();
+                  if (d && d.popularity !== undefined) return d;
+                } catch(e) {}
+              }
+              return null;
+            }
+
+            const rows = await fetchAll();
+            console.log(`Found ${rows.length} rows`);
+
+            const withTmdb = rows.filter(row => row.data && row.data.tmdb_id);
+            const withoutTmdb = rows.filter(row => !row.data || !row.data.tmdb_id);
+            console.log(`With tmdb_id: ${withTmdb.length}, Without: ${withoutTmdb.length}`);
+
+            let updated = 0, skipped = 0, errors = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+              const row = rows[i];
+              const m = row.data;
+
+              if (!m || !m.tmdb_id) {
+                skipped++;
+                continue;
+              }
+
+              try {
+                const td = await tmdbFetch(m.tmdb_id, m.media_type);
+                if (!td) { skipped++; continue; }
+
+                const newData = {};
+                for (const [k, v] of Object.entries(m)) {
+                  if (k !== '_id') newData[k] = v;
+                }
+                newData.popularity   = td.popularity;
+                newData.vote_average = td.vote_average !== undefined ? td.vote_average : (m.vote_average || 0);
+
+                const pr = await fetch(`${SU}/rest/v1/movies?id=eq.${row.id}`, {
+                  method: 'PATCH',
+                  headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                  body: JSON.stringify({ data: newData })
+                });
+
+                if (pr.ok) {
+                  updated++;
+                  if (updated <= 5) console.log(`✓ ${m.title}: pop=${td.popularity}`);
+                } else {
+                  errors++;
+                  if (errors <= 2) {
+                    const t = await pr.text();
+                    console.log(`✗ ${m.title} (${pr.status}): ${t.slice(0,200)}`);
+                  }
+                }
+              } catch(e) {
+                errors++;
+                if (errors <= 2) console.log(`Exception: ${e.message}`);
+              }
+
+              if (i % 100 === 0 && i > 0) {
+                console.log(`${i}/${rows.length} — updated:${updated} skipped:${skipped} errors:${errors}`);
+                await new Promise(r => setTimeout(r, 1000));
+              }
+            }
+
+            console.log(`Done! Updated:${updated} Skipped:${skipped} Errors:${errors}`);
