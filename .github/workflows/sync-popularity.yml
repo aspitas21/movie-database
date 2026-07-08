@@ -20,8 +20,8 @@ jobs:
             const SU = process.env.SUPABASE_URL;
             const SK = process.env.SUPABASE_KEY;
             const TK = process.env.TMDB_KEY;
+            const H = { apikey: SK, Authorization: `Bearer ${SK}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' };
 
-            // Récupérer tous les films
             async function fetchAll() {
               let all = [], offset = 0;
               while (true) {
@@ -40,34 +40,6 @@ jobs:
             const rows = await fetchAll();
             console.log(`Found ${rows.length} films`);
 
-            // Test sur 1 film pour vérifier le format
-            const testRow = rows.find(r => r.data && r.data.tmdb_id && r.data.media_type === 'movie');
-            if (testRow) {
-              console.log(`Test film: ${testRow.data.title}, id=${testRow.id}`);
-              console.log(`Data keys: ${Object.keys(testRow.data).join(', ')}`);
-              
-              // Test PATCH
-              const testData = { ...testRow.data };
-              delete testData._id;
-              testData.popularity = testRow.data.popularity || 0;
-              
-              const testPatch = await fetch(`${SU}/rest/v1/movies?id=eq.${testRow.id}`, {
-                method: 'PATCH',
-                headers: {
-                  apikey: SK,
-                  Authorization: `Bearer ${SK}`,
-                  'Content-Type': 'application/json',
-                  Prefer: 'return=minimal'
-                },
-                body: JSON.stringify({ data: testData })
-              });
-              console.log(`Test PATCH status: ${testPatch.status}`);
-              if (!testPatch.ok) {
-                const errText = await testPatch.text();
-                console.log(`Test PATCH error: ${errText}`);
-              }
-            }
-
             let updated = 0, errors = 0, skipped = 0;
 
             for (let i = 0; i < rows.length; i++) {
@@ -83,22 +55,19 @@ jobs:
                 const tr = await fetch(`https://api.themoviedb.org/3/${type}/${m.tmdb_id}?api_key=${TK}`);
                 if (!tr.ok) { errors++; continue; }
                 const td = await tr.json();
-                if (!td || td.success === false || td.popularity === undefined) { skipped++; continue; }
+                if (!td || td.popularity === undefined) { skipped++; continue; }
 
-                // Construire le nouvel objet data SANS _id
-                const newData = { ...m };
-                delete newData._id;
+                // Copier toutes les clés sauf _id
+                const newData = {};
+                for (const k of Object.keys(m)) {
+                  if (k !== '_id') newData[k] = m[k];
+                }
                 newData.popularity = td.popularity;
                 newData.vote_average = td.vote_average !== undefined ? td.vote_average : (m.vote_average || 0);
 
                 const pr = await fetch(`${SU}/rest/v1/movies?id=eq.${row.id}`, {
                   method: 'PATCH',
-                  headers: {
-                    apikey: SK,
-                    Authorization: `Bearer ${SK}`,
-                    'Content-Type': 'application/json',
-                    Prefer: 'return=minimal'
-                  },
+                  headers: H,
                   body: JSON.stringify({ data: newData })
                 });
 
@@ -106,14 +75,14 @@ jobs:
                   updated++;
                   if (updated <= 3) console.log(`✓ ${m.title}: ${td.popularity}`);
                 } else {
-                  if (errors === 0) {
+                  if (errors < 3) {
                     const errText = await pr.text();
-                    console.log(`First error on ${m.title}: ${errText}`);
+                    console.log(`✗ ${m.title} (status ${pr.status}): ${errText.slice(0, 200)}`);
                   }
                   errors++;
                 }
               } catch(e) {
-                if (errors === 0) console.log(`Exception: ${e.message}`);
+                if (errors < 3) console.log(`Exception on ${m.title}: ${e.message}`);
                 errors++;
               }
 
