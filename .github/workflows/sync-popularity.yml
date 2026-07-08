@@ -20,42 +20,72 @@ jobs:
             const SU = process.env.SUPABASE_URL;
             const SK = process.env.SUPABASE_KEY;
             const TK = process.env.TMDB_KEY;
+            const H  = { apikey: SK, Authorization: `Bearer ${SK}` };
 
-            // Test sur 1 seul film pour voir l'erreur exacte
-            const r = await fetch(`${SU}/rest/v1/movies?select=id,data&limit=1`, {
-              headers: { apikey: SK, Authorization: `Bearer ${SK}` }
-            });
-            const rows = await r.json();
-            const row = rows[0];
-            const m = row.data;
-            
-            console.log(`Film: ${m.title}, row.id: ${row.id}`);
-            console.log(`tmdb_id: ${m.tmdb_id}, media_type: ${m.media_type}`);
+            async function fetchAll() {
+              let all = [], offset = 0;
+              while (true) {
+                const r = await fetch(`${SU}/rest/v1/movies?select=id,data&limit=1000&offset=${offset}`, { headers: H });
+                const page = await r.json();
+                if (!Array.isArray(page) || !page.length) break;
+                all = all.concat(page);
+                if (page.length < 1000) break;
+                offset += 1000;
+              }
+              return all;
+            }
 
-            // Fetch TMDB
-            const tmdbRes = await fetch(`https://api.themoviedb.org/3/movie/${m.tmdb_id}?api_key=${TK}`);
-            const td = await tmdbRes.json();
-            console.log(`TMDB popularity: ${td.popularity}`);
+            async function tmdbFetch(tmdbId, mediaType) {
+              // Essayer d'abord avec le bon type, puis l'autre si undefined
+              const types = mediaType === 'tv' ? ['tv', 'movie'] : ['movie', 'tv'];
+              for (const type of types) {
+                const r = await fetch(`https://api.themoviedb.org/3/${type}/${tmdbId}?api_key=${TK}`);
+                if (!r.ok) continue;
+                const d = await r.json();
+                if (d && d.popularity !== undefined) return d;
+              }
+              return null;
+            }
 
-            // Construire newData sans _id
-            const newData = Object.fromEntries(Object.entries(m).filter(([k]) => k !== '_id'));
-            newData.popularity = td.popularity;
-            newData.vote_average = td.vote_average;
-            
-            console.log(`Sending PATCH to: ${SU}/rest/v1/movies?id=eq.${row.id}`);
-            console.log(`newData has _id: ${'_id' in newData}`);
+            const rows = await fetchAll();
+            console.log(`Found ${rows.length} films`);
 
-            const pr = await fetch(`${SU}/rest/v1/movies?id=eq.${row.id}`, {
-              method: 'PATCH',
-              headers: {
-                apikey: SK,
-                Authorization: `Bearer ${SK}`,
-                'Content-Type': 'application/json',
-                Prefer: 'return=representation'
-              },
-              body: JSON.stringify({ data: newData })
-            });
-            
-            console.log(`PATCH status: ${pr.status}`);
-            const responseText = await pr.text();
-            console.log(`PATCH response: ${responseText.slice(0, 500)}`);
+            let updated = 0, skipped = 0, errors = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+              const row = rows[i];
+              const m = row.data;
+              if (!m || !m.tmdb_id) { skipped++; continue; }
+
+              try {
+                const td = await tmdbFetch(m.tmdb_id, m.media_type);
+                if (!td) { skipped++; continue; }
+
+                const newData = Object.fromEntries(Object.entries(m).filter(([k]) => k !== '_id'));
+                newData.popularity   = td.popularity;
+                newData.vote_average = td.vote_average !== undefined ? td.vote_average : (m.vote_average || 0);
+
+                const pr = await fetch(`${SU}/rest/v1/movies?id=eq.${row.id}`, {
+                  method: 'PATCH',
+                  headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                  body: JSON.stringify({ data: newData })
+                });
+
+                if (pr.ok) {
+                  updated++;
+                  if (updated <= 5) console.log(`✓ ${m.title}: ${td.popularity}`);
+                } else {
+                  errors++;
+                  if (errors <= 3) console.log(`✗ ${m.title}: ${await pr.text()}`);
+                }
+              } catch(e) {
+                errors++;
+              }
+
+              if (i % 50 === 0 && i > 0) {
+                console.log(`${i}/${rows.length} — updated: ${updated}, skipped: ${skipped}, errors: ${errors}`);
+                await new Promise(r => setTimeout(r, 1000));
+              }
+            }
+
+            console.log(`Done! Updated: ${updated}, Skipped: ${skipped}, Errors: ${errors}`);
