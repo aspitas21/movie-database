@@ -1682,43 +1682,65 @@ function render() {
   grid.className = 'grid';
   const frag = document.createDocumentFragment();
 
-  list.forEach((m, i) => {
-    const idx    = movies.indexOf(m);
-    const year   = m.release_date ? m.release_date.slice(0,4) : '';
-    const dur    = fmt(m.runtime);
-    const rating = m.imdb_rating ? '⭐ ' + m.imdb_rating.toFixed(1)
-                 : m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : '';
+  // Fusionner les doublons par tmdb_id
+  const mergedMap = new Map();
+  const noIdList  = [];
+  list.forEach(m => {
+    const key = m.tmdb_id ? String(m.tmdb_id) + '_' + (m.media_type || 'movie') : null;
+    if (!key || m.media_type === 'collection' || m.media_type === 'saga') {
+      noIdList.push([m]);
+      return;
+    }
+    if (!mergedMap.has(key)) mergedMap.set(key, []);
+    mergedMap.get(key).push(m);
+  });
+  const groups = [...mergedMap.values(), ...noIdList];
+
+  groups.forEach((versions, i) => {
+    const m    = versions[0];
+    const idx  = movies.indexOf(m);
+    const year = m.release_date ? m.release_date.slice(0,4) : '';
+    const dur  = fmt(m.runtime);
+    const rating  = m.imdb_rating ? '⭐ ' + m.imdb_rating.toFixed(1) : m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : '';
     const rtBadge = m.rt_rating ? `<span class="rt-badge">${m.rt_rating >= 60 ? '🍅' : '🤢'} ${m.rt_rating}%</span>` : '';
-    const isCol  = m.media_type === 'collection';
-    const isSaga = m.media_type === 'saga';
+    const isCol   = m.media_type === 'collection';
+    const isSaga  = m.media_type === 'saga';
+    const isMulti = versions.length > 1;
 
     const card = document.createElement('div');
     card.className = `card ${m.quality}${isCol ? ' collection' : ''}${isSaga ? ' collection' : ''}`;
     card.style.animationDelay = (Math.min(i, 30) * 0.022) + 's';
-    card.onclick = e => { if (!e.target.closest('.detail-btn')) openDetail(e, idx); };
 
-    let posterHtml;
-    if (isCol || isSaga) {
-      const roleLabel = isSaga ? 'Saga' : (m.person_role || 'Collection');
-      posterHtml = `<div class="col-portrait-wrap">`
-        + (m.poster
-          ? `<img class="col-portrait" loading="lazy" src="${m.poster}" alt="${m.title}" onerror="this.outerHTML='<div class=&quot;no-portrait&quot;>${isCol?'🎞':'⚡'}</div>'">`
-          : `<div class="no-portrait">${isCol ? '🎞' : '⚡'}</div>`)
-        + `<div class="col-name-overlay"><div class="col-role">${roleLabel}</div><div class="col-title">${escapeHtml(m.title)}</div></div>`
-        + `</div>`;
+    if (isMulti) {
+      const vKey = storeVersions(versions.map(v => movies.indexOf(v)));
+      card.onclick = e => { if (!e.target.closest('.detail-btn')) openVersions(vKey); };
+      card.innerHTML = (m.poster
+        ? `<div class="poster-wrap"><img class="cposter" loading="lazy" src="${m.poster}" alt="${m.title}" onerror="this.outerHTML='<div class=&quot;no-poster&quot;>🎬</div>'">`
+        : `<div class="poster-wrap"><div class="no-poster">🎬</div>`)
+        + (rating ? `<div class="c-rating">${rating}</div>` : '')
+        + `<div class="card-overlay"><div class="cov-title">${escapeHtml(m.title)}</div>${year ? `<div class="cov-year">${year}</div>` : ''}</div>`
+        + `<div class="card-multi-badges">${versions.map(v => `<span class="card-qbadge-corner ${v.quality||''}">${QICON[v.quality]||'?'}</span>`).join('')}</div>`
+        + `</div>`
+        + `<button class="detail-btn admin-only" style="display:${isAdmin?'':'none'}" onclick="openVersions('${vKey}')">⋯</button>`;
     } else {
-      posterHtml = `<div class="poster-wrap">`
-        + (m.poster
-          ? `<img class="cposter" loading="lazy" src="${m.poster}" alt="${m.title}" onerror="this.outerHTML='<div class=&quot;no-poster&quot;>🎬</div>'">`
-          : `<div class="no-poster">🎬</div>`)
-        + (rating ? `<div class="c-rating">${rating}${rtBadge ? ' '+rtBadge : ''}</div>` : (rtBadge ? `<div class="c-rating">${rtBadge}</div>` : ''))
-        + `<div class="card-overlay"><div class="cov-title">${escapeHtml(m.title)}</div>${year ? `<div class="cov-year">${year}${dur ? ' · '+dur : ''}</div>` : ''}</div>`
-        + (m.quality ? `<div class="card-qbadge-corner ${m.quality}">${QICON[m.quality]||''}</div>` : '')
-        + `</div>`;
+      card.onclick = e => { if (!e.target.closest('.detail-btn')) openDetail(e, idx); };
+      let posterHtml;
+      if (isCol || isSaga) {
+        const roleLabel = isSaga ? 'Saga' : (m.person_role || 'Collection');
+        posterHtml = `<div class="col-portrait-wrap">`
+          + (m.poster ? `<img class="col-portrait" loading="lazy" src="${m.poster}" alt="${m.title}" onerror="this.outerHTML='<div class=&quot;no-portrait&quot;>${isCol?'🎞':'⚡'}</div>'">` : `<div class="no-portrait">${isCol ? '🎞' : '⚡'}</div>`)
+          + `<div class="col-name-overlay"><div class="col-role">${roleLabel}</div><div class="col-title">${escapeHtml(m.title)}</div></div>`
+          + `</div>`;
+      } else {
+        posterHtml = `<div class="poster-wrap">`
+          + (m.poster ? `<img class="cposter" loading="lazy" src="${m.poster}" alt="${m.title}" onerror="this.outerHTML='<div class=&quot;no-poster&quot;>🎬</div>'">` : `<div class="no-poster">🎬</div>`)
+          + (rating ? `<div class="c-rating">${rating}${rtBadge ? ' '+rtBadge : ''}</div>` : (rtBadge ? `<div class="c-rating">${rtBadge}</div>` : ''))
+          + `<div class="card-overlay"><div class="cov-title">${escapeHtml(m.title)}</div>${year ? `<div class="cov-year">${year}${dur ? ' · '+dur : ''}</div>` : ''}</div>`
+          + (m.quality ? `<div class="card-qbadge-corner ${m.quality}">${QICON[m.quality]||''}</div>` : '')
+          + `</div>`;
+      }
+      card.innerHTML = posterHtml + `<button class="detail-btn admin-only" style="display:${isAdmin?'':'none'}" onclick="openDetail(event,${idx})">⋯</button>`;
     }
-
-    card.innerHTML = posterHtml
-      + `<button class="detail-btn admin-only" style="display:${isAdmin?'':'none'}" onclick="openDetail(event,${idx})">⋯</button>`;
 
     frag.appendChild(card);
   });
@@ -1730,82 +1752,6 @@ function render() {
 // ══════════════════════════════════════════════════
 //  DETAIL MODAL
 // ══════════════════════════════════════════════════
-// Global store pour les versions fusionnées (évite JSON dans onclick)
-const _versionsStore = new Map();
-let _versionsCounter = 0;
-function storeVersions(versions) {
-  const key = 'v' + (++_versionsCounter);
-  _versionsStore.set(key, versions);
-  return key;
-}
-
-function openDetailMerged(e, keyOrVersions) {
-  const versions = typeof keyOrVersions === 'string'
-    ? (_versionsStore.get(keyOrVersions) || [])
-    : keyOrVersions;
-  if (versions.length === 1) { openDetail(e, versions[0].idx); return; }
-  e.stopPropagation();
-
-  const m   = movies[versions[0].idx];
-  const idx = versions[0].idx;
-  const year = m.release_date ? m.release_date.slice(0,4) : '';
-  const dur  = fmt(m.runtime);
-  const isTV = m.media_type === 'tv';
-  const rating = m.imdb_rating ? '⭐ ' + m.imdb_rating.toFixed(1) : m.vote_average ? '⭐ ' + m.vote_average.toFixed(1) : '';
-  const lbUrl    = m.tmdb_id ? `https://letterboxd.com/tmdb/${m.tmdb_id}/` : '';
-  const allocUrl = `https://www.allocine.fr/rechercher/?q=${encodeURIComponent(m.title)}`;
-  const subUrl   = `https://www.opensubtitles.org/fr/search/moviename-${encodeURIComponent(m.title)}`;
-
-  // Fusionner tous les liens de toutes les versions avec leur badge qualité
-  const allLinks = [];
-  versions.forEach(v => {
-    const vm = movies[v.idx];
-    const ql = QLABEL[v.quality] || v.quality || '';
-    const qi = QICON[v.quality] || '';
-    if (vm.links && vm.links.length) {
-      vm.links.forEach(l => { if (l && l.url) allLinks.push({ url: l.url, name: l.name || ql, quality: v.quality, qi, ql }); });
-    } else if (vm.link) {
-      allLinks.push({ url: vm.link, name: ql, quality: v.quality, qi, ql });
-    }
-  });
-
-  const linksHtml = allLinks.length
-    ? `<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">`
-      + allLinks.map(l => `<a class="dbtn watch" href="${l.url}" target="_blank" rel="noopener noreferrer"><span class="card-qbadge-corner ${l.quality}" style="position:static;font-size:9px;padding:1px 4px;border-radius:3px;margin-right:6px;">${l.qi} ${l.ql}</span>${escapeHtml(l.name !== l.ql ? l.name : 'Ouvrir')}</a>`).join('')
-      + `</div>`
-    : `<span class="no-link">Aucun lien ajouté</span>`;
-
-  // Badge qualités multiples
-  const badgesHtml = versions.map(v => `<span class="detail-qbadge ${v.quality}">${QICON[v.quality]||''} ${QLABEL[v.quality]||''}</span>`).join(' ');
-
-  document.getElementById('dcont').innerHTML = `
-    <div class="detail-body">
-      <div class="detail-poster-wrap">
-        ${m.poster ? `<img src="${m.poster}" alt="${escapeHtml(m.title)}">` : `<div class="detail-no-poster">${isTV ? '📺' : '🎬'}</div>`}
-      </div>
-      <div class="detail-info">
-        <div class="detail-title">${isTV ? '📺 ' : ''}${escapeHtml(m.title)}</div>
-        ${year ? `<div class="detail-year">${year}</div>` : ''}
-        <div style="display:flex;gap:4px;flex-wrap:wrap">${badgesHtml}</div>
-        <div class="detail-badges">
-          ${rating ? `<span class="detail-badge r">${rating}</span>` : ''}
-          ${dur    ? `<span class="detail-badge d">⏱ ${dur}</span>` : ''}
-        </div>
-        ${m.tags && m.tags.length ? `<div class="detail-tags">${m.tags.map(t => `<span class="gpill">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
-        <div class="detail-btns">
-          ${lbUrl ? `<a class="dbtn lb" href="${lbUrl}" target="_blank" rel="noopener noreferrer">🎞 Letterboxd</a>` : ''}
-          <a class="dbtn alloc" href="${allocUrl}" target="_blank" rel="noopener noreferrer">🎬 Allociné</a>
-          <a class="dbtn sub"   href="${subUrl}"   target="_blank" rel="noopener noreferrer">💬 Sous-titres</a>
-        </div>
-        ${linksHtml}
-      </div>
-    </div>
-    <div class="modal-actions" style="margin-top:1.5rem">
-      <button class="btn-delete admin-only" style="display:${isAdmin?'':'none'}" onclick="closeDet();openEdit(null,${idx})">✎ Modifier</button>
-      <div class="modal-actions-right"><button class="btn-cancel" onclick="closeDet()">Fermer</button></div>
-    </div>`;
-  document.getElementById('dmod').classList.add('open');
-}
 function openDetail(e, idx) {
   e.stopPropagation();
   const m    = movies[idx];
@@ -3611,6 +3557,51 @@ window.addEventListener('resize', () => {
   if (btn) btn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
   if (window.innerWidth > 768) closeMobileMenu();
 });
+
+// ── Versions store ──────────────────────────────
+const _versionsStore = new Map();
+let _vKey = 0;
+function storeVersions(indices) {
+  const key = 'vk' + (++_vKey);
+  _versionsStore.set(key, indices);
+  return key;
+}
+
+function openVersions(key) {
+  const indices = typeof key === 'string' ? (_versionsStore.get(key) || []) : key;
+  if (!indices.length) return;
+  const versions = indices.map(i => movies[i]).filter(Boolean);
+  if (versions.length === 1) { openDetail({stopPropagation:()=>{}}, indices[0]); return; }
+
+  const m = versions[0];
+  // Réutiliser sc-detail-page comme mini grille
+  const page  = document.getElementById('sc-detail-page');
+  const grid  = document.getElementById('sc-detail-grid');
+  const title = document.getElementById('sc-detail-title');
+  const poster = document.getElementById('sc-detail-poster');
+
+  title.textContent = m.title + ' — ' + versions.length + ' versions';
+  if (m.poster) { poster.src = m.poster; poster.style.display = ''; }
+  else poster.style.display = 'none';
+
+  grid.innerHTML = versions.map((v, i) => {
+    const idx = indices[i];
+    const ql  = QLABEL[v.quality] || v.quality || '?';
+    const qi  = QICON[v.quality]  || '';
+    return `<div class="sc-detail-card" onclick="openDetail(event,${idx})" style="cursor:pointer;">
+      <div style="position:relative;aspect-ratio:2/3;border-radius:8px;overflow:hidden;background:#111;">
+        ${v.poster ? `<img src="${v.poster}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;">🎬</div>'}
+        <div class="card-qbadge-corner ${v.quality}" style="position:absolute;">${qi}</div>
+        <div class="card-overlay" style="opacity:1;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,transparent 60%);">
+          <div class="cov-title">${ql}</div>
+          <div class="cov-year">${v.release_date ? v.release_date.slice(0,4) : ''}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  page.style.display = 'flex';
+}
 
 async function syncPopularity() {
   const btn = document.getElementById('sync-pop-btn');
