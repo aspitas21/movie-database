@@ -1572,9 +1572,17 @@ function renderRecent() {
   if (!pool.length) { sec.style.display = 'none'; return; }
   sec.style.display = '';
 
-  const last100 = pool.slice(-100);
+  // Dédupliquer par tmdb_id — garder 1 exemplaire par film
+  const seenIds = new Set();
+  const poolUniq = pool.filter(m => {
+    const key = m.tmdb_id || m.title;
+    if (seenIds.has(key)) return false;
+    seenIds.add(key); return true;
+  });
+
+  const last100 = poolUniq.slice(-100);
   const recent5 = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 14);
-  const top8 = [...pool].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 8);
+  const top8    = [...poolUniq].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 8);
 
   sec.innerHTML = `
     <div class="popular-left">
@@ -3240,7 +3248,11 @@ function renderScGroup(g, isPeople = false) {
 
   function closeScDetail() {
   document.getElementById('sc-detail-page').style.display = 'none';
-  document.getElementById('sc-page').style.display = 'flex';
+  if (_versionsOrigin) {
+    _versionsOrigin = false;
+  } else {
+    document.getElementById('sc-page').style.display = 'flex';
+  }
 }
   
  function filterByGroup(indices) {
@@ -3567,6 +3579,7 @@ function storeVersions(indices) {
   return key;
 }
 
+let _versionsOrigin = false;
 function openVersions(key) {
   const indices = typeof key === 'string' ? (_versionsStore.get(key) || []) : key;
   if (!indices.length) return;
@@ -3600,6 +3613,7 @@ function openVersions(key) {
     </div>`;
   }).join('');
 
+  _versionsOrigin = true;
   page.style.display = 'flex';
 }
 
