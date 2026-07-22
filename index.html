@@ -1639,6 +1639,7 @@ function render() {
   let list = [...movies];
   if (filts.size > 0)    list = list.filter(m => filts.has(m.quality));
   if (mediaFilt)         list = list.filter(m => (m.media_type||'movie') === mediaFilt);
+  else                   list = list.filter(m => !m.media_type || m.media_type === 'movie' || m.media_type === 'collection' || m.media_type === 'saga');
   if (genreInc.size > 0) list = list.filter(m => [...genreInc].every(g => (m.tags||[]).includes(g)));
   if (genreExc.size > 0) list = list.filter(m => [...genreExc].every(g => !(m.tags||[]).includes(g)));
   if (q) list = list.filter(m => m.title.toLowerCase().includes(q));
