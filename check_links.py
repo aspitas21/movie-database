@@ -19,11 +19,22 @@ MOTS_CLES_MORT = {
         "this folder is empty", "has been automatically removed", "file not found"
     ],
     "transfer.it": [
-        "expired", "expiré", "not found", "introuvable",
-        "no longer available", "n'est plus disponible", "deleted", "supprimé",
-        "doesn't exist", "does not exist", "n'existe pas", "invalid", "invalide",
-        "unavailable", "indisponible", "oops", "oups", "error", "erreur",
-        "nothing here", "empty", "removed"
+        # Textes exacts de Transfer.it (FR + EN)
+        "nous ne trouvons pas ce transfert",
+        "il se peut qu'il ait expiré",
+        "qu'il ait été supprimé",
+        "we can't find this transfer",
+        "we cannot find this transfer",
+        "couldn't find this transfer",
+        "might have expired",
+        "may have expired",
+        "or been deleted",
+        "oups,",
+        "oops,",
+        # Mots-clés génériques de secours
+        "transfer expired", "link has expired", "ce transfert a expiré",
+        "lien expiré", "file not found", "fichier introuvable",
+        "no longer available", "deleted or expired"
     ],
     "google": [
         "sorry, the file you have requested does not exist",
@@ -64,14 +75,12 @@ async def verifier_url(semaphore, context, url):
     async with semaphore:
         page = await context.new_page()
         try:
-            # On bloque uniquement les images et vidéos lourdes, mais on garde tout le reste pour Transfer.it
             await page.route("**/*.{png,jpg,jpeg,webp,mp4,mkv,avi}", lambda r: r.abort())
             u = url.lower()
 
             if "transfer.it" in u:
-                # Transfer.it met plus de temps à décrypter les métadonnées en JavaScript
                 response = await page.goto(url, wait_until="networkidle", timeout=30000)
-                await asyncio.sleep(6)
+                await asyncio.sleep(5)
             else:
                 response = await page.goto(url, wait_until="domcontentloaded", timeout=25000)
                 await asyncio.sleep(3.5)
@@ -79,19 +88,14 @@ async def verifier_url(semaphore, context, url):
             if response and response.status in [404, 410]:
                 return f"Erreur HTTP {response.status}"
 
-            # Si Transfer.it redirige vers la page d'accueil (sans "/t/" dans l'URL finale), le lien est mort
-            if "transfer.it" in u and "/t/" not in page.url.lower():
-                return "Redirigé vers l'accueil (Lien expiré)"
-
             texte = (await page.inner_text("body")).lower()
 
-            # 1. Vérification des mots-clés d'expiration
             mots = MOTS_CLES_MORT["gofile.io"] if "gofile.io" in u else (MOTS_CLES_MORT["transfer.it"] if "transfer.it" in u else MOTS_CLES_MORT["google"])
             for mot in mots:
                 if mot in texte:
                     return f"Expiré ({mot})"
 
-            # 2. Sécurité spéciale Transfer.it : vérifier qu'un fichier ou bouton Download est bien présent
+            # Double sécurité pour Transfer.it : si le bouton bleu "Commencer" / "Get started" d'erreur est présent
             if "transfer.it" in u:
                 indices_fichier_actif = [
                     "download", "télécharger", "telecharger", "descargar",
@@ -101,9 +105,8 @@ async def verifier_url(semaphore, context, url):
                 a_une_taille = bool(re.search(r'\b\d+([.,]\d+)?\s*(mb|gb|tb|kb|mo|go|to|ko|bytes|octets)\b', texte))
 
                 if not (a_un_bouton_ou_fichier or a_une_taille):
-                    # Extrait des 60 premiers caractères affichés sur la page pour te dire exactement ce que Transfer.it affiche
                     apercu = " ".join(texte.split())[:60]
-                    return f"Aucun fichier détecté sur Transfer.it ({apercu}...)"
+                    return f"Transfert introuvable ({apercu})"
 
             return None
         except Exception:
@@ -140,6 +143,7 @@ async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
+            locale="fr-FR",
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
         )
         urls_uniques = list(carte_urls.keys())
