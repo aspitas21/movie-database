@@ -3911,63 +3911,104 @@ function editDeadMovie(idxInDeadList) {
   }
 }
 
+// Fonction qui supprime le lien mort, ET supprime la fiche du film s'il ne lui reste plus aucun lien
+async function cleanOrDeleteMovieLink(m, targetUrl) {
+  // Récupérer tous les liens actuels du film
+  const allUrls = [];
+  if (m.links && Array.isArray(m.links)) {
+    m.links.forEach(l => {
+      if (l && l.url && l.url.trim()) allUrls.push({ name: l.name || '', url: l.url.trim() });
+    });
+  }
+  if (m.link && m.link.trim() && !allUrls.some(l => l.url === m.link.trim())) {
+    allUrls.push({ name: '', url: m.link.trim() });
+  }
+
+  // Filtrer pour enlever le lien mort
+  const remainingLinks = allUrls.filter(l => l.url !== targetUrl);
+
+  if (remainingLinks.length === 0) {
+    // Plus aucun lien valide -> on supprime complètement la fiche du film de Supabase
+    if (m._id) {
+      await fetch(`${SU}/rest/v1/movies?id=eq.${m._id}`, { method: 'DELETE', headers: H });
+    }
+    const idx = movies.indexOf(m);
+    if (idx >= 0) movies.splice(idx, 1);
+    return 'deleted_movie';
+  } else {
+    // Il reste au moins un autre lien valide -> on garde le film et on met à jour ses liens
+    const updatedMovie = {
+      ...m,
+      link: remainingLinks[0].url,
+      links: remainingLinks
+    };
+    const idx = movies.indexOf(m);
+    if (idx >= 0) {
+      movies[idx] = updatedMovie;
+      await updMSilent(idx, updatedMovie);
+    }
+    return 'kept_movie';
+  }
+}
+
 async function removeSpecificDeadLink(idxInDeadList, btnEl) {
   const item = _deadMoviesList[idxInDeadList];
   if (!item) return;
   const targetUrl = (item.dead_url || '').trim();
 
-  const matchingIndices = [];
-  movies.forEach((m, i) => {
+  const matchingMovies = movies.filter(m => {
     const hasInMain = (m.link || '').trim() === targetUrl;
     const hasInArr  = (m.links || []).some(l => l && (l.url || '').trim() === targetUrl);
-    if (hasInMain || hasInArr) matchingIndices.push(i);
+    return hasInMain || hasInArr;
   });
 
-  const singleIdx = movies.findIndex(m => (item.id && m._id === item.id) || (item.tmdb_id && m.tmdb_id === item.tmdb_id) || m.title === item.title);
-  if (singleIdx < 0 && matchingIndices.length === 0) {
-    alert("Ce lien a déjà été retiré de ce film !");
+  const singleMovie = movies.find(m => (item.id && m._id === item.id) || (item.tmdb_id && m.tmdb_id === item.tmdb_id) || m.title === item.title);
+  if (!singleMovie && matchingMovies.length === 0) {
+    alert("Ce lien ou ce film a déjà été supprimé !");
     return;
   }
 
-  let indicesToClean = [singleIdx >= 0 ? singleIdx : matchingIndices[0]];
+  let moviesToProcess = [singleMovie || matchingMovies[0]];
 
-  if (matchingIndices.length > 1) {
+  if (matchingMovies.length > 1) {
     const cleanAll = confirm(
-      "Ce lien expiré (" + targetUrl + ") est utilisé sur " + matchingIndices.length + " films.\n\n" +
-      "• OK : Retirer ce lien des " + matchingIndices.length + " films d'un coup.\n" +
-      "• Annuler : Le retirer uniquement de \"" + item.title + "\"."
+      "Ce lien expiré (" + targetUrl + ") est utilisé sur " + matchingMovies.length + " films.\n\n" +
+      "• OK : Nettoyer les " + matchingMovies.length + " films d'un coup (supprime les films qui n'ont pas d'autre lien).\n" +
+      "• Annuler : Traiter uniquement \"" + item.title + "\"."
     );
-    if (cleanAll) indicesToClean = matchingIndices;
-    else if (!confirm("Retirer uniquement le lien de \"" + item.title + "\" ?")) return;
+    if (cleanAll) moviesToProcess = matchingMovies;
+    else if (!confirm("Supprimer le lien expiré de \"" + item.title + "\" (et supprimer sa fiche s'il n'a aucun autre lien) ?")) return;
   } else {
-    if (!confirm("Retirer ce lien expiré de \"" + item.title + "\" ?")) return;
+    if (!confirm("Supprimer le lien expiré de \"" + item.title + "\" ?\n(Si ce film n'a aucun autre lien, sa fiche sera supprimée du site)")) return;
   }
 
   btnEl.textContent = "⏳...";
   btnEl.disabled = true;
 
-  for (const idx of indicesToClean) {
-    const m = movies[idx];
+  for (const m of moviesToProcess) {
     if (!m) continue;
-    const newLinks = (m.links || []).filter(l => l && l.url && l.url.trim() !== targetUrl);
-    let newMainLink = (m.link || '').trim();
-    if (newMainLink === targetUrl) {
-      newMainLink = newLinks.length > 0 ? newLinks[0].url : '';
-    }
-    const updatedMovie = { ...m, link: newMainLink, links: newLinks };
-    movies[idx] = updatedMovie;
-    await updMSilent(idx, updatedMovie);
+    await cleanOrDeleteMovieLink(m, targetUrl);
   }
 
   render();
-  document.querySelectorAll('[data-dead-url="' + CSS.escape(targetUrl) + '"]').forEach(row => {
-    row.style.opacity = '0.35';
-    row.style.pointerEvents = 'none';
-  });
 
+  if (moviesToProcess.length > 1) {
+    document.querySelectorAll('[data-dead-url="' + CSS.escape(targetUrl) + '"]').forEach(row => {
+      row.style.opacity = '0.35';
+      row.style.pointerEvents = 'none';
+    });
+  } else {
+    const row = document.getElementById('dead-row-' + idxInDeadList);
+    if (row) {
+      row.style.opacity = '0.35';
+      row.style.pointerEvents = 'none';
+    }
+  }
+
+  btnEl.textContent = "✓ Fait";
   const countEl = document.getElementById('dead-links-count');
   const currentCount = parseInt(countEl.textContent) || 0;
-  const nextCount = Math.max(0, currentCount - indicesToClean.length);
+  const nextCount = Math.max(0, currentCount - moviesToProcess.length);
   countEl.textContent = nextCount;
   if (nextCount === 0) document.getElementById('dead-links-widget').style.display = 'none';
 }
@@ -3975,46 +4016,45 @@ async function removeSpecificDeadLink(idxInDeadList, btnEl) {
 async function removeAllDeadLinks(btnEl) {
   if (!_deadMoviesList || _deadMoviesList.length === 0) return;
   
-  const confirm1 = confirm("⚠️ ATTENTION : Vous êtes sur le point de nettoyer TOUS les liens expirés signalés dans cette liste.\n\nLes fiches de vos films seront conservées, mais tous leurs liens morts seront effacés.\n\nVoulez-vous continuer ?");
+  const confirm1 = confirm(
+    "⚠️ ATTENTION : Vous allez nettoyer TOUS les liens expirés de cette liste.\n\n" +
+    "• Si un film possède un autre lien valide, seul le lien mort sera retiré.\n" +
+    "• Si un film n'a PLUS AUCUN lien valide, sa fiche sera SUPPRIMÉE du site.\n\n" +
+    "Voulez-vous continuer ?"
+  );
   if (!confirm1) return;
 
-  const confirm2 = prompt("Pour confirmer la suppression globale, tapez le mot : SUPPRIMER");
+  const confirm2 = prompt("Pour confirmer, tapez le mot : SUPPRIMER");
   if (confirm2 !== "SUPPRIMER") {
-    alert("Action annulée (mot de confirmation incorrect).");
+    alert("Action annulée.");
     return;
   }
 
-  btnEl.textContent = "⏳ Nettoyage...";
+  btnEl.textContent = "⏳ Suppression...";
   btnEl.disabled = true;
 
   const deadUrls = [...new Set(_deadMoviesList.map(m => (m.dead_url || '').trim()).filter(Boolean))];
+  let deletedMoviesCount = 0;
+  let keptMoviesCount = 0;
 
   for (const targetUrl of deadUrls) {
-    const matchingIndices = [];
-    movies.forEach((m, i) => {
+    const matchingMovies = movies.filter(m => {
       const hasInMain = (m.link || '').trim() === targetUrl;
       const hasInArr  = (m.links || []).some(l => l && (l.url || '').trim() === targetUrl);
-      if (hasInMain || hasInArr) matchingIndices.push(i);
+      return hasInMain || hasInArr;
     });
 
-    for (const idx of matchingIndices) {
-      const m = movies[idx];
-      if (!m) continue;
-      const newLinks = (m.links || []).filter(l => l && l.url && l.url.trim() !== targetUrl);
-      let newMainLink = (m.link || '').trim();
-      if (newMainLink === targetUrl) {
-        newMainLink = newLinks.length > 0 ? newLinks[0].url : '';
-      }
-      const updatedMovie = { ...m, link: newMainLink, links: newLinks };
-      movies[idx] = updatedMovie;
-      await updMSilent(idx, updatedMovie);
+    for (const m of matchingMovies) {
+      const res = await cleanOrDeleteMovieLink(m, targetUrl);
+      if (res === 'deleted_movie') deletedMoviesCount++;
+      else keptMoviesCount++;
     }
   }
 
   render();
   document.getElementById('dead-links-widget').style.display = 'none';
   document.getElementById('dead-links-modal').style.display = 'none';
-  alert("✅ Tous les liens expirés ont été retirés de vos films avec succès !");
+  alert(`✅ Nettoyage terminé !\n• ${deletedMoviesCount} fiche(s) de film supprimée(s) (aucun autre lien)\n• ${keptMoviesCount} fiche(s) conservée(s) (avaient un autre lien valide)`);
 }
 
 fetch('./dead_links.json?t=' + Date.now())
@@ -4043,15 +4083,16 @@ fetch('./dead_links.json?t=' + Date.now())
             ✎ Remplacer
           </button>
           <button onclick="removeSpecificDeadLink(${idx}, this)" 
-                  title="Supprime uniquement ce lien mort mais garde le film et ses autres liens"
+                  title="Supprime le lien mort (et supprime le film s'il n'a plus d'autre lien)"
                   style="background:rgba(239,68,68,0.12); color:#f87171; border:1px solid rgba(239,68,68,0.3); padding:7px 11px; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer;">
-            🗑 Retirer
+            🗑 Supprimer
           </button>
         </div>
       </div>
     `).join('');
   })
   .catch(() => {});
+</script>
 </script>
 </script>
 </script>
