@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 import urllib.request
 from datetime import datetime
 from playwright.async_api import async_playwright
@@ -9,7 +10,7 @@ SU = "https://dnzrpvyeiyxplrcomsuo.supabase.co"
 SK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTUzNjA1MCwiZXhwIjoyMDk1MTEyMDUwfQ.IZUKY4IsWIkk2LDMQTdUORtW3PhdlrlmTsu9Mng7oLA"
 
 FICHIER_RAPPORT = "dead_links.json"
-CONCURRENCE_MAX = 6
+CONCURRENCE_MAX = 5
 DOMAINES_CIBLES = ["gofile.io", "transfer.it", "drive.google.com", "docs.google.com"]
 
 MOTS_CLES_MORT = {
@@ -18,9 +19,11 @@ MOTS_CLES_MORT = {
         "this folder is empty", "has been automatically removed", "file not found"
     ],
     "transfer.it": [
-        "transfer expired", "link has expired", "ce transfert a expiré",
-        "lien expiré", "file not found", "fichier introuvable",
-        "no longer available", "deleted or expired", "doesn't exist", "n'existe pas"
+        "expired", "expiré", "not found", "introuvable",
+        "no longer available", "n'est plus disponible", "deleted", "supprimé",
+        "doesn't exist", "does not exist", "n'existe pas", "invalid", "invalide",
+        "unavailable", "indisponible", "oops", "oups", "error", "erreur",
+        "nothing here", "empty", "removed"
     ],
     "google": [
         "sorry, the file you have requested does not exist",
@@ -61,20 +64,47 @@ async def verifier_url(semaphore, context, url):
     async with semaphore:
         page = await context.new_page()
         try:
-            await page.route("**/*.{png,jpg,jpeg,webp,mp4,mkv,avi,woff,woff2}", lambda r: r.abort())
-            response = await page.goto(url, wait_until="domcontentloaded", timeout=25000)
-            await asyncio.sleep(3.5)
+            # On bloque uniquement les images et vidéos lourdes, mais on garde tout le reste pour Transfer.it
+            await page.route("**/*.{png,jpg,jpeg,webp,mp4,mkv,avi}", lambda r: r.abort())
+            u = url.lower()
+
+            if "transfer.it" in u:
+                # Transfer.it met plus de temps à décrypter les métadonnées en JavaScript
+                response = await page.goto(url, wait_until="networkidle", timeout=30000)
+                await asyncio.sleep(6)
+            else:
+                response = await page.goto(url, wait_until="domcontentloaded", timeout=25000)
+                await asyncio.sleep(3.5)
 
             if response and response.status in [404, 410]:
                 return f"Erreur HTTP {response.status}"
 
-            texte = (await page.inner_text("body")).lower()
-            u = url.lower()
-            mots = MOTS_CLES_MORT["gofile.io"] if "gofile.io" in u else (MOTS_CLES_MORT["transfer.it"] if "transfer.it" in u else MOTS_CLES_MORT["google"])
+            # Si Transfer.it redirige vers la page d'accueil (sans "/t/" dans l'URL finale), le lien est mort
+            if "transfer.it" in u and "/t/" not in page.url.lower():
+                return "Redirigé vers l'accueil (Lien expiré)"
 
+            texte = (await page.inner_text("body")).lower()
+
+            # 1. Vérification des mots-clés d'expiration
+            mots = MOTS_CLES_MORT["gofile.io"] if "gofile.io" in u else (MOTS_CLES_MORT["transfer.it"] if "transfer.it" in u else MOTS_CLES_MORT["google"])
             for mot in mots:
                 if mot in texte:
                     return f"Expiré ({mot})"
+
+            # 2. Sécurité spéciale Transfer.it : vérifier qu'un fichier ou bouton Download est bien présent
+            if "transfer.it" in u:
+                indices_fichier_actif = [
+                    "download", "télécharger", "telecharger", "descargar",
+                    ".mkv", ".mp4", ".avi", ".zip", ".rar", ".iso"
+                ]
+                a_un_bouton_ou_fichier = any(ind in texte for ind in indices_fichier_actif)
+                a_une_taille = bool(re.search(r'\b\d+([.,]\d+)?\s*(mb|gb|tb|kb|mo|go|to|ko|bytes|octets)\b', texte))
+
+                if not (a_un_bouton_ou_fichier or a_une_taille):
+                    # Extrait des 60 premiers caractères affichés sur la page pour te dire exactement ce que Transfer.it affiche
+                    apercu = " ".join(texte.split())[:60]
+                    return f"Aucun fichier détecté sur Transfer.it ({apercu}...)"
+
             return None
         except Exception:
             return "Page inaccessible ou délai dépassé"
