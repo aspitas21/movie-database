@@ -1,0 +1,540 @@
+{
+  "last_check": "15/10/2026 à 09:06",
+  "total_movies_scanned": 2152,
+  "unique_links_checked": 1658,
+  "dead_links_count": 55,
+  "affected_movies_count": 59,
+  "dead_movies": [
+    {
+      "id": 3198,
+      "tmdb_id": 945961,
+      "title": "Alien: Romulus",
+      "poster": "https://image.tmdb.org/t/p/w342/2uSWRTtCG336nuBiG8jOTEUKSy8.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/74Uywc",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3201,
+      "tmdb_id": 53200,
+      "title": "Lessons of Darkness",
+      "poster": "https://image.tmdb.org/t/p/w342/dNLmxJKFxMVcEe4BEe1vM7HOHGq.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/cOqeq6",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3206,
+      "tmdb_id": 76341,
+      "title": "Mad Max: Fury Road",
+      "poster": "https://image.tmdb.org/t/p/w342/oLy2V6AWSEfdPgKOtrSGnwB3Q2R.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/xHW1u8",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3209,
+      "tmdb_id": 949,
+      "title": "Heat",
+      "poster": "https://image.tmdb.org/t/p/w342/e0xv5Y7UVrhKEVy1g3URMLLVDYB.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/i9RQOu",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3381,
+      "tmdb_id": 414419,
+      "title": "Kill Bill: The Whole Bloody Affair",
+      "poster": "https://image.tmdb.org/t/p/w342/nSOJfWJCdVFZQwXQA7RXn7FIIiY.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/xomZR5",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3382,
+      "tmdb_id": 1102883,
+      "title": "Mother Mary",
+      "poster": "https://image.tmdb.org/t/p/w342/uaCJhncUYYXFlG253BEPAzog3hl.jpg",
+      "quality": "4kl",
+      "dead_url": "https://gofile.io/d/Q6JXxY",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3383,
+      "tmdb_id": 1177767,
+      "title": "Mile End Kicks",
+      "poster": "https://image.tmdb.org/t/p/w342/qq3Q1tsxAxMqP38YTZKl8m5zmA4.jpg",
+      "quality": "4kl",
+      "dead_url": "https://gofile.io/d/qxp6KR",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3384,
+      "tmdb_id": 7459,
+      "title": "Speed Racer",
+      "poster": "https://image.tmdb.org/t/p/w342/hpCPT2V1UjBSOqxbTrPGsYLDRgC.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/Ilq6Kr",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3516,
+      "tmdb_id": 16391,
+      "title": "Black Narcissus",
+      "poster": "https://image.tmdb.org/t/p/w342/jSbFWWbkUq5N5ikewJHNATcWnxS.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/Clj3jZ",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3518,
+      "tmdb_id": 27019,
+      "title": "Céline and Julie Go Boating",
+      "poster": "https://image.tmdb.org/t/p/w342/ebybh1zQBCmN77wfd4lCQaDx3Sl.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/hZNNKd",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3521,
+      "tmdb_id": 22843,
+      "title": "Evangelion: 2.0 You Can (Not) Advance",
+      "poster": "https://image.tmdb.org/t/p/w342/7o2JoenPNslllUBtJkrVZcLKzWE.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/b1kiYw",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3543,
+      "tmdb_id": 265193,
+      "title": "Still the Water",
+      "poster": "https://image.tmdb.org/t/p/w342/ckBL9PAhEDt3S9qeVH5IpNIOUQl.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/GvJlPv",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3544,
+      "tmdb_id": 319373,
+      "title": "Sweet Bean",
+      "poster": "https://image.tmdb.org/t/p/w342/oCEOdGiSTAk78fcANEF2DWxbkL0.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/PjJDeO",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3869,
+      "tmdb_id": 9343,
+      "title": "Fitzcarraldo",
+      "poster": "https://image.tmdb.org/t/p/w342/ffWXGB8ZMdL5xgZAELR2M1vD1an.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/WqPuMo",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3870,
+      "tmdb_id": 42124,
+      "title": "Burden of Dreams",
+      "poster": "https://image.tmdb.org/t/p/w342/qJuD9yZ7Mn9QCVqKO9WarNNYo4R.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/iopaGJ",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3884,
+      "tmdb_id": 15916,
+      "title": "Angel's Egg",
+      "poster": "https://image.tmdb.org/t/p/w342/kDEETCFXROZ84Mdv1j5upRZRabv.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/woNZBC",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3885,
+      "tmdb_id": 262833,
+      "title": "Ani*Kuri15",
+      "poster": "https://image.tmdb.org/t/p/w342/go15d0ivlPo9zpIMhG2XKIAMlyI.jpg",
+      "quality": "1l",
+      "dead_url": "https://gofile.io/d/woNZBC",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3886,
+      "tmdb_id": 41373,
+      "title": "Assault Girls",
+      "poster": "https://image.tmdb.org/t/p/w342/jGLnaGgCMk1ZxaJB4qQbBNrrYas.jpg",
+      "quality": "1l",
+      "dead_url": "https://gofile.io/d/oNxqQz",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3887,
+      "tmdb_id": 10881,
+      "title": "Avalon",
+      "poster": "https://image.tmdb.org/t/p/w342/wC3tlkk2ATUhSMIlxL1BbTIFIXC.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/oNxqQz",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3888,
+      "tmdb_id": 79328,
+      "title": "Dallos",
+      "poster": "https://image.tmdb.org/t/p/w342/x7jjm3SHGEI1Vc6TFBxIjvCRfan.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/i8yBU0",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3889,
+      "tmdb_id": 302026,
+      "title": "Garm Wars: The Last Druid",
+      "poster": "https://image.tmdb.org/t/p/w342/cz3tMdY7XPjzhEWH7hdKOn3doJ1.jpg",
+      "quality": "1l",
+      "dead_url": "https://gofile.io/d/dEXq0c",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3890,
+      "tmdb_id": 9323,
+      "title": "Ghost in the Shell",
+      "poster": "https://image.tmdb.org/t/p/w342/692vdwjxZpk3ibwDqOGxZLRYgvy.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/UweqpX",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3891,
+      "tmdb_id": 14092,
+      "title": "Ghost in the Shell 2.0",
+      "poster": "https://image.tmdb.org/t/p/w342/7OsWlh6v5J0ORQSaYxfmYEg1TyY.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/Nr1NTq",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3908,
+      "tmdb_id": 12180,
+      "title": "Mamoru Oshii",
+      "poster": "https://image.tmdb.org/t/p/w342/2eDakuSsipmgku9MtGcZf244Hv4.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/Nr1NTq",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3928,
+      "tmdb_id": 414906,
+      "title": "The Batman",
+      "poster": "https://image.tmdb.org/t/p/w342/74xTEgt7R36Fpooo50r9T25onhq.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/rhCvfB",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3929,
+      "tmdb_id": 31026,
+      "title": "Distant",
+      "poster": "https://image.tmdb.org/t/p/w342/iyLo7yyc0QkX6DRDpFSNSOlG7fu.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/uNODH9",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3930,
+      "tmdb_id": 445,
+      "title": "Caché",
+      "poster": "https://image.tmdb.org/t/p/w342/vSIGVNCLDnw1NYH8mgSrxC5jYQn.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/VaPqAa",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3983,
+      "tmdb_id": 77921,
+      "title": "Hideaki Anno",
+      "poster": "https://image.tmdb.org/t/p/w342/AfV9h1RW6uALpx751APdUoX8ONc.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/KPAryf",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3984,
+      "tmdb_id": 96850,
+      "title": "Evangelion - Saga",
+      "poster": "https://image.tmdb.org/t/p/w342/rMGVm0q3iJZ1Rpe0ZLBwO3TEhQ8.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/KPAryf",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 3983,
+      "tmdb_id": 77921,
+      "title": "Hideaki Anno",
+      "poster": "https://image.tmdb.org/t/p/w342/AfV9h1RW6uALpx751APdUoX8ONc.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/Y7ktM1",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4002,
+      "tmdb_id": 11542,
+      "title": "Altered States",
+      "poster": "https://image.tmdb.org/t/p/w342/lPpYPfHUJ8kg7sddlqdkjpwLPev.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/6YtuSD",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4003,
+      "tmdb_id": 10778,
+      "title": "The Man Who Wasn't There",
+      "poster": "https://image.tmdb.org/t/p/w342/iu8Q2QH1Jbe7JWyqDjM7OYtVeMi.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/k5WmTS",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4004,
+      "tmdb_id": 705996,
+      "title": "Decision to Leave",
+      "poster": "https://image.tmdb.org/t/p/w342/2QHFZh7GHrkntKI9Nd6xWSFuwGP.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/ONePbw",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4113,
+      "tmdb_id": 1430077,
+      "title": "Hokum",
+      "poster": "https://image.tmdb.org/t/p/w342/2sq0GooVOtvGAQRyuYsSg9GA8Fy.jpg",
+      "quality": "4kl",
+      "dead_url": "https://gofile.io/d/RKhMmS",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4114,
+      "tmdb_id": 1380316,
+      "title": "Is God Is",
+      "poster": "https://image.tmdb.org/t/p/w342/c3nN8XnbYfj2ZEBcNqqlTbtLiQy.jpg",
+      "quality": "4kl",
+      "dead_url": "https://gofile.io/d/njYlGN",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4115,
+      "tmdb_id": 1337592,
+      "title": "Erupcja",
+      "poster": "https://image.tmdb.org/t/p/w342/1OMiyrpkZvu5YmWbPBtwDQHZsu1.jpg",
+      "quality": "1l",
+      "dead_url": "https://gofile.io/d/zkfKRr",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4116,
+      "tmdb_id": 1116201,
+      "title": "Iron Lung",
+      "poster": "https://image.tmdb.org/t/p/w342/sIwakdbMGS1krtgendTWpxTY9Hw.jpg",
+      "quality": "4kl",
+      "dead_url": "https://gofile.io/d/d0qYOU",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4225,
+      "tmdb_id": 1029281,
+      "title": "Strange Darling",
+      "poster": "https://image.tmdb.org/t/p/w342/kWNCRgt3ocv19bYO0sk7TRuZuFY.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/Xz68d3",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4226,
+      "tmdb_id": 16642,
+      "title": "Days of Heaven",
+      "poster": "https://image.tmdb.org/t/p/w342/rwxTYjOZmX2rGhz7avLe1qsjNqe.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/VTNcf3",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4227,
+      "tmdb_id": 75733,
+      "title": "Perceval",
+      "poster": "https://image.tmdb.org/t/p/w342/hvywz6133UMPfKRVcMWav151Ci5.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/kCrnMQ",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4228,
+      "tmdb_id": 491584,
+      "title": "Burning",
+      "poster": "https://image.tmdb.org/t/p/w342/kXiF80o74fE9gf3Utf9moAI7ar0.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/weZCgv",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4372,
+      "tmdb_id": 670,
+      "title": "Oldboy",
+      "poster": "https://image.tmdb.org/t/p/w342/pWDtjs568ZfOTMbURQBYuT4Qxka.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/Oyhlyf",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4373,
+      "tmdb_id": 19426,
+      "title": "Nights of Cabiria",
+      "poster": "https://image.tmdb.org/t/p/w342/xF4oCG3PLNbcrtPZbqB3BtkIbKg.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/iXCsKc",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4375,
+      "tmdb_id": 114410,
+      "title": "Chainsaw Man",
+      "poster": "https://image.tmdb.org/t/p/w342/yVtx7Xn9UxNJqvG2BkvhCcmed9S.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/C0t8Et",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4377,
+      "tmdb_id": 840430,
+      "title": "The Holdovers",
+      "poster": "https://image.tmdb.org/t/p/w342/VHSzNBTwxV8vh7wylo7O9CLdac.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/9McArz",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4416,
+      "tmdb_id": 118202,
+      "title": "Lost and Found",
+      "poster": "https://image.tmdb.org/t/p/w342/jJSJhFBp5FYZnq72CPg6xSVJZgq.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/a7SNzy",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4417,
+      "tmdb_id": 20605,
+      "title": "The City of Violence",
+      "poster": "https://image.tmdb.org/t/p/w342/l2W7qEQejWlclNixeG8pbnnekkr.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/VTfGWz",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4418,
+      "tmdb_id": 454639,
+      "title": "Masters of the Universe",
+      "poster": "https://image.tmdb.org/t/p/w342/3YMd9Ogae4rDKLWuAZFuse9xhc5.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/mJoZDN",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4457,
+      "tmdb_id": 27337,
+      "title": "Linda Linda Linda",
+      "poster": "https://image.tmdb.org/t/p/w342/wX3xwuJ9uhCamndfGUePDkpAggZ.jpg",
+      "quality": "1l",
+      "dead_url": "https://gofile.io/d/Wln7Ya",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4458,
+      "tmdb_id": 36592,
+      "title": "Swing Girls",
+      "poster": "https://image.tmdb.org/t/p/w342/u7lAziuBxlX4DQQzuPHDRoOwtDx.jpg",
+      "quality": "1l",
+      "dead_url": "https://gofile.io/d/WQW9Q8",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4459,
+      "tmdb_id": 2153,
+      "title": "The Driver",
+      "poster": "https://image.tmdb.org/t/p/w342/zSpk2OH4MCgLGB06XDv4YUfBTv6.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/IHBbSo",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4475,
+      "tmdb_id": 77,
+      "title": "Memento",
+      "poster": "https://image.tmdb.org/t/p/w342/fKTPH2WvH8nHTXeBYBVhawtRqtR.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/2UskqN",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4476,
+      "tmdb_id": 916,
+      "title": "Bullitt",
+      "poster": "https://image.tmdb.org/t/p/w342/2ffzF1WmeXtH420fSUoCrecFvDA.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/46A91R",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4477,
+      "tmdb_id": 293670,
+      "title": "The Wailing",
+      "poster": "https://image.tmdb.org/t/p/w342/RbymxgEM5SpDfO2Io2JMFG10Vi.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/DnYuGK",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4478,
+      "tmdb_id": 11222,
+      "title": "The American Friend",
+      "poster": "https://image.tmdb.org/t/p/w342/jHVe5EHDFj9ac2F2aU86sWTGKnn.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/6c2fEo",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4539,
+      "tmdb_id": 1339713,
+      "title": "Obsession",
+      "poster": "https://image.tmdb.org/t/p/w342/bRwnj8WEKBCvmfeUNOukJPwB43K.jpg",
+      "quality": "4kl",
+      "dead_url": "https://gofile.io/d/Ho0OGX",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4658,
+      "tmdb_id": 1305781,
+      "title": "Blades of the Guardians",
+      "poster": "https://image.tmdb.org/t/p/w342/R84km7PJ0frFSNPmvIjG6LV1kg.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/3JWuTy",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 5042,
+      "tmdb_id": 652,
+      "title": "Troy",
+      "poster": "https://image.tmdb.org/t/p/w342/a07wLy4ONfpsjnBqMwhlWTJTcm.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/zObVqL",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 5269,
+      "tmdb_id": 8489,
+      "title": "Ali",
+      "poster": "https://image.tmdb.org/t/p/w342/32l3FaCzs8cXWps6hkgNJAcOsP.jpg",
+      "quality": "1l",
+      "dead_url": "https://gofile.io/d/LCpfARLC",
+      "reason": "Expiré (this content does not exist)"
+    }
+  ]
+}
