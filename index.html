@@ -3878,13 +3878,19 @@ function updateActiveGenreBar() {
 </div>
 
 <div id="dead-links-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); z-index:10000; align-items:center; justify-content:center; padding:20px; font-family:'DM Sans',sans-serif;">
-  <div style="background:#0c0c12; color:#f0f0fa; width:100%; max-width:680px; max-height:82vh; border-radius:16px; border:1px solid rgba(255,255,255,0.11); display:flex; flex-direction:column; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.8);">
+  <div style="background:#0c0c12; color:#f0f0fa; width:100%; max-width:700px; max-height:85vh; border-radius:16px; border:1px solid rgba(255,255,255,0.11); display:flex; flex-direction:column; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.8);">
     <div style="padding:16px 20px; background:#111118; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.07);">
       <div>
         <div style="font-family:'DM Serif Display',serif; font-size:19px;">🚨 Liens expirés à remplacer</div>
         <div id="dead-links-date" style="color:#5e5e90; font-size:11px; margin-top:2px;"></div>
       </div>
-      <button onclick="document.getElementById('dead-links-modal').style.display='none'" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✕</button>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button onclick="removeAllDeadLinks(this)" 
+                style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.35); padding:6px 12px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer;">
+          🗑 Tout supprimer
+        </button>
+        <button onclick="document.getElementById('dead-links-modal').style.display='none'" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✕</button>
+      </div>
     </div>
     <div id="dead-links-list" style="padding:14px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
   </div>
@@ -3910,7 +3916,6 @@ async function removeSpecificDeadLink(idxInDeadList, btnEl) {
   if (!item) return;
   const targetUrl = (item.dead_url || '').trim();
 
-  // Trouver tous les films de la bibliothèque qui possèdent exactement ce lien mort
   const matchingIndices = [];
   movies.forEach((m, i) => {
     const hasInMain = (m.link || '').trim() === targetUrl;
@@ -3918,7 +3923,6 @@ async function removeSpecificDeadLink(idxInDeadList, btnEl) {
     if (hasInMain || hasInArr) matchingIndices.push(i);
   });
 
-  // Trouver le film précis sur lequel on a cliqué
   const singleIdx = movies.findIndex(m => (item.id && m._id === item.id) || (item.tmdb_id && m.tmdb_id === item.tmdb_id) || m.title === item.title);
   if (singleIdx < 0 && matchingIndices.length === 0) {
     alert("Ce lien a déjà été retiré de ce film !");
@@ -3927,73 +3931,90 @@ async function removeSpecificDeadLink(idxInDeadList, btnEl) {
 
   let indicesToClean = [singleIdx >= 0 ? singleIdx : matchingIndices[0]];
 
-  // Si c'est un lien de pack présent sur plusieurs films, proposer de nettoyer tout le pack ou juste ce film
   if (matchingIndices.length > 1) {
     const cleanAll = confirm(
-      `Ce lien expiré (${targetUrl}) est utilisé sur ${matchingIndices.length} films.\n\n` +
-      `• Cliquez sur "OK" pour retirer ce lien des ${matchingIndices.length} films d'un coup (sans supprimer les films).\n` +
-      `• Cliquez sur "Annuler" pour le retirer uniquement de "${item.title}".`
+      "Ce lien expiré (" + targetUrl + ") est utilisé sur " + matchingIndices.length + " films.\n\n" +
+      "• OK : Retirer ce lien des " + matchingIndices.length + " films d'un coup.\n" +
+      "• Annuler : Le retirer uniquement de \"" + item.title + "\"."
     );
-    if (cleanAll) {
-      indicesToClean = matchingIndices;
-    } else if (!confirm(`Retirer uniquement le lien expiré de "${item.title}" ? (Le film et ses autres liens seront conservés)`)) {
-      return;
-    }
+    if (cleanAll) indicesToClean = matchingIndices;
+    else if (!confirm("Retirer uniquement le lien de \"" + item.title + "\" ?")) return;
   } else {
-    if (!confirm(`Retirer ce lien expiré de "${item.title}" ?\n(Le film et ses autres liens éventuels seront conservés intact)`)) return;
+    if (!confirm("Retirer ce lien expiré de \"" + item.title + "\" ?")) return;
   }
 
-  const oldText = btnEl.textContent;
   btnEl.textContent = "⏳...";
   btnEl.disabled = true;
 
   for (const idx of indicesToClean) {
     const m = movies[idx];
     if (!m) continue;
-
-    // 1. On garde tous les autres liens du tableau links[] sauf le lien mort
     const newLinks = (m.links || []).filter(l => l && l.url && l.url.trim() !== targetUrl);
-
-    // 2. Si le champ principal 'link' était ce lien mort, on met le 1er lien valide restant (ou vide s'il n'en reste plus)
     let newMainLink = (m.link || '').trim();
     if (newMainLink === targetUrl) {
       newMainLink = newLinks.length > 0 ? newLinks[0].url : '';
     }
-
-    const updatedMovie = {
-      ...m,
-      link: newMainLink,
-      links: newLinks
-    };
-
+    const updatedMovie = { ...m, link: newMainLink, links: newLinks };
     movies[idx] = updatedMovie;
     await updMSilent(idx, updatedMovie);
   }
 
   render();
+  document.querySelectorAll('[data-dead-url="' + CSS.escape(targetUrl) + '"]').forEach(row => {
+    row.style.opacity = '0.35';
+    row.style.pointerEvents = 'none';
+  });
 
-  // Griser la ligne(s) dans la fenêtre d'alerte et mettre à jour le compteur
-  if (indicesToClean.length > 1) {
-    document.querySelectorAll(`[data-dead-url="${CSS.escape(targetUrl)}"]`).forEach(row => {
-      row.style.opacity = '0.35';
-      row.style.pointerEvents = 'none';
-    });
-  } else {
-    const row = document.getElementById('dead-row-' + idxInDeadList);
-    if (row) {
-      row.style.opacity = '0.35';
-      row.style.pointerEvents = 'none';
-    }
-  }
-
-  btnEl.textContent = "✓ Retiré";
   const countEl = document.getElementById('dead-links-count');
   const currentCount = parseInt(countEl.textContent) || 0;
   const nextCount = Math.max(0, currentCount - indicesToClean.length);
   countEl.textContent = nextCount;
-  if (nextCount === 0) {
-    document.getElementById('dead-links-widget').style.display = 'none';
+  if (nextCount === 0) document.getElementById('dead-links-widget').style.display = 'none';
+}
+
+async function removeAllDeadLinks(btnEl) {
+  if (!_deadMoviesList || _deadMoviesList.length === 0) return;
+  
+  const confirm1 = confirm("⚠️ ATTENTION : Vous êtes sur le point de nettoyer TOUS les liens expirés signalés dans cette liste.\n\nLes fiches de vos films seront conservées, mais tous leurs liens morts seront effacés.\n\nVoulez-vous continuer ?");
+  if (!confirm1) return;
+
+  const confirm2 = prompt("Pour confirmer la suppression globale, tapez le mot : SUPPRIMER");
+  if (confirm2 !== "SUPPRIMER") {
+    alert("Action annulée (mot de confirmation incorrect).");
+    return;
   }
+
+  btnEl.textContent = "⏳ Nettoyage...";
+  btnEl.disabled = true;
+
+  const deadUrls = [...new Set(_deadMoviesList.map(m => (m.dead_url || '').trim()).filter(Boolean))];
+
+  for (const targetUrl of deadUrls) {
+    const matchingIndices = [];
+    movies.forEach((m, i) => {
+      const hasInMain = (m.link || '').trim() === targetUrl;
+      const hasInArr  = (m.links || []).some(l => l && (l.url || '').trim() === targetUrl);
+      if (hasInMain || hasInArr) matchingIndices.push(i);
+    });
+
+    for (const idx of matchingIndices) {
+      const m = movies[idx];
+      if (!m) continue;
+      const newLinks = (m.links || []).filter(l => l && l.url && l.url.trim() !== targetUrl);
+      let newMainLink = (m.link || '').trim();
+      if (newMainLink === targetUrl) {
+        newMainLink = newLinks.length > 0 ? newLinks[0].url : '';
+      }
+      const updatedMovie = { ...m, link: newMainLink, links: newLinks };
+      movies[idx] = updatedMovie;
+      await updMSilent(idx, updatedMovie);
+    }
+  }
+
+  render();
+  document.getElementById('dead-links-widget').style.display = 'none';
+  document.getElementById('dead-links-modal').style.display = 'none';
+  alert("✅ Tous les liens expirés ont été retirés de vos films avec succès !");
 }
 
 fetch('./dead_links.json?t=' + Date.now())
@@ -4003,7 +4024,7 @@ fetch('./dead_links.json?t=' + Date.now())
     _deadMoviesList = data.dead_movies;
     document.getElementById('dead-links-widget').style.display = 'block';
     document.getElementById('dead-links-count').textContent = data.affected_movies_count;
-    document.getElementById('dead-links-date').textContent = `Dernière vérification : ${data.last_check} (${data.unique_links_checked} liens testés)`;
+    document.getElementById('dead-links-date').textContent = "Dernière vérification : " + data.last_check + " (" + data.unique_links_checked + " liens testés)";
     
     const list = document.getElementById('dead-links-list');
     list.innerHTML = _deadMoviesList.map((m, idx) => `
@@ -4024,13 +4045,14 @@ fetch('./dead_links.json?t=' + Date.now())
           <button onclick="removeSpecificDeadLink(${idx}, this)" 
                   title="Supprime uniquement ce lien mort mais garde le film et ses autres liens"
                   style="background:rgba(239,68,68,0.12); color:#f87171; border:1px solid rgba(239,68,68,0.3); padding:7px 11px; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer;">
-            🗑 Retirer le lien
+            🗑 Retirer
           </button>
         </div>
       </div>
     `).join('');
   })
   .catch(() => {});
+</script>
 </script>
 </script>
 </script>
