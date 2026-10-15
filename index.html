@@ -3868,5 +3868,65 @@ function updateActiveGenreBar() {
   });
 }
 </script>
+  <!-- WIDGET ALERTE LIENS MORTS -->
+<div id="dead-links-widget" style="display:none; position:fixed; bottom:28px; left:28px; z-index:999; font-family:'DM Sans',sans-serif;">
+  <button onclick="document.getElementById('dead-links-modal').style.display='flex'" 
+          style="background:#e50914; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:10px 16px; border-radius:50px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 6px 20px rgba(229,9,20,0.5); display:flex; align-items:center; gap:8px;">
+    <span>⚠️</span> <span id="dead-links-count">0</span> film(s) expiré(s)
+  </button>
+</div>
+
+<div id="dead-links-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); z-index:10000; align-items:center; justify-content:center; padding:20px; font-family:'DM Sans',sans-serif;">
+  <div style="background:#0c0c12; color:#f0f0fa; width:100%; max-width:620px; max-height:82vh; border-radius:16px; border:1px solid rgba(255,255,255,0.11); display:flex; flex-direction:column; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.8);">
+    <div style="padding:16px 20px; background:#111118; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.07);">
+      <div>
+        <div style="font-family:'DM Serif Display',serif; font-size:19px;">🚨 Liens expirés à remplacer</div>
+        <div id="dead-links-date" style="color:#5e5e90; font-size:11px; margin-top:2px;"></div>
+      </div>
+      <button onclick="document.getElementById('dead-links-modal').style.display='none'" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✕</button>
+    </div>
+    <div id="dead-links-list" style="padding:14px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+  </div>
+</div>
+
+<script>
+function editDeadMovie(movieId, tmdbId, title) {
+  document.getElementById('dead-links-modal').style.display = 'none';
+  const idx = movies.findIndex(m => (movieId && m._id === movieId) || (tmdbId && m.tmdb_id === tmdbId) || m.title === title);
+  if (idx >= 0) {
+    openEdit(null, idx);
+  } else {
+    alert("Film introuvable dans la liste chargée.");
+  }
+}
+
+fetch('./dead_links.json?t=' + Date.now())
+  .then(res => res.ok ? res.json() : null)
+  .then(data => {
+    if (!data || !data.dead_movies || data.dead_movies.length === 0) return;
+    document.getElementById('dead-links-widget').style.display = 'block';
+    document.getElementById('dead-links-count').textContent = data.affected_movies_count;
+    document.getElementById('dead-links-date').textContent = `Dernière vérification : ${data.last_check} (${data.unique_links_checked} liens testés)`;
+    
+    const list = document.getElementById('dead-links-list');
+    list.innerHTML = data.dead_movies.map(m => `
+      <div style="display:flex; align-items:center; gap:12px; background:#16161f; border:1px solid rgba(255,255,255,0.06); padding:10px; border-radius:10px;">
+        <img src="${m.poster || ''}" style="width:42px; height:63px; object-fit:cover; border-radius:5px; flex-shrink:0;" onerror="this.style.display='none'">
+        <div style="flex:1; min-width:0;">
+          <div style="font-weight:700; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            ${escapeHtml(m.title)} <span style="background:rgba(255,255,255,0.08); font-size:10px; padding:2px 6px; border-radius:4px; margin-left:4px;">${m.quality || ''}</span>
+          </div>
+          <a href="${m.dead_url}" target="_blank" style="color:#f87171; font-size:11px; word-break:break-all; display:block; margin-top:2px;">${m.dead_url}</a>
+          <div style="color:#5e5e90; font-size:10px; margin-top:2px;">${escapeHtml(m.reason)}</div>
+        </div>
+        <button onclick="editDeadMovie(${m.id || 'null'}, ${m.tmdb_id || 'null'}, '${escapeHtml(m.title).replace(/'/g, "\\'")}')" 
+                style="background:#7c6af5; color:#fff; border:none; padding:7px 12px; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; flex-shrink:0;">
+          ✎ Remplacer
+        </button>
+      </div>
+    `).join('');
+  })
+  .catch(() => {});
+</script>
 </body>
 </html>
