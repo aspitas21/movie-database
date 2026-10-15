@@ -10,7 +10,7 @@ SU = "https://dnzrpvyeiyxplrcomsuo.supabase.co"
 SK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuenJwdnllaXl4cGxyY29tc3VvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTUzNjA1MCwiZXhwIjoyMDk1MTEyMDUwfQ.IZUKY4IsWIkk2LDMQTdUORtW3PhdlrlmTsu9Mng7oLA"
 
 FICHIER_RAPPORT = "dead_links.json"
-CONCURRENCE_MAX = 5
+CONCURRENCE_MAX = 10  # 10 onglets en parallèle (2x plus rapide)
 DOMAINES_CIBLES = ["gofile.io", "transfer.it", "drive.google.com", "docs.google.com"]
 
 MOTS_CLES_MORT = {
@@ -19,22 +19,12 @@ MOTS_CLES_MORT = {
         "this folder is empty", "has been automatically removed", "file not found"
     ],
     "transfer.it": [
-        # Textes exacts de Transfer.it (FR + EN)
-        "nous ne trouvons pas ce transfert",
-        "il se peut qu'il ait expiré",
-        "qu'il ait été supprimé",
-        "we can't find this transfer",
-        "we cannot find this transfer",
-        "couldn't find this transfer",
-        "might have expired",
-        "may have expired",
-        "or been deleted",
-        "oups,",
-        "oops,",
-        # Mots-clés génériques de secours
-        "transfer expired", "link has expired", "ce transfert a expiré",
-        "lien expiré", "file not found", "fichier introuvable",
-        "no longer available", "deleted or expired"
+        "nous ne trouvons pas ce transfert", "il se peut qu'il ait expiré",
+        "qu'il ait été supprimé", "we can't find this transfer",
+        "we cannot find this transfer", "couldn't find this transfer",
+        "might have expired", "may have expired", "or been deleted",
+        "oups,", "oops,", "transfer expired", "link has expired",
+        "ce transfert a expiré", "lien expiré", "file not found", "fichier introuvable"
     ],
     "google": [
         "sorry, the file you have requested does not exist",
@@ -43,6 +33,11 @@ MOTS_CLES_MORT = {
         "we're sorry. you can't access this item", "vous ne pouvez pas accéder à cet élément"
     ]
 }
+
+INDICES_ACTIF = [
+    "download", "télécharger", "telecharger", "descargar",
+    ".mkv", ".mp4", ".avi", ".zip", ".rar", ".iso"
+]
 
 def recuperer_films_supabase():
     films = []
@@ -75,38 +70,34 @@ async def verifier_url(semaphore, context, url):
     async with semaphore:
         page = await context.new_page()
         try:
-            await page.route("**/*.{png,jpg,jpeg,webp,mp4,mkv,avi}", lambda r: r.abort())
+            await page.route("**/*.{png,jpg,jpeg,webp,mp4,mkv,avi,woff,woff2}", lambda r: r.abort())
             u = url.lower()
 
-            if "transfer.it" in u:
-                response = await page.goto(url, wait_until="networkidle", timeout=30000)
-                await asyncio.sleep(5)
-            else:
-                response = await page.goto(url, wait_until="domcontentloaded", timeout=25000)
-                await asyncio.sleep(3.5)
-
+            response = await page.goto(url, wait_until="domcontentloaded", timeout=20000)
             if response and response.status in [404, 410]:
                 return f"Erreur HTTP {response.status}"
 
-            texte = (await page.inner_text("body")).lower()
-
             mots = MOTS_CLES_MORT["gofile.io"] if "gofile.io" in u else (MOTS_CLES_MORT["transfer.it"] if "transfer.it" in u else MOTS_CLES_MORT["google"])
-            for mot in mots:
-                if mot in texte:
-                    return f"Expiré ({mot})"
 
-            # Double sécurité pour Transfer.it : si le bouton bleu "Commencer" / "Get started" d'erreur est présent
+            # Scan intelligent : vérifie toutes les 0.7s jusqu'à 7 secondes max
+            # Dès qu'on voit le texte d'erreur OU un fichier valide, on coupe tout de suite !
+            texte = ""
+            for _ in range(10):
+                await asyncio.sleep(0.7)
+                texte = (await page.inner_text("body")).lower()
+
+                for mot in mots:
+                    if mot in texte:
+                        return f"Expiré ({mot})"
+
+                a_fichier = any(ind in texte for ind in INDICES_ACTIF)
+                a_taille = bool(re.search(r'\b\d+([.,]\d+)?\s*(mb|gb|tb|kb|mo|go|to|ko)\b', texte))
+                if a_fichier or a_taille:
+                    return None  # Fichier bien présent, on passe direct au suivant !
+
             if "transfer.it" in u:
-                indices_fichier_actif = [
-                    "download", "télécharger", "telecharger", "descargar",
-                    ".mkv", ".mp4", ".avi", ".zip", ".rar", ".iso"
-                ]
-                a_un_bouton_ou_fichier = any(ind in texte for ind in indices_fichier_actif)
-                a_une_taille = bool(re.search(r'\b\d+([.,]\d+)?\s*(mb|gb|tb|kb|mo|go|to|ko|bytes|octets)\b', texte))
-
-                if not (a_un_bouton_ou_fichier or a_une_taille):
-                    apercu = " ".join(texte.split())[:60]
-                    return f"Transfert introuvable ({apercu})"
+                apercu = " ".join(texte.split())[:60]
+                return f"Transfert introuvable ({apercu})"
 
             return None
         except Exception:
