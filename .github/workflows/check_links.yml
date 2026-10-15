@@ -1,0 +1,37 @@
+name: Verification Hebdomadaire des Liens
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Recuperation du site
+        uses: actions/checkout@v4
+
+      - name: Installation de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Installation du navigateur
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Verification des liens
+        run: python check_links.py
+
+      - name: Enregistrement du rapport sur le site
+        run: |
+          git config --global user.name "CineVault Bot"
+          git config --global user.email "bot@cinevault.local"
+          git add dead_links.json
+          git diff --staged --quiet || git commit -m "Mise a jour du rapport des liens morts"
+          git push
