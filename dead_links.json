@@ -1,531 +1,837 @@
 {
-  "last_check": "19/10/2026 à 09:31",
-  "total_movies_scanned": 1368,
-  "unique_links_checked": 957,
-  "dead_links_count": 53,
-  "affected_movies_count": 58,
+  "last_check": "26/10/2026 à 09:34",
+  "total_movies_scanned": 1310,
+  "unique_links_checked": 904,
+  "dead_links_count": 65,
+  "affected_movies_count": 92,
   "dead_movies": [
     {
-      "id": 3210,
-      "tmdb_id": 284,
-      "title": "The Apartment",
-      "poster": "https://image.tmdb.org/t/p/w342/hhSRt1KKfRT0yEhEtRW3qp31JFU.jpg",
+      "id": 3209,
+      "tmdb_id": 949,
+      "title": "Heat",
+      "poster": "https://image.tmdb.org/t/p/w342/e0xv5Y7UVrhKEVy1g3URMLLVDYB.jpg",
       "quality": "4kr",
-      "dead_url": "https://gofile.io/d/vNAVnr",
+      "dead_url": "https://gofile.io/d/i9RQOu",
       "reason": "Expiré (this content does not exist)"
     },
     {
-      "id": 3213,
-      "tmdb_id": 25237,
-      "title": "Come and See",
-      "poster": "https://image.tmdb.org/t/p/w342/aT7fV0q7mbsN0HCrcC41NeYQoCU.jpg",
-      "quality": "1r",
-      "dead_url": "https://gofile.io/d/HYQKZr",
-      "reason": "Expiré (this content does not exist)"
-    },
-    {
-      "id": 3266,
-      "tmdb_id": 103663,
-      "title": "The Hunt",
-      "poster": "https://image.tmdb.org/t/p/w342/rWvp8PaWrieqoUTgEwRMo7RsELj.jpg",
-      "quality": "1r",
-      "dead_url": "https://gofile.io/d/2f9WB1",
-      "reason": "Expiré (this content does not exist)"
-    },
-    {
-      "id": 3385,
-      "tmdb_id": 1450527,
-      "title": "Forbidden Fruits",
-      "poster": "https://image.tmdb.org/t/p/w342/nSlKzxvXWOeDC9qZiwkhGuTAKkq.jpg",
-      "quality": "4kl",
-      "dead_url": "https://gofile.io/d/F6ew8h",
-      "reason": "Expiré (this content does not exist)"
-    },
-    {
-      "id": 3386,
+      "id": 3267,
       "tmdb_id": 855435,
       "title": "Faces of Death",
       "poster": "https://image.tmdb.org/t/p/w342/vPVY3S57lEooBLJCg6KGdMHkUxm.jpg",
       "quality": "4kl",
-      "dead_url": "https://gofile.io/d/idepC8",
+      "dead_url": "https://gofile.io/d/zUPaK1",
       "reason": "Expiré (this content does not exist)"
     },
     {
-      "id": 3387,
-      "tmdb_id": 28796,
-      "title": "Yakuza: Like a Dragon",
-      "poster": "https://image.tmdb.org/t/p/w342/hH6d03qnDyoCbg4TxJfKIvpIlZH.jpg",
-      "quality": "1l",
-      "dead_url": "https://gofile.io/d/WzkVAa",
-      "reason": "Expiré (this content does not exist)"
-    },
-    {
-      "id": 3890,
-      "tmdb_id": 9323,
-      "title": "Ghost in the Shell",
-      "poster": "https://image.tmdb.org/t/p/w342/692vdwjxZpk3ibwDqOGxZLRYgvy.jpg",
-      "quality": "4kr",
-      "dead_url": "https://gofile.io/d/UweqpX",
-      "reason": "Expiré (this content does not exist)"
-    },
-    {
-      "id": 3936,
-      "tmdb_id": 1089,
-      "title": "Point Break",
-      "poster": "https://image.tmdb.org/t/p/w342/yRjcd5vmqoXTDlLyiQNpIHOYlj7.jpg",
-      "quality": "4kr",
-      "dead_url": "https://gofile.io/d/kVT2oM",
-      "reason": "Expiré (this content does not exist)"
-    },
-    {
-      "id": 3937,
-      "tmdb_id": 3763,
-      "title": "Onibaba",
-      "poster": "https://image.tmdb.org/t/p/w342/oCk2BiBzgpQGKe2eA01RH9B9k4K.jpg",
+      "id": 3891,
+      "tmdb_id": 14092,
+      "title": "Ghost in the Shell 2.0",
+      "poster": "https://image.tmdb.org/t/p/w342/7OsWlh6v5J0ORQSaYxfmYEg1TyY.jpg",
       "quality": "1r",
-      "dead_url": "https://gofile.io/d/D6gMP9",
+      "dead_url": "https://gofile.io/d/Nr1NTq",
       "reason": "Expiré (this content does not exist)"
     },
     {
-      "id": 3981,
-      "tmdb_id": 4246,
-      "title": "Scary Movie - Saga",
-      "poster": "https://image.tmdb.org/t/p/w342/8ds74cRhyAza3WcDVT8rZycwSC9.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/OBRNQpkHRR5R",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4175,
-      "tmdb_id": 4247,
-      "title": "Scary Movie",
-      "poster": "https://image.tmdb.org/t/p/w342/fVQFPRuw3yWXojYDJvA5EoFjUOY.jpg",
-      "quality": "1l",
-      "dead_url": "https://transfer.it/t/OBRNQpkHRR5R",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4176,
-      "tmdb_id": 4248,
-      "title": "Scary Movie 2",
-      "poster": "https://image.tmdb.org/t/p/w342/7Eb1JWK0Cb0rbfsYjwfc9g0PbQH.jpg",
-      "quality": "1l",
-      "dead_url": "https://transfer.it/t/OBRNQpkHRR5R",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4177,
-      "tmdb_id": 4256,
-      "title": "Scary Movie 3",
-      "poster": "https://image.tmdb.org/t/p/w342/lpNG1nx67rvYze1b1R9q0YoSzrC.jpg",
-      "quality": "1l",
-      "dead_url": "https://transfer.it/t/OBRNQpkHRR5R",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4178,
-      "tmdb_id": 4257,
-      "title": "Scary Movie 4",
-      "poster": "https://image.tmdb.org/t/p/w342/sEqFdw1wLtY94RKCSPolsHWzn6r.jpg",
-      "quality": "1l",
-      "dead_url": "https://transfer.it/t/OBRNQpkHRR5R",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4179,
-      "tmdb_id": 4258,
-      "title": "Scary Movie 5",
-      "poster": "https://image.tmdb.org/t/p/w342/vBqLLxE6GaAPhO6v9EFvFbLZ7Ap.jpg",
-      "quality": "1l",
-      "dead_url": "https://transfer.it/t/OBRNQpkHRR5R",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4232,
-      "tmdb_id": 776305,
-      "title": "Belle",
-      "poster": "https://image.tmdb.org/t/p/w342/fYHOD4pxZQk4rsP2tQrZI5uBlZV.jpg",
+      "id": 3908,
+      "tmdb_id": 12180,
+      "title": "Mamoru Oshii",
+      "poster": "https://image.tmdb.org/t/p/w342/2eDakuSsipmgku9MtGcZf244Hv4.jpg",
       "quality": "4kr",
-      "dead_url": "https://gofile.io/d/VEJfKF",
+      "dead_url": "https://gofile.io/d/Nr1NTq",
       "reason": "Expiré (this content does not exist)"
     },
     {
-      "id": 4233,
-      "tmdb_id": 4550,
-      "title": "Lady Vengeance",
-      "poster": "https://image.tmdb.org/t/p/w342/3Oy3iLMqD79us2iAUD6fKqWebYU.jpg",
+      "id": 3892,
+      "tmdb_id": 12140,
+      "title": "Ghost in the Shell 2: Innocence",
+      "poster": "https://image.tmdb.org/t/p/w342/dz1Sfgcg9wwIQGKs5WdsjxfegnK.jpg",
       "quality": "4kr",
-      "dead_url": "https://gofile.io/d/0Cto0k",
+      "dead_url": "https://gofile.io/d/2D4FUm",
       "reason": "Expiré (this content does not exist)"
     },
     {
-      "id": 4234,
-      "tmdb_id": 138765,
-      "title": "The Demon",
-      "poster": "https://image.tmdb.org/t/p/w342/wo0RUtWIw1KmWHpwBCUiN4Hz853.jpg",
+      "id": 3893,
+      "tmdb_id": 60879,
+      "title": "Halo Legends",
+      "poster": "https://image.tmdb.org/t/p/w342/j2JIG3G7KDP6kJLqEUTtahoLAGS.jpg",
       "quality": "1r",
-      "dead_url": "https://gofile.io/d/k6GKaA",
+      "dead_url": "https://gofile.io/d/qQimPW",
       "reason": "Expiré (this content does not exist)"
     },
     {
-      "id": 4235,
+      "id": 3894,
+      "tmdb_id": 265829,
+      "title": "Je t'aime",
+      "poster": "https://image.tmdb.org/t/p/w342/rP7xdPrHRzeurLwemEIlRu7ogSa.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/b1Ia8I",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4120,
+      "tmdb_id": 103328,
+      "title": "Holy Motors",
+      "poster": "https://image.tmdb.org/t/p/w342/htqJeUz86S2sowWpnQX4LK0Nlcm.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/Hzu9JK",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4121,
+      "tmdb_id": 587,
+      "title": "Big Fish",
+      "poster": "https://image.tmdb.org/t/p/w342/SF6pWtcdu1GEQxzeeYBEP1yEcK.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/Qvr44C",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4229,
+      "tmdb_id": 40962,
+      "title": "Ironweed",
+      "poster": "https://image.tmdb.org/t/p/w342/rqVu5FREmvI83jyPpY4jxLTVRxd.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/Sirqs4",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4230,
+      "tmdb_id": 758866,
+      "title": "Drive My Car",
+      "poster": "https://image.tmdb.org/t/p/w342/a2lxHS6Au35k5XtFQEQW44yWHeH.jpg",
+      "quality": "1r",
+      "dead_url": "https://gofile.io/d/Gf8fIj",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4231,
+      "tmdb_id": 511809,
+      "title": "West Side Story",
+      "poster": "https://image.tmdb.org/t/p/w342/yfz3IUoYYSY32tkb97HlUBGFsnh.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/aKvklQ",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4377,
+      "tmdb_id": 840430,
+      "title": "The Holdovers",
+      "poster": "https://image.tmdb.org/t/p/w342/VHSzNBTwxV8vh7wylo7O9CLdac.jpg",
+      "quality": "4kr",
+      "dead_url": "https://gofile.io/d/9McArz",
+      "reason": "Expiré (this content does not exist)"
+    },
+    {
+      "id": 4800,
+      "tmdb_id": 34068,
+      "title": "Assassin(s)",
+      "poster": "https://image.tmdb.org/t/p/w342/cq6qzZTrBtMfGaoco5SMgOd4IlI.jpg",
+      "quality": "1l",
+      "dead_url": "https://transfer.it/t/P4UUCkpXyLDQ",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4803,
+      "tmdb_id": 2767,
+      "title": "The Lovers on the Bridge",
+      "poster": "https://image.tmdb.org/t/p/w342/un81oln6mAv66sqnkgPSpWONUqP.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/LSwANEsRSbrY",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4817,
+      "tmdb_id": 37799,
+      "title": "The Social Network",
+      "poster": "https://image.tmdb.org/t/p/w342/n0ybibhJtQ5icDqTp8eRytcIHJx.jpg",
+      "quality": "4kr",
+      "dead_url": "https://transfer.it/t/bUAMnFsVHJ6C",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4818,
+      "tmdb_id": 60554,
+      "title": "Star Wars Rebels",
+      "poster": "https://image.tmdb.org/t/p/w342/eLrScs6Bs26JMcS8hiZhf7YRROr.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/cI1VPRtzyRaQ",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4827,
+      "tmdb_id": 21612,
+      "title": "The Funeral",
+      "poster": "https://image.tmdb.org/t/p/w342/sHbJbr6BvVwRJhliiX1PKPERejO.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/yfF8usonQBbK",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4828,
+      "tmdb_id": 186738,
+      "title": "The Red Light Bandit",
+      "poster": "https://image.tmdb.org/t/p/w342/49CQCiWXs3mnFSJmAxVTTYOMQjh.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/AkQhD5gD2DRR",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4833,
+      "tmdb_id": 36243,
+      "title": "The Tatami Galaxy",
+      "poster": "https://image.tmdb.org/t/p/w342/lPvrDKvfwjqCp6fp6aCpLkpxyi6.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/Sx4cd35zwBTT",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4855,
+      "tmdb_id": 20156,
+      "title": "Exotica",
+      "poster": "https://image.tmdb.org/t/p/w342/3pibvRQK3A1E8cyhX8IQPIAU2J8.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/zORrbQsFnBBL",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4856,
+      "tmdb_id": 46772,
+      "title": "Electra, My Love",
+      "poster": "https://image.tmdb.org/t/p/w342/8dvDFx9R6KWtWEPeTZCq0DfMWbK.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/6b66bYtDkBZA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4857,
+      "tmdb_id": 1213,
+      "title": "The Talented Mr. Ripley",
+      "poster": "https://image.tmdb.org/t/p/w342/6ojHgqtIR41O2qLKa7LFUVj0cZa.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/QfrhnA8RVB6L",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4864,
+      "tmdb_id": 3175,
+      "title": "Barry Lyndon",
+      "poster": "https://image.tmdb.org/t/p/w342/znfLskGQnXYB2xcOGM9eInRHPAV.jpg",
+      "quality": "4kr",
+      "dead_url": "https://transfer.it/t/NfKkitplGRiB",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4865,
+      "tmdb_id": 2457,
+      "title": "Children of Paradise",
+      "poster": "https://image.tmdb.org/t/p/w342/yiy9stl1jjVhW44ypkWMFDT8Ix3.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/3foACooHEBgA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4866,
+      "tmdb_id": 8422,
+      "title": "Rocco and His Brothers",
+      "poster": "https://image.tmdb.org/t/p/w342/pngL8AraChIDOiWnKF2o3S9kJzJ.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/Kzstbhhx3TaD",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4867,
+      "tmdb_id": 38027,
+      "title": "Mandingo",
+      "poster": "https://image.tmdb.org/t/p/w342/bZXmb4HQt24OAzdKoBdSEqcFvBw.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/rleD3h4FiD4K",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4870,
+      "tmdb_id": 10218,
+      "title": "Swingers",
+      "poster": "https://image.tmdb.org/t/p/w342/rRjWk68kU3a2so4lgr3TKB7Y5vA.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/1Ht5O4wTzbjZ",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4873,
+      "tmdb_id": 687163,
+      "title": "Project Hail Mary",
+      "poster": "https://image.tmdb.org/t/p/w342/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
+      "quality": "4kr",
+      "dead_url": "https://transfer.it/t/e8SPrtw3hJzZ",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4875,
+      "tmdb_id": 37903,
+      "title": "The White Ribbon",
+      "poster": "https://image.tmdb.org/t/p/w342/54dlnGDexrwAFlDb8HWKfmmX4LB.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/M9j1ePxHUTJA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4895,
+      "tmdb_id": 976576,
+      "title": "Emmanuelle",
+      "poster": "https://image.tmdb.org/t/p/w342/s9gmKus9YPTDzdMKZQJYPh0VoGk.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/q0MvrIk1yDTQ",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4896,
+      "tmdb_id": 166,
+      "title": "The Party",
+      "poster": "https://image.tmdb.org/t/p/w342/usGV1Q7KWR0Uq4dOIppGZ0ba8kz.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/OuMoDYlH3JhT",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4897,
+      "tmdb_id": 171,
+      "title": "The Party 2",
+      "poster": "https://image.tmdb.org/t/p/w342/pbkccDoxH1H1VdqWcQYycZxHTIK.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/h9JpTA83DTIL",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4898,
+      "tmdb_id": 11163,
+      "title": "Satyricon",
+      "poster": "https://image.tmdb.org/t/p/w342/83urUMl04GtwuuGIFpezqzi7n6m.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/8y0MGM1BVJJB",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4899,
+      "tmdb_id": 89484,
+      "title": "Home from the Hill",
+      "poster": "https://image.tmdb.org/t/p/w342/cE52KPgeJqDyaVu29OFGKqSDyET.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/g8EmqUlRiBRB",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4900,
+      "tmdb_id": 118202,
+      "title": "Lost and Found",
+      "poster": "https://image.tmdb.org/t/p/w342/jJSJhFBp5FYZnq72CPg6xSVJZgq.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/TL9SPAkHzJbJ",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4901,
+      "tmdb_id": 110402,
+      "title": "Hard to Be a God",
+      "poster": "https://image.tmdb.org/t/p/w342/ivdmKR9K56nxfhWwA5k2UQnyeFK.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/ugsr7NtDHJZS",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4902,
+      "tmdb_id": 910,
+      "title": "The Big Sleep",
+      "poster": "https://image.tmdb.org/t/p/w342/lraHo9D8c0YWfxsKqT5P5sVqMKN.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/WTbNuA8DkTqB",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4903,
+      "tmdb_id": 27324,
+      "title": "Pulse",
+      "poster": "https://image.tmdb.org/t/p/w342/c3zEimDraIyMSasPMGDaNOrhnzn.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/AIJkCJ1H1RKR",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4904,
+      "tmdb_id": 29143,
+      "title": "Eyes of Laura Mars",
+      "poster": "https://image.tmdb.org/t/p/w342/b6njtFr9IkmJGzwCkZWpDIYI1oC.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/hvZxfBtH0bwb",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4905,
       "tmdb_id": 4689,
       "title": "Sympathy for Mr. Vengeance",
       "poster": "https://image.tmdb.org/t/p/w342/uj42ubGbgVL65T10SvPVr0p9mJc.jpg",
-      "quality": "4kr",
-      "dead_url": "https://gofile.io/d/xLznpl",
-      "reason": "Expiré (this content does not exist)"
-    },
-    {
-      "id": 4685,
-      "tmdb_id": 29161,
-      "title": "Phenomena",
-      "poster": "https://image.tmdb.org/t/p/w342/dhk14s8ogQkbf6re3HLKV2UBHjx.jpg",
-      "quality": "4kl",
-      "dead_url": "https://transfer.it/t/sKfYKghFSDZK",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4686,
-      "tmdb_id": 99749,
-      "title": "Rampage",
-      "poster": "https://image.tmdb.org/t/p/w342/oW6HqRb2DiyptApYUn527FkpgMw.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/Jdh7bhhDzTbK",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4704,
-      "tmdb_id": 368942,
-      "title": "A Quiet Passion",
-      "poster": "https://image.tmdb.org/t/p/w342/k2WWlrMbuINyzDCfBuD48eN22QY.jpg",
       "quality": "1r",
-      "dead_url": "https://transfer.it/t/o9tFWUtBxDyC",
+      "dead_url": "https://transfer.it/t/kSlHOQsThLxD",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4705,
-      "tmdb_id": 261680,
-      "title": "The Mad Fox",
-      "poster": "https://image.tmdb.org/t/p/w342/mTIksgtzxtjaguZXraGZz2rIxIG.jpg",
+      "id": 4906,
+      "tmdb_id": 670,
+      "title": "Oldboy",
+      "poster": "https://image.tmdb.org/t/p/w342/pWDtjs568ZfOTMbURQBYuT4Qxka.jpg",
       "quality": "1r",
-      "dead_url": "https://transfer.it/t/EZMTWYtDQBQD",
+      "dead_url": "https://transfer.it/t/kSlHOQsThLxD",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4706,
-      "tmdb_id": 444973,
-      "title": "Sisterhood",
-      "poster": "https://image.tmdb.org/t/p/w342/cABxMvX0BuHLFVWfXGzr4wpNAfT.jpg",
+      "id": 4907,
+      "tmdb_id": 4550,
+      "title": "Lady Vengeance",
+      "poster": "https://image.tmdb.org/t/p/w342/3Oy3iLMqD79us2iAUD6fKqWebYU.jpg",
       "quality": "1r",
-      "dead_url": "https://transfer.it/t/Q2mV7NlH0bBB",
+      "dead_url": "https://transfer.it/t/kSlHOQsThLxD",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4742,
-      "tmdb_id": 11782,
-      "title": "Hard Boiled",
-      "poster": "https://image.tmdb.org/t/p/w342/oMqr4CGGqVlfI8DdrSelK1e9aFM.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/KGT3dEl1WJ6R",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4743,
-      "tmdb_id": 1091,
-      "title": "The Thing",
-      "poster": "https://image.tmdb.org/t/p/w342/tzGY49kseSE9QAKk47uuDGwnSCu.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/Fy0uNE01QRIA",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4744,
-      "tmdb_id": 46919,
-      "title": "Daisies",
-      "poster": "https://image.tmdb.org/t/p/w342/8sxMhdn3i1Pn8OlGCBBjr9rjP1y.jpg",
+      "id": 4915,
+      "tmdb_id": 4194,
+      "title": "Star Wars: The Clone Wars",
+      "poster": "https://image.tmdb.org/t/p/w342/e1nWfnnCVqxS2LeTO3dwGyAsG2V.jpg",
       "quality": "1r",
-      "dead_url": "https://transfer.it/t/ylzR1c1hkLrR",
+      "dead_url": "https://transfer.it/t/TkCLjV9DhRSb",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4745,
-      "tmdb_id": 567,
-      "title": "Rear Window",
-      "poster": "https://image.tmdb.org/t/p/w342/ILVF0eJxHMddjxeQhswFtpMtqx.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/YaT9lc93WLBK",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4746,
-      "tmdb_id": 213,
-      "title": "North by Northwest",
-      "poster": "https://image.tmdb.org/t/p/w342/kNOFPQrel9YFCVzI0DF8FnCEpCw.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/b82cAUlBVDZT",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4749,
-      "tmdb_id": 26617,
-      "title": "Five Easy Pieces",
-      "poster": "https://image.tmdb.org/t/p/w342/sUEzamvvoTIhPIVhfZw3pUEo6bY.jpg",
-      "quality": "4kl",
-      "dead_url": "https://transfer.it/t/ot7H284BzZgQ",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4750,
-      "tmdb_id": 33441,
-      "title": "Robot Carnival",
-      "poster": "https://image.tmdb.org/t/p/w342/2DTREQNErBYtZd1isRqdqNbbXA8.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/wB98uo5RlZiK",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4751,
-      "tmdb_id": 11967,
-      "title": "Young Guns",
-      "poster": "https://image.tmdb.org/t/p/w342/3AgCq7xY1rHRAAn0iVcnNr2OWL.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/wHLu1Is1RRBI",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4752,
-      "tmdb_id": 9576,
-      "title": "Tootsie",
-      "poster": "https://image.tmdb.org/t/p/w342/ngyCzZwb9y5sMUCig5JQT4Y33Q.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/RamIYNklmb7L",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4753,
-      "tmdb_id": 9271,
-      "title": "Virtuosity",
-      "poster": "https://image.tmdb.org/t/p/w342/5emgnXYrXjqyiup2JsvtuENseiV.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/R9Ro2swXRD6b",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4754,
-      "tmdb_id": 234,
-      "title": "The Cabinet of Dr. Caligari",
-      "poster": "https://image.tmdb.org/t/p/w342/myK9DeIsXWGKgUTZyGXg2IfFk0W.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/Cmj0NM0BWJra",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4755,
-      "tmdb_id": 9464,
-      "title": "Buffalo '66",
-      "poster": "https://image.tmdb.org/t/p/w342/fxzXFzbSGNA52NHQCMqQiwzMIQw.jpg",
+      "id": 4916,
+      "tmdb_id": 1487,
+      "title": "Static Shock",
+      "poster": "https://image.tmdb.org/t/p/w342/c4bMyE2SZv9B6rS0Anvlwej14R1.jpg",
       "quality": "1r",
-      "dead_url": "https://transfer.it/t/OzHnUc8nELLR",
+      "dead_url": "https://transfer.it/t/9dw1nJkjTZLT",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4767,
-      "tmdb_id": 26302,
-      "title": "The Color of Pomegranates",
-      "poster": "https://image.tmdb.org/t/p/w342/rMUbQf7RgsYgQ47AFf1wpoSt4dX.jpg",
+      "id": 4917,
+      "tmdb_id": 1081003,
+      "title": "Supergirl",
+      "poster": "https://image.tmdb.org/t/p/w342/niSvU02l2BONH9ivubV6K1a5QiK.jpg",
       "quality": "1r",
-      "dead_url": "https://transfer.it/t/roOOHIsxDBwT",
+      "dead_url": "https://transfer.it/t/nudFzAt3yL5B",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4768,
-      "tmdb_id": 195841,
-      "title": "Soleil O",
-      "poster": "https://image.tmdb.org/t/p/w342/l23NdXYuqkhFiXZHAES3XJkfBkN.jpg",
+      "id": 4919,
+      "tmdb_id": 43873,
+      "title": "César",
+      "poster": "https://image.tmdb.org/t/p/w342/bD2tr5HY23lWMw5b4LgI6YunCPA.jpg",
       "quality": "1r",
-      "dead_url": "https://transfer.it/t/I1eVyBkD0ZYS",
+      "dead_url": "https://transfer.it/t/WSl1z5xhXL4Z",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4783,
-      "tmdb_id": 426,
-      "title": "Vertigo",
-      "poster": "https://image.tmdb.org/t/p/w342/15uOEfqBNTVtDUT7hGBVCka0rZz.jpg",
+      "id": 4920,
+      "tmdb_id": 38724,
+      "title": "Some Came Running",
+      "poster": "https://image.tmdb.org/t/p/w342/oFivW0sMerjzWmC6GI8axAfc5xy.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/PHkSO1pzgRqS",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4921,
+      "tmdb_id": 4734,
+      "title": "Van Gogh",
+      "poster": "https://image.tmdb.org/t/p/w342/sbyckO3FYAtFt3hDCunQG7FbIiu.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/jG2gY7wVgDgB",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4922,
+      "tmdb_id": 27030,
+      "title": "The Earrings of Madame de...",
+      "poster": "https://image.tmdb.org/t/p/w342/3eJIw86taD84NkpuZaORf5k2DsH.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/POwSZiwlhLDR",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4923,
+      "tmdb_id": 82,
+      "title": "Miami Vice",
+      "poster": "https://image.tmdb.org/t/p/w342/iJPSls4taB09EUKtLj6FjFSprb3.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/qffETpon1DJT",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4924,
+      "tmdb_id": 11645,
+      "title": "Ran",
+      "poster": "https://image.tmdb.org/t/p/w342/dGgiXMWDcS5aJTBEFu7bmaQPNox.jpg",
       "quality": "4kr",
-      "dead_url": "https://transfer.it/t/JEm4QVkVWRYY",
+      "dead_url": "https://transfer.it/t/WHuOixxDTBSR",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4784,
-      "tmdb_id": 571,
-      "title": "The Birds",
-      "poster": "https://image.tmdb.org/t/p/w342/eClg8QPg8mwB6INIC4pyR5pAbDr.jpg",
+      "id": 4925,
+      "tmdb_id": 94192,
+      "title": "Great Day in the Morning",
+      "poster": "https://image.tmdb.org/t/p/w342/ghQY8BJfQKHMk6OQV79gW7X1k1D.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/nqAx61x1zZLL",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4926,
+      "tmdb_id": 678,
+      "title": "Out of the Past",
+      "poster": "https://image.tmdb.org/t/p/w342/lnUK6Cg5ARM0qaq0B5SG20VAM0h.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/gS64i5o1FTTB",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4927,
+      "tmdb_id": 114975,
+      "title": "Wichita",
+      "poster": "https://image.tmdb.org/t/p/w342/ne83mYnmEBLhXnU8qawebKTA1nv.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/A95Lm0x1CZRR",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4928,
+      "tmdb_id": 131473,
+      "title": "Way of a Gaucho",
+      "poster": "https://image.tmdb.org/t/p/w342/vwfHr6RIpRVGcjVfTILmmd6FEwH.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/xh9BGopXABiZ",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4929,
+      "tmdb_id": 18311,
+      "title": "Days of Being Wild",
+      "poster": "https://image.tmdb.org/t/p/w342/g0nbZt1eFlL8FqG8r524iXnpoQV.jpg",
       "quality": "4kr",
-      "dead_url": "https://transfer.it/t/T9tHFV81VZwD",
+      "dead_url": "https://transfer.it/t/PPHnK0xnFDxD",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4785,
-      "tmdb_id": 1942,
-      "title": "Bunny Lake Is Missing",
-      "poster": "https://image.tmdb.org/t/p/w342/zsZ2PAMMyBhkn5OSC8Qnror2KCA.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/21V1ZJ13hbKb",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4786,
-      "tmdb_id": 1394,
-      "title": "Nostalgia",
-      "poster": "https://image.tmdb.org/t/p/w342/fCYSidPXp3LpDa9wlLNv0gZvjyF.jpg",
+      "id": 4930,
+      "tmdb_id": 195,
+      "title": "Trouble in Paradise",
+      "poster": "https://image.tmdb.org/t/p/w342/FBxuoLRD3Biyul14unT5m3PYNS.jpg",
       "quality": "4kr",
-      "dead_url": "https://transfer.it/t/xxzqtA0jUTKD",
+      "dead_url": "https://transfer.it/t/DnQzKshlRTaD",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4787,
-      "tmdb_id": 38985,
-      "title": "Sorcerer",
-      "poster": "https://image.tmdb.org/t/p/w342/2b7oexm173SF1FSEq0DdgxZZNRH.jpg",
+      "id": 4935,
+      "tmdb_id": 1233413,
+      "title": "Sinners",
+      "poster": "https://image.tmdb.org/t/p/w342/fWPgbnt2LSqkQ6cdQc0SZN9CpLm.jpg",
       "quality": "4kr",
-      "dead_url": "https://transfer.it/t/pSMr8RslET5C",
+      "dead_url": "https://transfer.it/t/f2mLfBsjTJ5B",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4788,
-      "tmdb_id": 28055,
-      "title": "Blood and Black Lace",
-      "poster": "https://image.tmdb.org/t/p/w342/zYCQjsdktEvlWTRap836iI5paEL.jpg",
+      "id": 4936,
+      "tmdb_id": 626767,
+      "title": "On-Gaku: Our Sound",
+      "poster": "https://image.tmdb.org/t/p/w342/iUbxhvPFNthEDwZEZDEPwOJZL4Y.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4937,
+      "tmdb_id": 22501,
+      "title": "Time Masters",
+      "poster": "https://image.tmdb.org/t/p/w342/4ktdTOrJnSk7iCtX6Q2QR0sR9Je.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4938,
+      "tmdb_id": 41213,
+      "title": "The Fabulous Baron Munchausen",
+      "poster": "https://image.tmdb.org/t/p/w342/azAhyBd8netxD18VdYo7C4oUvbR.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4939,
+      "tmdb_id": 82094,
+      "title": "The Pied Piper",
+      "poster": "https://image.tmdb.org/t/p/w342/tYDRQvqgTUorU37ZzEFULNMvMHf.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4940,
+      "tmdb_id": 37433,
+      "title": "Neo Tokyo",
+      "poster": "https://image.tmdb.org/t/p/w342/3tQqkfhE2v03OXK4ocxKQ4rnkaC.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4941,
+      "tmdb_id": 311054,
+      "title": "The Case of Hana & Alice",
+      "poster": "https://image.tmdb.org/t/p/w342/j9zJ3Dx90DmOTeEMx5K6BQN9J0W.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4942,
+      "tmdb_id": 381028,
+      "title": "Tower",
+      "poster": "https://image.tmdb.org/t/p/w342/sYau8BFtkQUMWDyRbpACru4cS6G.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4943,
+      "tmdb_id": 27716,
+      "title": "Coonskin",
+      "poster": "https://image.tmdb.org/t/p/w342/3zrxUkbeLl2KmSIRywNTwiGOZ2y.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4944,
+      "tmdb_id": 116369,
+      "title": "The Tragedy of Man",
+      "poster": "https://image.tmdb.org/t/p/w342/mAVOj2Lr7BwuGPVrqRxAJI558EJ.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4945,
+      "tmdb_id": 244265,
+      "title": "Heroic Times",
+      "poster": "https://image.tmdb.org/t/p/w342/62VnBgCB0nzhKdvmqQzYLBDndtC.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4946,
+      "tmdb_id": 582881,
+      "title": "The Swallows of Kabul",
+      "poster": "https://image.tmdb.org/t/p/w342/djd3QU6ThcDSOEGMuUl1h1Am8sN.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4947,
+      "tmdb_id": 413770,
+      "title": "Ethel & Ernest",
+      "poster": "https://image.tmdb.org/t/p/w342/aXIrOeS81jXR1ZyYq73yrqHALzT.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4948,
+      "tmdb_id": 35648,
+      "title": "Roujin Z",
+      "poster": "https://image.tmdb.org/t/p/w342/kpJBEfjC9l7BFhmmGPmkNB8gl6h.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4949,
+      "tmdb_id": 492015,
+      "title": "The Pinchcliffe Grand Prix",
+      "poster": "https://image.tmdb.org/t/p/w342/iWnG4MrdUcrJ3dhB2pvwQZjKXIR.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4950,
+      "tmdb_id": 107391,
+      "title": "The Angel",
+      "poster": "https://image.tmdb.org/t/p/w342/gtRYTODf0nxEZNC0FZNThlc4J3l.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4951,
+      "tmdb_id": 680952,
+      "title": "Josep",
+      "poster": "https://image.tmdb.org/t/p/w342/o0pwyA3PqgqfguXUKc475SJYR2x.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4952,
+      "tmdb_id": 15877,
+      "title": "The Sky Crawlers",
+      "poster": "https://image.tmdb.org/t/p/w342/bCObr03CsKOOwKysoUL5teG8wmU.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4953,
+      "tmdb_id": 17922,
+      "title": "Golgo 13: The Professional",
+      "poster": "https://image.tmdb.org/t/p/w342/nOTFmar2FyhDEDFNIMQL97K5Pcg.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4954,
+      "tmdb_id": 32618,
+      "title": "A Midsummer's Night Dream",
+      "poster": "https://image.tmdb.org/t/p/w342/oPy3ixFzoCJx2lhz1YhTS4wZwZK.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4955,
+      "tmdb_id": 184608,
+      "title": "Saint☆Young Men",
+      "poster": "https://image.tmdb.org/t/p/w342/oeTiyyFgP4PSya310BTExpoxIGi.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4956,
+      "tmdb_id": 47759,
+      "title": "The Monkey King: Uproar in Heaven",
+      "poster": "https://image.tmdb.org/t/p/w342/vBHI9QjQyCyJP7EtqoGweahTU8S.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4957,
+      "tmdb_id": 130445,
+      "title": "Consuming Spirits",
+      "poster": "https://image.tmdb.org/t/p/w342/4aajK6DzNoLEnzIS8RFxA0o69Kw.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4958,
+      "tmdb_id": 413927,
+      "title": "Louise by the Shore",
+      "poster": "https://image.tmdb.org/t/p/w342/tjgfIldVv0380ohpptbbtE27VW2.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4959,
+      "tmdb_id": 26368,
+      "title": "Spring and Chaos",
+      "poster": "https://image.tmdb.org/t/p/w342/1l8RUGcyikvdPtJGwCYkZaXaKiv.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4960,
+      "tmdb_id": null,
+      "title": "Limitless Paradise",
+      "poster": "",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/caA5Rr5zHRTA",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4967,
+      "tmdb_id": 86837,
+      "title": "Amour",
+      "poster": "https://image.tmdb.org/t/p/w342/19hyCudualHxCD0GrEngqsi0wBF.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/YZj2t3hRSDoJ",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4968,
+      "tmdb_id": 12703,
+      "title": "The Brown Bunny",
+      "poster": "https://image.tmdb.org/t/p/w342/bGzU4TgdqmMjIfPIgf2MjDW6H7c.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/ZkQXnThVUTzL",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 4970,
+      "tmdb_id": 29266,
+      "title": "War and Peace",
+      "poster": "https://image.tmdb.org/t/p/w342/tvMJ84g2lx2XusA29wvOeaanwWZ.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/XzQblixF3RTL",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 5152,
+      "tmdb_id": 1398,
+      "title": "The Sopranos",
+      "poster": "https://image.tmdb.org/t/p/w342/rTc7ZXdroqjkKivFPvCPX0Ru7uw.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/j4yBBcsnnLCZ",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 5153,
+      "tmdb_id": 89456,
+      "title": "Primal",
+      "poster": "https://image.tmdb.org/t/p/w342/mf12pRakr3eYdJtv6klQtoznnbU.jpg",
+      "quality": "1r",
+      "dead_url": "https://transfer.it/t/fwQqUM8ziDoB",
+      "reason": "Expiré (nous ne trouvons pas ce transfert)"
+    },
+    {
+      "id": 5155,
+      "tmdb_id": 1399,
+      "title": "Game of Thrones",
+      "poster": "https://image.tmdb.org/t/p/w342/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
       "quality": "4kr",
-      "dead_url": "https://transfer.it/t/hmWLRF8TEToB",
+      "dead_url": "https://transfer.it/t/B72f1cl3DDKJ",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4789,
-      "tmdb_id": 43195,
-      "title": "Senso",
-      "poster": "https://image.tmdb.org/t/p/w342/iyWApADv4UD9KtVQvJ1mkKn9WXV.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/CxMglZ1nzLzL",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4790,
-      "tmdb_id": 61391,
-      "title": "Distant Drums",
-      "poster": "https://image.tmdb.org/t/p/w342/i47dolQL1igTPUQ7jvCzyiBENDQ.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/gafNhdsHBJSS",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4791,
-      "tmdb_id": 48139,
-      "title": "El Sur",
-      "poster": "https://image.tmdb.org/t/p/w342/bAyghNTLIwHIxoQOha6kHfwmxS6.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/2dxzgE1zzZTQ",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4792,
-      "tmdb_id": 560,
-      "title": "Secret Beyond the Door",
-      "poster": "https://image.tmdb.org/t/p/w342/uVBEwjzXweHWjCFjAs7eJzH9in6.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/AdVyJNsRgbBa",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4801,
-      "tmdb_id": 1791,
-      "title": "The Piano Teacher",
-      "poster": "https://image.tmdb.org/t/p/w342/gNHKYQnP1RnqEhkivHJzBPb4MOP.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/ZTutHtw3HRqD",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4809,
-      "tmdb_id": 42691,
-      "title": "Oedipus Rex",
-      "poster": "https://image.tmdb.org/t/p/w342/7R3yPlLdiNhpGzasB8SDCT6Kwy.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/mu9sSYs3DDwD",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4810,
-      "tmdb_id": 16307,
-      "title": "The Wicker Man",
-      "poster": "https://image.tmdb.org/t/p/w342/wwtrXRL8SiOWxhwLEvw7iBgYh0g.jpg",
+      "id": 5155,
+      "tmdb_id": 1399,
+      "title": "Game of Thrones",
+      "poster": "https://image.tmdb.org/t/p/w342/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
       "quality": "4kr",
-      "dead_url": "https://transfer.it/t/gzP6GI8VXZQY",
+      "dead_url": "https://transfer.it/t/M0lpIUkh0JIQ",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
     },
     {
-      "id": 4811,
-      "tmdb_id": 28333,
-      "title": "The Ladies Man",
-      "poster": "https://image.tmdb.org/t/p/w342/c15TotHYrXPZSzjZCBfbup3fz4V.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/x6BM3I9lWRCR",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4820,
-      "tmdb_id": 3082,
-      "title": "Modern Times",
-      "poster": "https://image.tmdb.org/t/p/w342/7uoiKOEjxBBW0AgDGQWrlfGQ90w.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/GgGaMM8VxZ6K",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4821,
-      "tmdb_id": 42513,
-      "title": "Two English Girls",
-      "poster": "https://image.tmdb.org/t/p/w342/2fc5hjuzJbkVKXLy0SoAr2Hbdy2.jpg",
+      "id": 5336,
+      "tmdb_id": 16642,
+      "title": "Days of Heaven",
+      "poster": "https://image.tmdb.org/t/p/w342/rwxTYjOZmX2rGhz7avLe1qsjNqe.jpg",
       "quality": "4kr",
-      "dead_url": "https://transfer.it/t/IXWm5V0VyZRA",
+      "dead_url": "https://transfer.it/t/Dx5U6bglhLCI",
       "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4822,
-      "tmdb_id": 147,
-      "title": "The 400 Blows",
-      "poster": "https://image.tmdb.org/t/p/w342/12PuU23kkDLvTd0nb8hMlE3oShB.jpg",
-      "quality": "4kr",
-      "dead_url": "https://transfer.it/t/0Li3QZtDEDKD",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4835,
-      "tmdb_id": 445,
-      "title": "Caché",
-      "poster": "https://image.tmdb.org/t/p/w342/vTzjRi0Uhy0tt3Rjw8SARZZJHlX.jpg",
-      "quality": "1r",
-      "dead_url": "https://transfer.it/t/ueLU6pxzDRqb",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 4934,
-      "tmdb_id": 466272,
-      "title": "Once Upon a Time... in Hollywood",
-      "poster": "https://image.tmdb.org/t/p/w342/8j58iEBw9pOXFD2L0nt0ZXeHviB.jpg",
-      "quality": "4kl",
-      "dead_url": "https://transfer.it/t/c2mjDQtHCLBQ",
-      "reason": "Expiré (nous ne trouvons pas ce transfert)"
-    },
-    {
-      "id": 5120,
-      "tmdb_id": 1960,
-      "title": "Evil Dead Collection",
-      "poster": "https://image.tmdb.org/t/p/w342/eWFADubShlTEUiNsPcN6BMOKakr.jpg",
-      "quality": "4kr",
-      "dead_url": "https://gofile.io/d/P9Okzs",
-      "reason": "Expiré (this content does not exist)"
     }
   ]
 }
