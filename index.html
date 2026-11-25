@@ -407,10 +407,12 @@ header {
 }
 .popular-section {
   width: 100%;
-  padding: 1.75rem 2rem 3rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.25rem 2rem 2rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 32px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 26px;
   align-items: start;
 }
 .popular-left {
@@ -449,7 +451,7 @@ header {
 .popular-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
 .popular-card {
   position: relative; border-radius: 10px; overflow: hidden;
@@ -1173,13 +1175,13 @@ footer {
   .filter-bar::before { display: none; }
   .popular-section { padding: 1.35rem 1.25rem 2.25rem; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; }
   .popular-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-  .popular-grid-recent .popular-card:nth-child(n+13) { display: none; }
+  .popular-grid-recent .popular-card:nth-child(n+9) { display: none; }
 }
 @media (max-width: 900px) {
   .popular-section { grid-template-columns: 1fr; }
   .popular-right { display: none; }
   .popular-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-  .popular-grid-recent .popular-card:nth-child(n+13) { display: none; }
+  .popular-grid-recent .popular-card:nth-child(n+9) { display: none; }
 }
 @media (max-width: 768px) {
   header { padding: 0 1rem; height: 54px; flex-wrap: nowrap; gap: 8px; }
@@ -1844,7 +1846,7 @@ function renderRecent() {
   });
 
   const last100  = poolUniq.slice(-100);
-  const recent15 = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 15);
+  const recent10 = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 10);
   const top10 = [...poolUniq].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 10);
 
   const renderCard = (m) => {
@@ -1870,7 +1872,7 @@ function renderRecent() {
           <button class="popular-more" onclick="showAllFilms();setSort('pop');document.getElementById('sort-sel').value='pop';render();">Voir plus →</button>
         </div>
         <div class="popular-grid popular-grid-recent">
-          ${recent15.map(m => renderCard(m)).join('')}
+          ${recent10.map(m => renderCard(m)).join('')}
         </div>
       </div>
     </div>
