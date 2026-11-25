@@ -59,6 +59,8 @@ body {
   color: var(--text);
   font-family: var(--font-sans);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -396,55 +398,76 @@ header {
 /* ══════════════════════════════════════════════════
    4. POPULAR SHOWCASE (HOME VIEW)
    ══════════════════════════════════════════════════ */
-#home-view { position: relative; z-index: 1; }
+#home-view {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 .popular-section {
-  padding: 1.35rem 1.75rem 2rem;
+  width: 100%;
+  padding: 1.65rem 2rem 2.75rem;
   display: grid;
-  grid-template-columns: 1fr 270px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 288px;
+  gap: 28px;
   align-items: start;
   max-width: 1680px;
   margin: 0 auto;
 }
-.popular-left { min-width: 0; }
+.popular-left {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.showcase-block { min-width: 0; }
 .popular-header {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 12px; padding-bottom: 8px;
+  margin-bottom: 14px; padding-bottom: 9px;
   border-bottom: 1px solid var(--border);
 }
 .popular-title {
   font-size: 11px; font-weight: 800; letter-spacing: 1.8px;
   text-transform: uppercase; color: var(--text-soft);
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 9px;
 }
 .popular-title::before {
   content: ''; width: 6px; height: 6px; border-radius: 50%;
   background: var(--emerald); box-shadow: 0 0 10px var(--emerald);
+  flex-shrink: 0;
+}
+.popular-title.gold::before {
+  background: var(--gold); box-shadow: 0 0 10px var(--gold);
 }
 .popular-more {
   font-size: 10.5px; color: var(--muted2); font-weight: 700;
   letter-spacing: 0.8px; text-transform: uppercase;
-  cursor: pointer; transition: all 0.15s; border: none; background: none;
-  padding: 3px 8px; border-radius: 6px;
+  cursor: pointer; transition: all 0.15s; border: 1px solid transparent;
+  background: none; padding: 4px 10px; border-radius: 6px;
 }
-.popular-more:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
+.popular-more:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border);
+}
 
 .popular-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 11px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 14px;
 }
 .popular-card {
-  position: relative; border-radius: 9px; overflow: hidden;
+  position: relative; border-radius: 10px; overflow: hidden;
   cursor: pointer; background: var(--s2);
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
   aspect-ratio: 2 / 3;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.48);
 }
 .popular-card:hover {
-  transform: translateY(-4px) scale(1.035);
-  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.22);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.24);
   z-index: 3;
 }
 .popular-card img {
@@ -459,8 +482,8 @@ header {
 }
 .popular-card::after {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-  height: 62%; pointer-events: none; z-index: 1;
-  background: linear-gradient(to top, rgba(7, 8, 11, 0.96) 0%, rgba(7, 8, 11, 0.5) 55%, transparent 100%);
+  height: 64%; pointer-events: none; z-index: 1;
+  background: linear-gradient(to top, rgba(7, 8, 11, 0.96) 0%, rgba(7, 8, 11, 0.52) 55%, transparent 100%);
 }
 .popular-card-info {
   position: absolute; bottom: 0; left: 0; right: 0;
@@ -471,10 +494,11 @@ header {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   line-height: 1.25;
 }
-.popular-card-year {
+.popular-card-meta {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
   font-family: var(--font-mono);
-  font-size: 10px; color: var(--text-soft); opacity: 0.7;
-  font-weight: 500; margin-top: 2px;
+  font-size: 10px; color: var(--text-soft); opacity: 0.78;
+  font-weight: 500; margin-top: 3px;
 }
 .popular-card-qbadge {
   position: absolute; top: 7px; right: 7px; z-index: 3;
@@ -490,17 +514,19 @@ header {
 
 /* Right Leaderboard Panel */
 .popular-right {
+  position: sticky;
+  top: calc(var(--hdr-h) + 58px);
   display: flex; flex-direction: column;
-  background: rgba(17, 19, 26, 0.75);
+  background: rgba(17, 19, 26, 0.78);
   backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 14px;
+  padding: 16px;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
 }
 .popular-right-header {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px; padding-bottom: 9px;
+  margin-bottom: 12px; padding-bottom: 10px;
   border-bottom: 1px solid var(--border);
 }
 .popular-right-title {
@@ -520,10 +546,10 @@ header {
   transform: translateX(1px);
 }
 
-.top-list { display: flex; flex-direction: column; gap: 4px; }
+.top-list { display: flex; flex-direction: column; gap: 6px; }
 .top-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 6px 7px; border-radius: 8px;
+  display: flex; align-items: center; gap: 11px;
+  padding: 6px 8px; border-radius: 9px;
   cursor: pointer; transition: all 0.15s ease;
   border: 1px solid transparent;
 }
@@ -542,12 +568,12 @@ header {
 .top-item:nth-child(2) .top-rank { color: #cbd5e1; }
 .top-item:nth-child(3) .top-rank { color: #d97706; }
 .top-thumb {
-  width: 34px; height: 50px; border-radius: 5px;
+  width: 36px; height: 54px; border-radius: 5px;
   object-fit: cover; background: var(--s3); flex-shrink: 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .top-thumb-placeholder {
-  width: 34px; height: 50px; border-radius: 5px;
+  width: 36px; height: 54px; border-radius: 5px;
   background: var(--s3); display: flex; align-items: center; justify-content: center;
   font-size: 14px; flex-shrink: 0;
 }
@@ -558,7 +584,7 @@ header {
 }
 .top-meta {
   font-family: var(--font-mono);
-  font-size: 10px; color: var(--muted2); margin-top: 2px;
+  font-size: 10px; color: var(--muted2); margin-top: 3px;
 }
 
 /* ══════════════════════════════════════════════════
@@ -1142,8 +1168,9 @@ header {
 /* ══════════════════════════════════════════════════
    9. FOOTER & RESPONSIVE
    ══════════════════════════════════════════════════ */
+#library-view { flex: 1; }
 footer {
-  position: relative; z-index: 1;
+  position: relative; z-index: 1; margin-top: auto;
   padding: 1.1rem 1.75rem; border-top: 1px solid var(--border);
   display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
   background: rgba(11, 13, 18, 0.6);
@@ -1156,13 +1183,22 @@ footer {
 }
 .btn-footer:hover { border-color: var(--border2); color: #fff; background: rgba(255, 255, 255, 0.07); }
 
-@media (max-width: 1120px) {
-  .popular-grid { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 1260px) {
+  .filter-bar { padding: 0 1rem; overflow-x: auto; }
+  .filter-bar::before { display: none; }
+  .popular-section { padding: 1.35rem 1.25rem 2.25rem; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; }
+  .popular-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  .popular-grid-recent .popular-card:nth-child(n+11) { display: none; }
+  .popular-grid-toprated .popular-card:nth-child(n+6) { display: none; }
 }
 @media (max-width: 900px) {
   .popular-section { grid-template-columns: 1fr; }
   .popular-right { display: none; }
-  .popular-grid { grid-template-columns: repeat(4, 1fr); }
+  .popular-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; }
+  .popular-grid-recent .popular-card:nth-child(n+11) { display: block; }
+  .popular-grid-recent .popular-card:nth-child(n+13) { display: none; }
+  .popular-grid-toprated .popular-card:nth-child(n+6) { display: block; }
+  .popular-grid-toprated .popular-card:nth-child(n+5) { display: none; }
 }
 @media (max-width: 768px) {
   header { padding: 0 1rem; height: 54px; flex-wrap: nowrap; gap: 8px; }
@@ -1199,7 +1235,11 @@ footer {
   .content { padding: 0.8rem 0.9rem 5rem; }
   .results-bar { padding: 0.6rem 0.9rem 0; }
   .popular-section { padding: 1rem 0.9rem 2rem; }
-  .popular-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .popular-left { gap: 20px; }
+  .popular-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+  .popular-grid-recent .popular-card:nth-child(n+13) { display: none; }
+  .popular-grid-toprated .popular-card:nth-child(n+5) { display: block; }
+  .popular-grid-toprated .popular-card:nth-child(n+7) { display: none; }
   #back-bar { padding: 8px 0.9rem; top: 96px; }
   .modal {
     border-radius: 20px 20px 0 0; position: fixed;
@@ -1741,6 +1781,7 @@ function toggleGenre(g) {
   if (!genreInc.has(g) && !genreExc.has(g)) genreInc.add(g);
   else if (genreInc.has(g)) { genreInc.delete(g); genreExc.add(g); }
   else genreExc.delete(g);
+  if (genreInc.size > 0 || genreExc.size > 0) showAllFilms();
   render();
 }
 function clearGenres() { genreInc.clear(); genreExc.clear(); render(); }
@@ -1813,7 +1854,7 @@ function renderRecent() {
   if (filts.size > 0 || genreInc.size > 0 || genreExc.size > 0 || mediaFilt || document.getElementById('sb').value.trim() || activeYearFilter || activeNoteFilter || activeGenreDD) {
     sec.style.display = 'none'; return;
   }
-  const pool = [...movies].filter(m => m.media_type === 'movie');
+  const pool = [...movies].filter(m => !m.media_type || m.media_type === 'movie');
   if (!pool.length) { sec.style.display = 'none'; return; }
   sec.style.display = '';
 
@@ -1825,30 +1866,51 @@ function renderRecent() {
     seenIds.add(key); return true;
   });
 
-  const last100 = poolUniq.slice(-100);
-  const recent5 = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 14);
-  const top8    = [...poolUniq].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 8);
+  const last100  = poolUniq.slice(-100);
+  const recent14 = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 14);
+  const recentSet = new Set(recent14);
+  const topRated7 = [...poolUniq]
+    .filter(m => !recentSet.has(m) && (m.imdb_rating || m.vote_average))
+    .sort((a,b) => ((b.imdb_rating || b.vote_average || 0) - (a.imdb_rating || a.vote_average || 0)))
+    .slice(0, 7);
+  const top10 = [...poolUniq].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 10);
+
+  const renderCard = (m, showRating) => {
+    const idx = movies.indexOf(m);
+    const year = m.release_date ? m.release_date.slice(0,4) : '';
+    const rating = m.imdb_rating || m.vote_average;
+    const icon = m.media_type === 'tv' ? '📺' : '🎬';
+    const qi = QICON[m.quality] || '';
+    return '<div class="popular-card" onclick="openDetail(event,'+idx+')">'
+      + (m.poster ? '<img src="'+m.poster+'" loading="lazy" alt="'+escapeHtml(m.title)+'">' : '<div class="popular-card-no-poster">'+icon+'</div>')
+      + (m.quality ? '<div class="popular-card-qbadge '+m.quality+'">'+qi+'</div>' : '')
+      + '<div class="popular-card-info"><div class="popular-card-title">'+escapeHtml(m.title)+'</div>'
+      + '<div class="popular-card-meta"><span>'+year+'</span>'
+      + (showRating && rating ? '<span>⭐ '+Number(rating).toFixed(1)+'</span>' : '')
+      + '</div></div></div>';
+  };
 
   sec.innerHTML = `
     <div class="popular-left">
-      <div class="popular-header">
-        <div class="popular-title">Populaires — Récemment ajoutés</div>
-        <button class="popular-more" onclick="setSort('pop');document.getElementById('sort-sel').value='pop';render()">MORE →</button>
+      <div class="showcase-block">
+        <div class="popular-header">
+          <div class="popular-title">Populaires — Récemment ajoutés</div>
+          <button class="popular-more" onclick="showAllFilms();setSort('pop');document.getElementById('sort-sel').value='pop';render();">Voir plus →</button>
+        </div>
+        <div class="popular-grid popular-grid-recent">
+          ${recent14.map(m => renderCard(m, false)).join('')}
+        </div>
       </div>
-      <div class="popular-grid">
-        ${recent5.map(m => {
-          const idx = movies.indexOf(m);
-          const year = m.release_date ? m.release_date.slice(0,4) : '';
-          const icon = m.media_type === 'tv' ? '📺' : '🎬';
-          const qi = QICON[m.quality] || '';
-          return '<div class="popular-card" onclick="openDetail(event,'+idx+')">'
-            + (m.poster ? '<img src="'+m.poster+'" loading="lazy" alt="'+escapeHtml(m.title)+'">' : '<div class="popular-card-no-poster">'+icon+'</div>')
-            + (m.quality ? '<div class="popular-card-qbadge '+m.quality+'">'+qi+'</div>' : '')
-            + '<div class="popular-card-info"><div class="popular-card-title">'+escapeHtml(m.title)+'</div>'
-            + (year ? '<div class="popular-card-year">'+year+'</div>' : '')
-            + '</div></div>';
-        }).join('')}
-      </div>
+      ${topRated7.length ? `
+      <div class="showcase-block">
+        <div class="popular-header">
+          <div class="popular-title gold">Les mieux notés</div>
+          <button class="popular-more" onclick="showAllFilms();setSort('note');document.getElementById('sort-sel').value='note';render();">Voir plus →</button>
+        </div>
+        <div class="popular-grid popular-grid-toprated">
+          ${topRated7.map(m => renderCard(m, true)).join('')}
+        </div>
+      </div>` : ''}
     </div>
     <div class="popular-right">
       <div class="popular-right-header">
@@ -1856,15 +1918,16 @@ function renderRecent() {
         <button class="btn-voir-tous" onclick="showAllFilms();setSort('pop');document.getElementById('sort-sel').value='pop';render();">Voir tous →</button>
       </div>
       <div class="top-list">
-        ${top8.map((m, i) => {
+        ${top10.map((m, i) => {
           const idx = movies.indexOf(m);
           const year = m.release_date ? m.release_date.slice(0,4) : '';
+          const rating = m.imdb_rating || m.vote_average;
           const icon = m.media_type === 'tv' ? '📺' : '🎬';
           return '<div class="top-item" onclick="openDetail(event,'+idx+')">'
             + '<div class="top-rank">'+(i+1)+'</div>'
             + (m.poster ? '<img class="top-thumb" src="'+m.poster+'" loading="lazy" alt="'+escapeHtml(m.title)+'">' : '<div class="top-thumb-placeholder">'+icon+'</div>')
             + '<div class="top-info"><div class="top-title">'+escapeHtml(m.title)+'</div>'
-            + '<div class="top-meta">'+year+(m.vote_average ? ' · ⭐ '+m.vote_average.toFixed(1) : '')+'</div>'
+            + '<div class="top-meta">'+year+(rating ? ' · ⭐ '+Number(rating).toFixed(1) : '')+'</div>'
             + '</div></div>';
         }).join('')}
       </div>
