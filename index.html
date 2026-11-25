@@ -4097,5 +4097,136 @@ fetch('./dead_links.json?t=' + Date.now())
 </script>
 </script>
 </script>
+  <!-- OUTIL SUPPRESSION VRAIS DOUBLONS (MÊME AFFICHE + MÊME LIEN) -->
+<div id="dupes-widget" style="position:fixed; bottom:28px; right:28px; z-index:999; font-family:'DM Sans',sans-serif;">
+  <button onclick="openDupesModal()" 
+          style="background:#16161f; color:#f0f0fa; border:1px solid rgba(255,255,255,0.14); padding:10px 15px; border-radius:50px; font-size:12px; font-weight:700; cursor:pointer; box-shadow:0 6px 20px rgba(0,0,0,0.45); display:flex; align-items:center; gap:7px;">
+    <span>🧹</span> Doublons
+  </button>
+</div>
+
+<div id="dupes-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); z-index:10000; align-items:center; justify-content:center; padding:20px; font-family:'DM Sans',sans-serif;">
+  <div style="background:#0c0c12; color:#f0f0fa; width:100%; max-width:680px; max-height:85vh; border-radius:16px; border:1px solid rgba(255,255,255,0.11); display:flex; flex-direction:column; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.8);">
+    <div style="padding:16px 20px; background:#111118; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.07);">
+      <div>
+        <div style="font-family:'DM Serif Display',serif; font-size:19px;">🧹 Vrais doublons détectés</div>
+        <div id="dupes-subtitle" style="color:#5e5e90; font-size:11px; margin-top:2px;">Critère : même affiche + même lien</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button id="dupes-delete-all-btn" onclick="deleteAllTrueDupes(this)" 
+                style="display:none; background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.35); padding:7px 13px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer;">
+          🗑 Supprimer les doublons
+        </button>
+        <button onclick="document.getElementById('dupes-modal').style.display='none'" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✕</button>
+      </div>
+    </div>
+    <div id="dupes-list" style="padding:14px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+  </div>
+</div>
+
+<script>
+let _trueDupesToDelete = [];
+
+function getMovieLinksSignature(m) {
+  const urls = new Set();
+  if (m.link && m.link.trim()) urls.add(m.link.trim());
+  if (Array.isArray(m.links)) {
+    m.links.forEach(l => {
+      if (l && l.url && l.url.trim()) urls.add(l.url.trim());
+    });
+  }
+  return [...urls].sort().join('|');
+}
+
+function findTrueDuplicates() {
+  const groups = new Map();
+  movies.forEach((m) => {
+    const poster = (m.poster || '').trim();
+    const linksSig = getMovieLinksSignature(m);
+    // On ignore les fiches sans affiche ou sans lien pour ne pas supprimer par erreur
+    if (!poster || !linksSig) return;
+
+    const key = poster + '::' + linksSig;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(m);
+  });
+
+  const dupes = [];
+  groups.forEach((list) => {
+    if (list.length > 1) {
+      // On trie pour garder la fiche la plus complète (celle qui a le plus de données/crédits)
+      list.sort((a, b) => JSON.stringify(b).length - JSON.stringify(a).length);
+      // Toutes les fiches après la première (index 0) sont des doublons à supprimer
+      for (let i = 1; i < list.length; i++) {
+        dupes.push({
+          duplicate: list[i],
+          kept: list[0],
+          linksSig: getMovieLinksSignature(list[i])
+        });
+      }
+    }
+  });
+  return dupes;
+}
+
+function openDupesModal() {
+  _trueDupesToDelete = findTrueDuplicates();
+  const listEl = document.getElementById('dupes-list');
+  const subEl = document.getElementById('dupes-subtitle');
+  const delBtn = document.getElementById('dupes-delete-all-btn');
+
+  if (_trueDupesToDelete.length === 0) {
+    subEl.textContent = "Aucun doublon trouvé dans ta bibliothèque !";
+    delBtn.style.display = 'none';
+    listEl.innerHTML = `<div style="text-align:center; padding:30px; color:#5e5e90; font-size:13px;">✅ Ta bibliothèque est 100 % propre : aucun film n'a à la fois la même affiche et le même lien.</div>`;
+  } else {
+    subEl.textContent = `${_trueDupesToDelete.length} doublon(s) trouvé(s) (1 exemplaire sera conservé pour chaque film)`;
+    delBtn.style.display = 'inline-block';
+    delBtn.textContent = `🗑 Supprimer les ${_trueDupesToDelete.length} doublon(s)`;
+    delBtn.disabled = false;
+
+    listEl.innerHTML = _trueDupesToDelete.map((item) => {
+      const m = item.duplicate;
+      const firstLink = item.linksSig.split('|')[0] || '';
+      return `
+        <div style="display:flex; align-items:center; gap:12px; background:#16161f; border:1px solid rgba(255,255,255,0.06); padding:10px; border-radius:10px;">
+          <img src="${m.poster || ''}" style="width:42px; height:63px; object-fit:cover; border-radius:5px; flex-shrink:0;" onerror="this.style.display='none'">
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              ${escapeHtml(m.title || 'Sans titre')} <span style="background:rgba(255,255,255,0.08); font-size:10px; padding:2px 6px; border-radius:4px; margin-left:4px;">${m.quality || ''}</span>
+            </div>
+            <div style="color:#94a3b8; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">${escapeHtml(firstLink)}</div>
+            <div style="color:#4ade80; font-size:10px; margin-top:2px;">✓ L'original est conservé, cette copie sera supprimée</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('dupes-modal').style.display = 'flex';
+}
+
+async function deleteAllTrueDupes(btnEl) {
+  if (!_trueDupesToDelete || _trueDupesToDelete.length === 0) return;
+
+  if (!confirm(`Supprimer définitivement ces ${_trueDupesToDelete.length} doublon(s) ?\n(L'exemplaire original de chaque film sera bien conservé)`)) return;
+
+  btnEl.textContent = "⏳ Suppression...";
+  btnEl.disabled = true;
+
+  for (const item of _trueDupesToDelete) {
+    const m = item.duplicate;
+    if (m && m._id) {
+      await fetch(`${SU}/rest/v1/movies?id=eq.${m._id}`, { method: 'DELETE', headers: H });
+    }
+    const idx = movies.indexOf(m);
+    if (idx >= 0) movies.splice(idx, 1);
+  }
+
+  render();
+  document.getElementById('dupes-modal').style.display = 'none';
+  alert(`✅ ${_trueDupesToDelete.length} doublon(s) supprimé(s) avec succès !`);
+}
+</script>
 </body>
 </html>
