@@ -4228,5 +4228,25 @@ async function deleteAllTrueDupes(btnEl) {
   alert(`✅ ${_trueDupesToDelete.length} doublon(s) supprimé(s) avec succès !`);
 }
 </script>
+  <script>
+// Correction du bouton "FILMS" dans la barre de navigation du haut
+document.addEventListener('DOMContentLoaded', () => {
+  const navElements = document.querySelectorAll('header a, header button, nav a, nav button, .nav-link, .nav-item');
+  navElements.forEach(el => {
+    if (el.textContent.trim().toUpperCase() === 'FILMS') {
+      el.style.cursor = 'pointer';
+      el.onclick = function(e) {
+        e.preventDefault();
+        // Met à jour l'onglet actif en haut
+        navElements.forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        // Ferme Collections / Sagas si ouverts et affiche toute la bibliothèque
+        if (typeof closeSmartCollections === 'function') closeSmartCollections();
+        if (typeof showAllFilms === 'function') showAllFilms();
+      };
+    }
+  });
+});
+</script>
 </body>
 </html>
