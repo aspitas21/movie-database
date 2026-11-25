@@ -407,19 +407,16 @@ header {
 }
 .popular-section {
   width: 100%;
-  padding: 1.65rem 2rem 2.75rem;
+  padding: 1.75rem 2rem 3rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 288px;
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 32px;
   align-items: start;
-  max-width: 1680px;
-  margin: 0 auto;
 }
 .popular-left {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 28px;
 }
 .showcase-block { min-width: 0; }
 .popular-header {
@@ -437,9 +434,6 @@ header {
   background: var(--emerald); box-shadow: 0 0 10px var(--emerald);
   flex-shrink: 0;
 }
-.popular-title.gold::before {
-  background: var(--gold); box-shadow: 0 0 10px var(--gold);
-}
 .popular-more {
   font-size: 10.5px; color: var(--muted2); font-weight: 700;
   letter-spacing: 0.8px; text-transform: uppercase;
@@ -454,8 +448,8 @@ header {
 
 .popular-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
 }
 .popular-card {
   position: relative; border-radius: 10px; overflow: hidden;
@@ -1098,10 +1092,10 @@ header {
 .sc-detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-w), 1fr)); gap: 12px; padding: 1.5rem 1.75rem; width: 100%; }
 
 /* ══════════════════════════════════════════════════
-   8. FLOATING WIDGETS (DEAD LINKS, DUPES, BACK TO TOP)
+   8. UTILITY MODALS & BACK TO TOP
    ══════════════════════════════════════════════════ */
 #back-to-top {
-  position: fixed; bottom: 76px; right: 26px; z-index: 998;
+  position: fixed; bottom: 26px; right: 26px; z-index: 998;
   width: 40px; height: 40px; border-radius: 50%;
   background: rgba(22, 25, 35, 0.92);
   backdrop-filter: blur(12px);
@@ -1115,26 +1109,17 @@ header {
 #back-to-top.visible { opacity: 1; pointer-events: all; }
 #back-to-top:hover { background: var(--s3); border-color: var(--border3); transform: translateY(-2px); }
 
-#dead-links-widget { display: none; position: fixed; bottom: 26px; left: 26px; z-index: 999; }
-.dead-links-pill {
-  background: linear-gradient(135deg, #e11d48, #be123c);
-  color: #fff; border: 1px solid rgba(255, 255, 255, 0.22);
-  padding: 10px 16px; border-radius: 99px; font-size: 12px; font-weight: 800;
-  cursor: pointer; box-shadow: 0 8px 26px rgba(225, 29, 72, 0.45);
-  display: flex; align-items: center; gap: 8px; transition: transform 0.16s;
+.btn-footer-dead {
+  display: none;
+  color: #fda4af;
+  background: rgba(225, 29, 72, 0.14);
+  border-color: rgba(225, 29, 72, 0.35);
 }
-.dead-links-pill:hover { transform: translateY(-2px); }
-
-#dupes-widget { position: fixed; bottom: 26px; right: 26px; z-index: 999; }
-.dupes-pill {
-  background: rgba(22, 25, 35, 0.92);
-  backdrop-filter: blur(12px);
-  color: var(--text); border: 1px solid var(--border2);
-  padding: 10px 16px; border-radius: 99px; font-size: 12px; font-weight: 700;
-  cursor: pointer; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
-  display: flex; align-items: center; gap: 7px; transition: all 0.16s;
+.btn-footer-dead:hover {
+  color: #fff;
+  background: rgba(225, 29, 72, 0.26);
+  border-color: rgba(225, 29, 72, 0.55);
 }
-.dupes-pill:hover { border-color: var(--border3); background: var(--s3); transform: translateY(-2px); }
 
 .util-modal-backdrop {
   display: none; position: fixed; inset: 0;
@@ -1187,18 +1172,14 @@ footer {
   .filter-bar { padding: 0 1rem; overflow-x: auto; }
   .filter-bar::before { display: none; }
   .popular-section { padding: 1.35rem 1.25rem 2.25rem; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; }
-  .popular-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-  .popular-grid-recent .popular-card:nth-child(n+11) { display: none; }
-  .popular-grid-toprated .popular-card:nth-child(n+6) { display: none; }
+  .popular-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  .popular-grid-recent .popular-card:nth-child(n+13) { display: none; }
 }
 @media (max-width: 900px) {
   .popular-section { grid-template-columns: 1fr; }
   .popular-right { display: none; }
-  .popular-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; }
-  .popular-grid-recent .popular-card:nth-child(n+11) { display: block; }
+  .popular-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   .popular-grid-recent .popular-card:nth-child(n+13) { display: none; }
-  .popular-grid-toprated .popular-card:nth-child(n+6) { display: block; }
-  .popular-grid-toprated .popular-card:nth-child(n+5) { display: none; }
 }
 @media (max-width: 768px) {
   header { padding: 0 1rem; height: 54px; flex-wrap: nowrap; gap: 8px; }
@@ -1237,9 +1218,7 @@ footer {
   .popular-section { padding: 1rem 0.9rem 2rem; }
   .popular-left { gap: 20px; }
   .popular-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
-  .popular-grid-recent .popular-card:nth-child(n+13) { display: none; }
-  .popular-grid-toprated .popular-card:nth-child(n+5) { display: block; }
-  .popular-grid-toprated .popular-card:nth-child(n+7) { display: none; }
+  .popular-grid-recent .popular-card:nth-child(n+10) { display: none; }
   #back-bar { padding: 8px 0.9rem; top: 96px; }
   .modal {
     border-radius: 20px 20px 0 0; position: fixed;
@@ -1445,6 +1424,14 @@ footer {
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
   <button class="btn-footer" style="color:#00e0a6;border-color:rgba(0,224,166,0.25)" onclick="exportLetterboxd()">🎞 Letterboxd CSV</button>
   <button class="btn-footer" style="color:#60a5fa;border-color:rgba(96,165,250,0.25)" onclick="syncPopularity()" id="sync-pop-btn">📈 Sync Popularité</button>
+  <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <button id="dead-links-widget" class="btn-footer btn-footer-dead" onclick="document.getElementById('dead-links-modal').style.display='flex'">
+      ⚠️ <span id="dead-links-count">0</span> lien(s) expiré(s)
+    </button>
+    <button id="dupes-widget" class="btn-footer" onclick="openDupesModal()">
+      🧹 Doublons
+    </button>
+  </div>
 </footer>
 
 <!-- ═══ FILMOGRAPHIE MODAL (ACTORS STANDALONE) ═══ -->
@@ -1628,12 +1615,7 @@ footer {
 <!-- ═══ RANDOM MODAL ═══ -->
 <div class="mbg" id="rmod"><div class="modal rmod" id="rcont"></div></div>
 
-<!-- ═══ WIDGET ALERTE LIENS MORTS ═══ -->
-<div id="dead-links-widget">
-  <button class="dead-links-pill" onclick="document.getElementById('dead-links-modal').style.display='flex'">
-    <span>⚠️</span> <span id="dead-links-count">0</span> film(s) expiré(s)
-  </button>
-</div>
+<!-- ═══ MODAL ALERTE LIENS MORTS ═══ -->
 
 <div id="dead-links-modal" class="util-modal-backdrop">
   <div class="util-modal-box">
@@ -1651,12 +1633,7 @@ footer {
   </div>
 </div>
 
-<!-- ═══ WIDGET SUPPRESSION VRAIS DOUBLONS ═══ -->
-<div id="dupes-widget">
-  <button class="dupes-pill" onclick="openDupesModal()">
-    <span>🧹</span> Doublons
-  </button>
-</div>
+<!-- ═══ MODAL SUPPRESSION VRAIS DOUBLONS ═══ -->
 
 <div id="dupes-modal" class="util-modal-backdrop">
   <div class="util-modal-box">
@@ -1867,15 +1844,10 @@ function renderRecent() {
   });
 
   const last100  = poolUniq.slice(-100);
-  const recent14 = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 14);
-  const recentSet = new Set(recent14);
-  const topRated7 = [...poolUniq]
-    .filter(m => !recentSet.has(m) && (m.imdb_rating || m.vote_average))
-    .sort((a,b) => ((b.imdb_rating || b.vote_average || 0) - (a.imdb_rating || a.vote_average || 0)))
-    .slice(0, 7);
+  const recent15 = [...last100].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 15);
   const top10 = [...poolUniq].sort((a,b) => (b.popularity||0) - (a.popularity||0)).slice(0, 10);
 
-  const renderCard = (m, showRating) => {
+  const renderCard = (m) => {
     const idx = movies.indexOf(m);
     const year = m.release_date ? m.release_date.slice(0,4) : '';
     const rating = m.imdb_rating || m.vote_average;
@@ -1886,7 +1858,7 @@ function renderRecent() {
       + (m.quality ? '<div class="popular-card-qbadge '+m.quality+'">'+qi+'</div>' : '')
       + '<div class="popular-card-info"><div class="popular-card-title">'+escapeHtml(m.title)+'</div>'
       + '<div class="popular-card-meta"><span>'+year+'</span>'
-      + (showRating && rating ? '<span>⭐ '+Number(rating).toFixed(1)+'</span>' : '')
+      + (rating ? '<span>⭐ '+Number(rating).toFixed(1)+'</span>' : '')
       + '</div></div></div>';
   };
 
@@ -1898,19 +1870,9 @@ function renderRecent() {
           <button class="popular-more" onclick="showAllFilms();setSort('pop');document.getElementById('sort-sel').value='pop';render();">Voir plus →</button>
         </div>
         <div class="popular-grid popular-grid-recent">
-          ${recent14.map(m => renderCard(m, false)).join('')}
+          ${recent15.map(m => renderCard(m)).join('')}
         </div>
       </div>
-      ${topRated7.length ? `
-      <div class="showcase-block">
-        <div class="popular-header">
-          <div class="popular-title gold">Les mieux notés</div>
-          <button class="popular-more" onclick="showAllFilms();setSort('note');document.getElementById('sort-sel').value='note';render();">Voir plus →</button>
-        </div>
-        <div class="popular-grid popular-grid-toprated">
-          ${topRated7.map(m => renderCard(m, true)).join('')}
-        </div>
-      </div>` : ''}
     </div>
     <div class="popular-right">
       <div class="popular-right-header">
@@ -4344,7 +4306,7 @@ fetch('./dead_links.json?t=' + Date.now())
   .then(data => {
     if (!data || !data.dead_movies || data.dead_movies.length === 0) return;
     _deadMoviesList = data.dead_movies;
-    document.getElementById('dead-links-widget').style.display = 'block';
+    document.getElementById('dead-links-widget').style.display = 'inline-flex';
     document.getElementById('dead-links-count').textContent = data.affected_movies_count;
     document.getElementById('dead-links-date').textContent = "Dernière vérification : " + data.last_check + " (" + data.unique_links_checked + " liens testés)";
     
